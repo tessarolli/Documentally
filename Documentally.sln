@@ -5,18 +5,28 @@ VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentally.API", "src\Documentally.API\Documentally.API.csproj", "{3FD48489-060D-4FEF-ACDA-5C910A551371}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentally.Domain", "src\Documentally.Domain\Documentally.Domain.csproj", "{B1A050FF-627F-4471-9D16-E27B9F10C61D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentally.Domain", "src\Documentally.Domain\Documentally.Domain.csproj", "{B1A050FF-627F-4471-9D16-E27B9F10C61D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentally.Infrastructure", "src\Documentally.Infrastructure\Documentally.Infrastructure.csproj", "{31A0D3D1-D97C-4DD4-8A24-E0CA73DE4366}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentally.Infrastructure", "src\Documentally.Infrastructure\Documentally.Infrastructure.csproj", "{31A0D3D1-D97C-4DD4-8A24-E0CA73DE4366}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentally.Application", "src\Documentally.Application\Documentally.Application.csproj", "{02C5C10D-A1AF-4045-8923-012D01320ADF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentally.Application", "src\Documentally.Application\Documentally.Application.csproj", "{02C5C10D-A1AF-4045-8923-012D01320ADF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentally.Tests", "src\Documentally.Tests\Documentally.Tests.csproj", "{3F93154B-1FE9-46AD-BA60-434EE0EECF69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentally.Tests", "src\Documentally.Tests\Documentally.Tests.csproj", "{3F93154B-1FE9-46AD-BA60-434EE0EECF69}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4F3819B5-0618-40AB-BFA8-1A66399F2F0F}"
 	ProjectSection(SolutionItems) = preProject
 		global.json = global.json
 		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requests", "Requests", "{2243F9D7-B5C5-460D-A196-37D2DA22E32A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentally.Contracts", "src\Documentally.Contracts\Documentally.Contracts.csproj", "{95AB91F9-6335-4499-BE0F-46B9220A9BEA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentication", "{35BD01C1-4279-4BFB-9C71-7D0C020B4566}"
+	ProjectSection(SolutionItems) = preProject
+		LoginRequest.http = LoginRequest.http
+		RegisterRequest.http = RegisterRequest.http
 	EndProjectSection
 EndProject
 Global
@@ -45,9 +55,16 @@ Global
 		{3F93154B-1FE9-46AD-BA60-434EE0EECF69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F93154B-1FE9-46AD-BA60-434EE0EECF69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F93154B-1FE9-46AD-BA60-434EE0EECF69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95AB91F9-6335-4499-BE0F-46B9220A9BEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95AB91F9-6335-4499-BE0F-46B9220A9BEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95AB91F9-6335-4499-BE0F-46B9220A9BEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95AB91F9-6335-4499-BE0F-46B9220A9BEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{35BD01C1-4279-4BFB-9C71-7D0C020B4566} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4FC4D3CA-E266-48F0-8E90-A7623AAB730D}
