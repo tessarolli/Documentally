@@ -44,7 +44,7 @@ To run the application locally, follow these steps:
 
 1. Clone the repository:
 
-`git clone https://github.com/username/Documentally.git`
+`git clone https://github.com/tessarolli/Documentally.git`
 
 2. Install dependencies:
 
