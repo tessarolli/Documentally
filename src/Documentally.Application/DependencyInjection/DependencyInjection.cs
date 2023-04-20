@@ -1,6 +1,4 @@
-﻿using Documentally.Application.Interfaces.Persistence;
-using Documentally.Application.Services.Authentication;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Documentally.Application.DependencyInjection;
 
@@ -8,7 +6,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddMediatR(configuration =>
+        {
+            configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+        });
 
         return services;
     }

@@ -1,49 +1,49 @@
-﻿using Documentally.Application.Services.Authentication;
+﻿using Documentally.Application.Authentication.Commands.Register;
+using Documentally.Application.Authentication.Common;
+using Documentally.Application.Authentication.Queries.Login;
 using Documentally.Contracts.Authentication;
+using FluentResults;
+using FluentResults.StatusCodes;
+using MapsterMapper;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Documentally.API.Controllers;
 
 [ApiController]
 [Route("authentication")]
-public class AuthenticationController : Controller
+public class AuthenticationController : ResultControllerBase
 {
-    private readonly IAuthenticationService _authenticationService;
+    private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
 
-    public AuthenticationController(IAuthenticationService authenticationService)
+    public AuthenticationController(IMediator mediator, IMapper mapper)
     {
-        _authenticationService = authenticationService;
+        _mediator = mediator;
+        _mapper = mapper;
     }
 
     [HttpPost("register")]
-    public IActionResult Register(RegisterRequest request)
+    public async Task<IActionResult> RegisterAsync(RegisterRequest request)
     {
-        var authenticationResult = _authenticationService.Register(request.FirstName, request.LastName, request.Email, request.Password);
+        var registerCommand = _mapper.Map<RegisterCommand>(request);
+        var authenticationResult = await _mediator.Send(registerCommand);
 
-        var authenticationResponse = new AuthenticationResponse(
-            authenticationResult.User.Id.Value ,
-            authenticationResult.User.FirstName,
-            authenticationResult.User.LastName,
-            authenticationResult.User.Email,
-            authenticationResult.Token
+        return ValidateResult(authenticationResult,
+            () => Ok(_mapper.Map<AuthenticationResponse>(authenticationResult)),
+            () => Problem()
         );
-
-        return Ok(authenticationResponse);
     }
 
     [HttpPost("login")]
-    public IActionResult Login(LoginRequest request)
+    public async Task<IActionResult> LoginAsync(LoginRequest request)
     {
-        var authenticationResult = _authenticationService.Login(request.Email, request.Password);
+        var loginQuery = _mapper.Map<LoginQuery>(request);
+        var authenticationResult = await _mediator.Send(loginQuery);
 
-        var authenticationResponse = new AuthenticationResponse(
-            authenticationResult.User.Id.Value,
-            authenticationResult.User.FirstName,
-            authenticationResult.User.LastName,
-            authenticationResult.User.Email,
-            authenticationResult.Token
+        return ValidateResult(authenticationResult,
+            () => Ok(_mapper.Map<AuthenticationResponse>(authenticationResult)),
+            () => Problem()
         );
-        return Ok(authenticationResponse);
-
     }
 }
