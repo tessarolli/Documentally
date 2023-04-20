@@ -30,7 +30,7 @@ public class AuthenticationController : ResultControllerBase
         var authenticationResult = await _mediator.Send(registerCommand);
 
         return ValidateResult(authenticationResult,
-            () => Ok(_mapper.Map<AuthenticationResponse>(authenticationResult)),
+            () => Ok(_mapper.Map<AuthenticationResponse>(authenticationResult.Value)),
             () => Problem()
         );
     }
@@ -42,7 +42,7 @@ public class AuthenticationController : ResultControllerBase
         var authenticationResult = await _mediator.Send(loginQuery);
 
         return ValidateResult(authenticationResult,
-            () => Ok(_mapper.Map<AuthenticationResponse>(authenticationResult)),
+            () => Ok(_mapper.Map<AuthenticationResponse>(authenticationResult.Value)),
             () => Problem()
         );
     }
