@@ -17,6 +17,7 @@ namespace Documentally.Infrastructure.Authentication
             _jwtSettings = optionsJwtSettings.Value;
         }
 
+        /// <inheritdoc/>
         public string GenerateToken(User user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));

@@ -6,6 +6,7 @@ namespace Documentally.API.Common.Mappings;
 
 public class AuthenticationResponseMappingConfig : IRegister
 {
+    /// <inheritdoc/>
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<AuthenticationResult, AuthenticationResponse>()

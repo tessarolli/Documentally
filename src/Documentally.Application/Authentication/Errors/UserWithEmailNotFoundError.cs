@@ -1,11 +1,11 @@
-﻿using FluentResults;
-using FluentResults.StatusCodes.Errors;
+﻿using Documentally.Application.Common.Validation.Errors;
 
 namespace Documentally.Application.Authentication.Errors;
 
-public class UserWithEmailNotFoundError : NotFoundError
+public class UserWithEmailNotFoundError : UnauthorizedError
 {
-    public UserWithEmailNotFoundError(string message = "Account with given e-mail address does not exist") : base(message)
+    public UserWithEmailNotFoundError() 
     {
+        Message = "Account with given e-mail address does not exist";
     }
 }

@@ -1,11 +1,11 @@
-﻿using FluentResults;
-using FluentResults.StatusCodes.Errors;
+﻿using Documentally.Application.Common.Validation.Errors;
 
 namespace Documentally.Application.Authentication.Errors;
 
-public class UserWithEmailAlreadyExistsError : BusinessValidationError
+public class UserWithEmailAlreadyExistsError : UnauthorizedError
 {
-    public UserWithEmailAlreadyExistsError(string message = "Given E-Mail address is already in use") : base(message)
+    public UserWithEmailAlreadyExistsError() 
     {
+        Message = "Given E-Mail address is already in use";
     }
 }

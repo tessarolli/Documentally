@@ -15,13 +15,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentally.Tests", "src\D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4F3819B5-0618-40AB-BFA8-1A66399F2F0F}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		global.json = global.json
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requests", "Requests", "{2243F9D7-B5C5-460D-A196-37D2DA22E32A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentally.Contracts", "src\Documentally.Contracts\Documentally.Contracts.csproj", "{95AB91F9-6335-4499-BE0F-46B9220A9BEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentally.Contracts", "src\Documentally.Contracts\Documentally.Contracts.csproj", "{95AB91F9-6335-4499-BE0F-46B9220A9BEA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentication", "{35BD01C1-4279-4BFB-9C71-7D0C020B4566}"
 	ProjectSection(SolutionItems) = preProject

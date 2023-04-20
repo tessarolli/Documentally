@@ -19,6 +19,7 @@ namespace Documentally.Application.Authentication.Queries.Login
             _jwtTokenGenerator = jwtTokenGenerator;
         }
 
+        /// <inheritdoc/>
         public async Task<Result<AuthenticationResult>> Handle(LoginQuery query, CancellationToken cancellationToken)
         {
             await Task.CompletedTask;

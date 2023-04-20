@@ -1,8 +1,11 @@
+// <copyright file="Program.cs" company="Documentally">
+// Copyright (c) Documentally. All rights reserved.
+// </copyright>
+
 using Documentally.API.DependencyInjection;
 using Documentally.Application.DependencyInjection;
 using Documentally.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Diagnostics;
-using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -10,12 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
         .AddPresentation()
         .AddApplication()
         .AddInfrastructure(builder.Configuration);
-
-    builder.Services.AddControllers();
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
 }
-
 
 var app = builder.Build();
 {
@@ -27,12 +25,11 @@ var app = builder.Build();
 
     app.UseExceptionHandler("/error");
 
-    app.Map("/error", (HttpContext context) => 
+    app.Map("/error", (HttpContext context) =>
     {
         Exception? exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
 
         return Results.Problem(exception?.Message);
-
     });
 
     app.UseHttpsRedirection();

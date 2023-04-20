@@ -1,4 +1,4 @@
-﻿namespace Documentally.Domain.BaseClasses;
+﻿namespace Documentally.Domain.BaseClasses.DDD;
 
 public abstract class Entity<TId> : IEquatable<Entity<TId>>
     where TId : notnull
@@ -10,11 +10,13 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
         Id = id;
     }
 
+    /// <inheritdoc/>
     public override bool Equals(object? obj)
     {
         return obj is Entity<TId> entity && Id.Equals(entity.Id);
     }
 
+    /// <inheritdoc/>
     public bool Equals(Entity<TId>? other)
     {
         return Equals((object?)other);
@@ -30,6 +32,7 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
         return !Equals(left, right);
     }
 
+    /// <inheritdoc/>
     public override int GetHashCode()
     {
         return Id.GetHashCode();

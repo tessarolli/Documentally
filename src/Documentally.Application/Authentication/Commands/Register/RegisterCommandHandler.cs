@@ -1,30 +1,47 @@
-﻿using Documentally.Application.Authentication.Common;
-using Documentally.Application.Authentication.Errors;
-using Documentally.Application.Interfaces.Infrastructure;
-using Documentally.Application.Interfaces.Persistence;
-using Documentally.Domain.Entities;
-using FluentResults;
-using MediatR;
-
+﻿// <copyright file="RegisterCommandHandler.cs" company="Documentally">
+// Copyright (c) Documentally. All rights reserved.
+// </copyright>
 namespace Documentally.Application.Authentication.Commands.Register
 {
+    using Documentally.Application.Authentication.Common;
+    using Documentally.Application.Authentication.Errors;
+    using Documentally.Application.Interfaces.Infrastructure;
+    using Documentally.Application.Interfaces.Persistence;
+    using Documentally.Domain.Entities;
+    using FluentResults;
+    using MediatR;
+
+    /// <summary>
+    /// The implementation for the Resgister Command.
+    /// </summary>
     public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<AuthenticationResult>>
     {
-        private readonly IJwtTokenGenerator _jwtTokenGenerator;
-        private readonly IUserRepository _userRepository;
+        private readonly IJwtTokenGenerator jwtTokenGenerator;
+        private readonly IUserRepository userRepository;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RegisterCommandHandler"/> class.
+        /// </summary>
+        /// <param name="userRepository">UserRepository being injected.</param>
+        /// <param name="jwtTokenGenerator">JwtTokenGenerator being injected.</param>
         public RegisterCommandHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator)
         {
-            _userRepository = userRepository;
-            _jwtTokenGenerator = jwtTokenGenerator;
+            this.jwtTokenGenerator = jwtTokenGenerator;
+            this.userRepository = userRepository;
         }
 
+        /// <summary>
+        /// The actual command Handler.
+        /// </summary>
+        /// <param name="command">RegisterCommand.</param>
+        /// <param name="cancellationToken">Async CancellationToken.</param>
+        /// <returns>FluentResult for the operation.</returns>
         public async Task<Result<AuthenticationResult>> Handle(RegisterCommand command, CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
 
             // Check if User with given e-mail already exists
-            if (_userRepository.GetByEmail(command.Email) is not null)
+            if (this.userRepository.GetByEmail(command.Email) is not null)
             {
                 return Result.Fail(new UserWithEmailAlreadyExistsError());
             }
@@ -33,10 +50,10 @@ namespace Documentally.Application.Authentication.Commands.Register
             var user = User.Create(command.FirstName, command.LastName, command.Email, command.Password);
 
             // Add to the Database
-            _userRepository.Add(user);
+            this.userRepository.Add(user);
 
             // Generate Token
-            var token = _jwtTokenGenerator.GenerateToken(user);
+            var token = this.jwtTokenGenerator.GenerateToken(user);
 
             return new AuthenticationResult(user, token);
         }

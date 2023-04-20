@@ -1,4 +1,4 @@
-﻿namespace Documentally.Domain.BaseClasses;
+﻿namespace Documentally.Domain.BaseClasses.DDD;
 
 public abstract class AggregateRoot<TId> : Entity<TId>
     where TId : notnull

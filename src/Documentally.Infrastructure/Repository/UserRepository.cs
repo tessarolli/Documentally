@@ -8,6 +8,7 @@ public class UserRepository : IUserRepository
 {
     private static readonly List<User> users = new();
 
+    /// <inheritdoc/>
     public Result<User> Add(User user)
     {
         users.Add(user);
@@ -17,6 +18,7 @@ public class UserRepository : IUserRepository
         return result.WithSuccess("User add to database");
     }
 
+    /// <inheritdoc/>
     public User? GetByEmail(string email)
     {
         var user = users.Where(x => x.Email.Equals(email)).FirstOrDefault();
@@ -24,6 +26,7 @@ public class UserRepository : IUserRepository
         return user;
     }
 
+    /// <inheritdoc/>
     public User? GetById(Guid id)
     {
         var user = users.Where(x => x.Id.Value.Equals(id)).FirstOrDefault();

@@ -1,9 +1,9 @@
-﻿using Documentally.Application.Authentication.Commands.Register;
+﻿using Documentally.API.Common.Controllers;
+using Documentally.Application.Authentication.Commands.Register;
 using Documentally.Application.Authentication.Common;
 using Documentally.Application.Authentication.Queries.Login;
 using Documentally.Contracts.Authentication;
 using FluentResults;
-using FluentResults.StatusCodes;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +28,8 @@ public class AuthenticationController : ResultControllerBase
     {
         var registerCommand = _mapper.Map<RegisterCommand>(request);
         var authenticationResult = await _mediator.Send(registerCommand);
+
+        
 
         return ValidateResult(authenticationResult,
             () => Ok(_mapper.Map<AuthenticationResponse>(authenticationResult.Value)),
