@@ -1,30 +1,48 @@
-﻿using FluentResults;
+﻿// <copyright file="ValidationService.cs" company="Documentally">
+// Copyright (c) Documentally. All rights reserved.
+// </copyright>
+
+using FluentResults;
 using FluentValidation;
 using MediatR;
 
 namespace Documentally.Application.Common.Validation;
 
+/// <summary>
+/// Validation Service Class for Performing Fluent Validations of Commands.
+/// </summary>
 public class ValidationService
 {
-    private readonly IEnumerable<IValidator> _fluentValidators;
+    private readonly IEnumerable<IValidator> fluentValidators;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationService"/> class.
+    /// </summary>
+    /// <param name="fluentValidators">List of Validators for beeing validated.</param>
     public ValidationService(IEnumerable<IValidator> fluentValidators)
     {
-        _fluentValidators = fluentValidators;
+        this.fluentValidators = fluentValidators;
     }
 
-    public Result ValidateCommand<TCommand>(TCommand command) where TCommand : IRequest<Result>
+    /// <summary>
+    /// Method to perform the validations of each IValidator.
+    /// </summary>
+    /// <typeparam name="TCommand">The type of the Command being validated.</typeparam>
+    /// <param name="command">Command name.</param>
+    /// <returns>FluentResult with the results of the validations.</returns>
+    public Result ValidateCommand<TCommand>(TCommand command)
+        where TCommand : IRequest<Result>
     {
         var result = Result.Ok();
 
-        if (!_fluentValidators.Any())
+        if (!fluentValidators.Any())
         {
             return result;
         }
 
         var context = new ValidationContext<TCommand>(command);
 
-        var failures = _fluentValidators
+        var failures = fluentValidators
             .Select(v => v.Validate(context))
             .SelectMany(validationResult => validationResult.Errors)
             .Where(f => f != null)

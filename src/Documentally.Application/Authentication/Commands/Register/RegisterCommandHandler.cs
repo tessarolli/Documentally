@@ -1,61 +1,61 @@
 ﻿// <copyright file="RegisterCommandHandler.cs" company="Documentally">
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
-namespace Documentally.Application.Authentication.Commands.Register
+
+using Documentally.Application.Authentication.Common;
+using Documentally.Application.Authentication.Errors;
+using Documentally.Application.Interfaces.Infrastructure;
+using Documentally.Application.Interfaces.Persistence;
+using Documentally.Domain.Entities;
+using FluentResults;
+using MediatR;
+
+namespace Documentally.Application.Authentication.Commands.Register;
+
+/// <summary>
+/// The implementation for the Resgister Command.
+/// </summary>
+public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<AuthenticationResult>>
 {
-    using Documentally.Application.Authentication.Common;
-    using Documentally.Application.Authentication.Errors;
-    using Documentally.Application.Interfaces.Infrastructure;
-    using Documentally.Application.Interfaces.Persistence;
-    using Documentally.Domain.Entities;
-    using FluentResults;
-    using MediatR;
+    private readonly IJwtTokenGenerator jwtTokenGenerator;
+    private readonly IUserRepository userRepository;
 
     /// <summary>
-    /// The implementation for the Resgister Command.
+    /// Initializes a new instance of the <see cref="RegisterCommandHandler"/> class.
     /// </summary>
-    public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<AuthenticationResult>>
+    /// <param name="userRepository">UserRepository being injected.</param>
+    /// <param name="jwtTokenGenerator">JwtTokenGenerator being injected.</param>
+    public RegisterCommandHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator)
     {
-        private readonly IJwtTokenGenerator jwtTokenGenerator;
-        private readonly IUserRepository userRepository;
+        this.jwtTokenGenerator = jwtTokenGenerator;
+        this.userRepository = userRepository;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RegisterCommandHandler"/> class.
-        /// </summary>
-        /// <param name="userRepository">UserRepository being injected.</param>
-        /// <param name="jwtTokenGenerator">JwtTokenGenerator being injected.</param>
-        public RegisterCommandHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator)
+    /// <summary>
+    /// The actual command Handler.
+    /// </summary>
+    /// <param name="command">RegisterCommand.</param>
+    /// <param name="cancellationToken">Async CancellationToken.</param>
+    /// <returns>FluentResult for the operation.</returns>
+    public async Task<Result<AuthenticationResult>> Handle(RegisterCommand command, CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+
+        // Check if User with given e-mail already exists
+        if (this.userRepository.GetByEmail(command.Email) is not null)
         {
-            this.jwtTokenGenerator = jwtTokenGenerator;
-            this.userRepository = userRepository;
+            return Result.Fail(new UserWithEmailAlreadyExistsError());
         }
 
-        /// <summary>
-        /// The actual command Handler.
-        /// </summary>
-        /// <param name="command">RegisterCommand.</param>
-        /// <param name="cancellationToken">Async CancellationToken.</param>
-        /// <returns>FluentResult for the operation.</returns>
-        public async Task<Result<AuthenticationResult>> Handle(RegisterCommand command, CancellationToken cancellationToken)
-        {
-            await Task.CompletedTask;
+        // Create a new user
+        var user = User.Create(command.FirstName, command.LastName, command.Email, command.Password);
 
-            // Check if User with given e-mail already exists
-            if (this.userRepository.GetByEmail(command.Email) is not null)
-            {
-                return Result.Fail(new UserWithEmailAlreadyExistsError());
-            }
+        // Add to the Database
+        this.userRepository.Add(user);
 
-            // Create a new user
-            var user = User.Create(command.FirstName, command.LastName, command.Email, command.Password);
+        // Generate Token
+        var token = this.jwtTokenGenerator.GenerateToken(user);
 
-            // Add to the Database
-            this.userRepository.Add(user);
-
-            // Generate Token
-            var token = this.jwtTokenGenerator.GenerateToken(user);
-
-            return new AuthenticationResult(user, token);
-        }
+        return new AuthenticationResult(user, token);
     }
 }

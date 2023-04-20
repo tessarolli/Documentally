@@ -1,9 +1,16 @@
-﻿using Documentally.Application.Authentication.Common;
+﻿// <copyright file="AuthenticationResponseMappingConfig.cs" company="Documentally">
+// Copyright (c) Documentally. All rights reserved.
+// </copyright>
+
+using Documentally.Application.Authentication.Common;
 using Documentally.Contracts.Authentication;
 using Mapster;
 
 namespace Documentally.API.Common.Mappings;
 
+/// <summary>
+/// Authentication Mapster Config Mapping.
+/// </summary>
 public class AuthenticationResponseMappingConfig : IRegister
 {
     /// <inheritdoc/>

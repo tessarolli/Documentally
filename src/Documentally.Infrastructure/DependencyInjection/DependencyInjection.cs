@@ -1,59 +1,65 @@
-﻿using System.Text;
+﻿// <copyright file="DependencyInjection.cs" company="Documentally">
+// Copyright (c) Documentally. All rights reserved.
+// </copyright>
+
 using Documentally.Application.Interfaces.Infrastructure;
 using Documentally.Application.Interfaces.Persistence;
 using Documentally.Infrastructure.Authentication;
 using Documentally.Infrastructure.Repository;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Documentally.Infrastructure.DependencyInjection;
 
+/// <summary>
+/// Dependency Injection.
+/// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Add Infrastructure dependencies.
+    /// </summary>
+    /// <param name="services">Injected services.</param>
+    /// <param name="configuration">Injected configuration.</param>
+    /// <returns>Services with dependencies injected.</returns>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddAuthentication(configuration)
             .AddPersistance();
 
-
         return services;
     }
 
+    /// <summary>
+    /// Add Persistence dependencies.
+    /// </summary>
+    /// <param name="services">Injected services.</param>
+    /// <returns>Services with dependencies injected.</returns>
     public static IServiceCollection AddPersistance(this IServiceCollection services)
     {
-
         services.AddScoped<IUserRepository, UserRepository>();
 
-
+        /*
         //services.AddDbContext<BuberDinnerDbContext>(options =>
         //    options.UseSqlServer("Server=localhost;Database=BuberDinner;User Id=sa;Password=amiko123!;TrustServerCertificate=True"));
 
         //services.AddScoped<IMenuRepository, MenuRepository>();
-
+        */
         return services;
     }
 
+    /// <summary>
+    /// Add Authentication dependencies.
+    /// </summary>
+    /// <param name="services">Injected services.</param>
+    /// <param name="configuration">Injected configuration.</param>
+    /// <returns>Services with dependencies injected.</returns>
     public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
-
-        //services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
-        //    .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
-        //    {
-        //        ValidateLifetime = true,
-        //        ValidateIssuer = true,
-        //        ValidateIssuerSigningKey = true,
-        //        ValidIssuer = jwtSettings.Issuer,
-        //        ValidAudience = jwtSettings.Audience,
-        //        ValidateAudience = true,
-        //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
-        //    });
 
         return services;
     }

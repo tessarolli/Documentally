@@ -1,18 +1,25 @@
-﻿using Documentally.Application.Interfaces.Persistence;
+﻿// <copyright file="UserRepository.cs" company="Documentally">
+// Copyright (c) Documentally. All rights reserved.
+// </copyright>
+
+using Documentally.Application.Interfaces.Persistence;
 using Documentally.Domain.Entities;
 using FluentResults;
 
 namespace Documentally.Infrastructure.Repository;
 
+/// <summary>
+/// The User Repository.
+/// </summary>
 public class UserRepository : IUserRepository
 {
-    private static readonly List<User> users = new();
+    private static readonly List<User> USERS = new ();
 
     /// <inheritdoc/>
     public Result<User> Add(User user)
     {
-        users.Add(user);
-        
+        USERS.Add(user);
+
         var result = new Result<User>();
 
         return result.WithSuccess("User add to database");
@@ -21,7 +28,7 @@ public class UserRepository : IUserRepository
     /// <inheritdoc/>
     public User? GetByEmail(string email)
     {
-        var user = users.Where(x => x.Email.Equals(email)).FirstOrDefault();
+        var user = USERS.Where(x => x.Email.Equals(email)).FirstOrDefault();
 
         return user;
     }
@@ -29,7 +36,7 @@ public class UserRepository : IUserRepository
     /// <inheritdoc/>
     public User? GetById(Guid id)
     {
-        var user = users.Where(x => x.Id.Value.Equals(id)).FirstOrDefault();
+        var user = USERS.Where(x => x.Id.Value.Equals(id)).FirstOrDefault();
 
         return user;
     }
