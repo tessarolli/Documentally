@@ -14,7 +14,7 @@ namespace Documentally.Contracts.Authentication;
 /// <param name="Token"></param>
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Contracts should be PascalCase")]
 public record AuthenticationResponse(
-    Guid Id,
+    long Id,
     string FirstName,
     string LastName,
     string Email,

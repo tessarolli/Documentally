@@ -1,0 +1,2 @@
+dotnet user-secrets set "JwtSettings:Secret" "my_super_secret_key"
+dotnet user-secrets set "PostgresSqlConnectionString" "Server=babar.db.elephantsql.com;Port=5432;Database=bwvumvgl;User Id=bwvumvgl;Password=A9cjWjXaif7Zh4ckp4HWi4VYWVwGDcg8;"

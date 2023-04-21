@@ -4,6 +4,7 @@
 
 using Documentally.Application.Abstractions.Authentication;
 using Documentally.Application.Abstractions.Repositories;
+using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.Authentication;
 using Documentally.Infrastructure.Repository;
 using Microsoft.Extensions.Configuration;
@@ -39,6 +40,7 @@ public static class DependencyInjection
     public static IServiceCollection AddPersistance(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPostgresSqlConnectionFactory, PostgresSqlConnectionFactory>();
 
         return services;
     }

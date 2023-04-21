@@ -45,6 +45,11 @@ public class User : Entity<UserId>
     public Roles Role { get; private set; }
 
     /// <summary>
+    /// Gets User's Creation Date on utc.
+    /// </summary>
+    public DateTime CreatedAtUtc { get; private set; }
+
+    /// <summary>
     /// Creates a new User.
     /// </summary>
     /// <param name="firstName">User's First Name.</param>

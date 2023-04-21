@@ -17,19 +17,19 @@ public interface IUserRepository
     /// </summary>
     /// <param name="id">The Id of the element to fetch.</param>
     /// <returns>The element instance, if it exists.</returns>
-    User? GetById(Guid id);
+    Task<User?> GetByIdAsync(long id);
 
     /// <summary>
     /// Get an element from the User Repository by it's email address.
     /// </summary>
     /// <param name="email">The email address of the element to fetch.</param>
     /// <returns>The element instance, if it exists.</returns>
-    User? GetByEmail(string email);
+    Task<User?> GetByEmailAsync(string email);
 
     /// <summary>
     /// Add an User to the user Repository.
     /// </summary>
     /// <param name="user">The User instance to add to the repository.</param>
     /// <returns>An Result indicating if the user was successfully added or not.</returns>
-    Result<User> Add(User user);
+    Task<Result<User>> AddAsync(User user);
 }

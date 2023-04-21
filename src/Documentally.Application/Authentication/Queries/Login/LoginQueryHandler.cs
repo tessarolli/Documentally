@@ -37,13 +37,13 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
         await Task.CompletedTask;
 
         // Check if User with given e-mail already exists
-        if (userRepository.GetByEmail(query.Email) is not User user)
+        if (await userRepository.GetByEmailAsync(query.Email) is not User user)
         {
             return Result.Fail(new UserWithEmailNotFoundError());
         }
 
         // Validate the Password
-        if (user.Password != query.Password)
+        if (user.Password.Value != query.Password)
         {
             return Result.Fail(new InvalidPasswordError());
         }

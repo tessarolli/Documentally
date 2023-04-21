@@ -40,23 +40,29 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, Authentic
     /// <returns>FluentResult for the operation.</returns>
     public async Task<Result<AuthenticationResult>> Handle(RegisterCommand command, CancellationToken cancellationToken)
     {
-        await Task.CompletedTask;
-
         // Check if User with given e-mail already exists
-        if (this.userRepository.GetByEmail(command.Email) is not null)
+        if (await userRepository.GetByEmailAsync(command.Email) is not null)
         {
             return Result.Fail(new UserWithEmailAlreadyExistsError());
         }
 
         // Create a new user
-        var user = User.Create(command.FirstName, command.LastName, command.Email, command.Password);
+        var userResult = User.Create(command.FirstName, command.LastName, command.Email, command.Password);
+        if (userResult.IsFailed)
+        {
+            return Result.Fail(userResult.Errors);
+        }
 
         // Add to the Database
-        this.userRepository.Add(user);
+        var persistResult = await userRepository.AddAsync(userResult.Value);
+        if (persistResult.IsFailed)
+        {
+            return Result.Fail(persistResult.Errors);
+        }
 
         // Generate Token
-        var token = this.jwtTokenGenerator.GenerateToken(user);
+        var token = jwtTokenGenerator.GenerateToken(userResult.Value);
 
-        return new AuthenticationResult(user, token);
+        return new AuthenticationResult(userResult.Value, token);
     }
 }

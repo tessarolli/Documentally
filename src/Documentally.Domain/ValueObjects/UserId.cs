@@ -16,23 +16,23 @@ namespace Documentally.Domain.ValueObjects
         /// <summary>
         /// Initializes a new instance of the <see cref="UserId"/> class.
         /// </summary>
-        /// <param name="guid">Guid value if exists.</param>
-        public UserId(Guid? guid = null)
+        /// <param name="id">Id value if exists.</param>
+        public UserId(long? id = null)
         {
-            if (guid is null)
+            if (id is null)
             {
-                Value = Guid.NewGuid();
+                Value = 0;
             }
             else
             {
-                Value = guid.Value;
+                Value = id.Value;
             }
         }
 
         /// <summary>
         /// Gets the User ID.
         /// </summary>
-        public Guid Value { get; }
+        public long Value { get; }
 
         /// <summary>
         /// Method required for comparing value objects.
