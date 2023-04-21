@@ -2,10 +2,10 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using Documentally.Application.Abstractions.Authentication;
+using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Authentication.Common;
 using Documentally.Application.Authentication.Errors;
-using Documentally.Application.Interfaces.Infrastructure;
-using Documentally.Application.Interfaces.Persistence;
 using Documentally.Domain.Entities;
 using FluentResults;
 using MediatR;

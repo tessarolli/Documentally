@@ -5,7 +5,7 @@
 using Documentally.Domain.Entities;
 using FluentResults;
 
-namespace Documentally.Application.Interfaces.Persistence;
+namespace Documentally.Application.Abstractions.Repositories;
 
 /// <summary>
 /// Interface for the User Repository.

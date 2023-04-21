@@ -2,8 +2,11 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using Documentally.Application.Abstractions.Messaging;
+using Documentally.Domain.BaseClasses;
 using FluentResults;
 using FluentValidation;
+using FluentValidation.Results;
 using MediatR;
 
 namespace Documentally.Application.Common.Validation;
@@ -14,10 +17,9 @@ namespace Documentally.Application.Common.Validation;
 /// <typeparam name="TRequest">The type of the incoming request contract.</typeparam>
 /// <typeparam name="TResponse">The type of the request's response contract.</typeparam>
 public class RequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-       where TRequest : IRequest<Result>
-       where TResponse : Result
+    where TRequest : notnull
 {
-    private readonly ValidationService validationService;
+    private readonly IEnumerable<IValidator<TRequest>> validators;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RequestValidationBehavior{TRequest, TResponse}"/> class.
@@ -25,23 +27,37 @@ public class RequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
     /// <param name="validators">Injected validators.</param>
     public RequestValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
     {
-        validationService = new ValidationService(validators);
+        this.validators = validators;
     }
 
     /// <inheritdoc/>
-    public async Task<TResponse> Handle(TRequest command, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        var validationResult = validationService.ValidateCommand(command);
-
-        if (validationResult.IsFailed)
+        if (!validators.Any())
         {
-            return (TResponse)validationResult;
+            return await next();
         }
 
-        var handlerResult = await next();
+        ValidationError[] errors = validators
+            .Select(validator => validator.Validate(request))
+            .SelectMany(validationResult => validationResult.Errors)
+            .Where(validationFailure => validationFailure is not null)
+            .Select(failure => new ValidationError(
+                failure.ErrorMessage,
+                new Error(failure.PropertyName)))
+            .Distinct()
+            .ToArray();
 
-        var result = Result.Merge(validationResult, handlerResult);
+        if (errors.Any())
+        {
+            return (TResponse)typeof(Result<>)
+                .GetGenericTypeDefinition()
+                .MakeGenericType(typeof(TResponse).GenericTypeArguments[0])
+                .GetMethods()
+                .First(x => x.Name == "WithErrors")
+                .Invoke(Activator.CreateInstance(typeof(TResponse)), new object?[] { errors }) !;
+        }
 
-        return (TResponse)result;
+        return await next();
     }
 }

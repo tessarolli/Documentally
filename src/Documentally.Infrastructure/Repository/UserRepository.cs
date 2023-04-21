@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Application.Interfaces.Persistence;
+using Documentally.Application.Abstractions.Repositories;
 using Documentally.Domain.Entities;
 using FluentResults;
 

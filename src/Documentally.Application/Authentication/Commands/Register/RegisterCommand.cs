@@ -2,6 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Authentication.Common;
 using FluentResults;
 using MediatR;
@@ -21,4 +22,4 @@ public record RegisterCommand(
     string FirstName,
     string LastName,
     string Email,
-    string Password) : IRequest<Result<AuthenticationResult>>;
+    string Password) : ICommand<AuthenticationResult>;

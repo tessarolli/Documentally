@@ -3,7 +3,9 @@
 // </copyright>
 
 using Documentally.Domain.BaseClasses.DDD;
+using Documentally.Domain.Enums;
 using Documentally.Domain.ValueObjects;
+using FluentResults;
 
 namespace Documentally.Domain.Entities;
 
@@ -35,12 +37,12 @@ public class User : Entity<UserId>
     /// <summary>
     /// Gets User's Last Name.
     /// </summary>
-    public string Password { get; private set; } = null!;
+    public Password Password { get; private set; } = null!;
 
     /// <summary>
     /// Gets User's Last Name.
     /// </summary>
-    public string Role { get; private set; } = null!;
+    public Roles Role { get; private set; }
 
     /// <summary>
     /// Creates a new User.
@@ -49,15 +51,23 @@ public class User : Entity<UserId>
     /// <param name="lastName">User's Last Name.</param>
     /// <param name="email">User's Email.</param>
     /// <param name="password">User's Password.</param>
-    /// <returns>New User's instance.</returns>
-    public static User Create(string firstName, string lastName, string email, string password)
+    /// <returns>New User's instance or error.</returns>
+    public static Result<User> Create(string firstName, string lastName, string email, string password)
     {
+        var passwordResult = Password.Create(password);
+
+        if (passwordResult.IsFailed)
+        {
+            return Result.Fail(passwordResult.Errors);
+        }
+
         return new User(new UserId())
         {
             FirstName = firstName,
             LastName = lastName,
             Email = email,
-            Password = password,
+            Password = passwordResult.Value,
+            Role = Roles.User,
         };
     }
 }

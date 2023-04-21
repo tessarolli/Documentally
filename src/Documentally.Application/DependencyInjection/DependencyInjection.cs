@@ -2,7 +2,6 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using System.Reflection;
 using Documentally.Application.Common.Validation;
 using FluentValidation;
 using MediatR;
@@ -22,14 +21,16 @@ public static class DependencyInjection
     /// <returns>IServiceCollection with dependencies injected.</returns>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        var assembly = typeof(DependencyInjection).Assembly;
+
         services.AddMediatR(configuration =>
         {
-            configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+            configuration.RegisterServicesFromAssembly(assembly);
         });
 
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
 
-        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
         return services;
     }

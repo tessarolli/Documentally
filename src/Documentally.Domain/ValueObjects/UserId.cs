@@ -2,6 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using System.Diagnostics;
 using Documentally.Domain.BaseClasses.DDD;
 
 namespace Documentally.Domain.ValueObjects
@@ -9,6 +10,7 @@ namespace Documentally.Domain.ValueObjects
     /// <summary>
     /// User Id Value Object.
     /// </summary>
+    [DebuggerDisplay("{Value}")]
     public sealed class UserId : ValueObject
     {
         /// <summary>

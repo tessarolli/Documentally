@@ -8,6 +8,7 @@ using Documentally.Application.Authentication.Queries.Login;
 using Documentally.Contracts.Authentication;
 using MapsterMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Documentally.API.Controllers;
@@ -15,7 +16,6 @@ namespace Documentally.API.Controllers;
 /// <summary>
 /// Authentication Controller.
 /// </summary>
-[ApiController]
 [Route("authentication")]
 public class AuthenticationController : ResultControllerBase
 {
@@ -39,6 +39,7 @@ public class AuthenticationController : ResultControllerBase
     /// <param name="request">User data for registration.</param>
     /// <returns>The result of the register operation.</returns>
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> RegisterAsync(RegisterRequest request)
     {
         var registerCommand = mapper.Map<RegisterCommand>(request);
@@ -56,6 +57,7 @@ public class AuthenticationController : ResultControllerBase
     /// <param name="request">User data for login.</param>
     /// <returns>The result of the login operation.</returns>
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> LoginAsync(LoginRequest request)
     {
         var loginQuery = mapper.Map<LoginQuery>(request);

@@ -2,8 +2,8 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Application.Interfaces.Infrastructure;
-using Documentally.Application.Interfaces.Persistence;
+using Documentally.Application.Abstractions.Authentication;
+using Documentally.Application.Abstractions.Repositories;
 using Documentally.Infrastructure.Authentication;
 using Documentally.Infrastructure.Repository;
 using Microsoft.Extensions.Configuration;
@@ -40,12 +40,6 @@ public static class DependencyInjection
     {
         services.AddScoped<IUserRepository, UserRepository>();
 
-        /*
-        //services.AddDbContext<BuberDinnerDbContext>(options =>
-        //    options.UseSqlServer("Server=localhost;Database=BuberDinner;User Id=sa;Password=amiko123!;TrustServerCertificate=True"));
-
-        //services.AddScoped<IMenuRepository, MenuRepository>();
-        */
         return services;
     }
 

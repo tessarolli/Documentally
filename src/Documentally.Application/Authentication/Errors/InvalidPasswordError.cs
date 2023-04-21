@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Application.Common.Validation.Errors;
+using Documentally.Application.Common.Errors;
 
 namespace Documentally.Application.Authentication.Errors;
 

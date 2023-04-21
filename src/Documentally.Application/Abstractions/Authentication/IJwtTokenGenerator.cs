@@ -4,7 +4,7 @@
 
 using Documentally.Domain.Entities;
 
-namespace Documentally.Application.Interfaces.Infrastructure;
+namespace Documentally.Application.Abstractions.Authentication;
 
 /// <summary>
 /// Interface for Json Web Tokens Generator.
