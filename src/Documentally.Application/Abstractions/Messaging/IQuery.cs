@@ -2,6 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using FluentResults;
 using MediatR;
 
 namespace Documentally.Application.Abstractions.Messaging;
@@ -10,6 +11,6 @@ namespace Documentally.Application.Abstractions.Messaging;
 /// IQuery Interface.
 /// </summary>
 /// <typeparam name="TResponse">Type of response.</typeparam>
-public interface IQuery<out TResponse> : IRequest<TResponse>
+public interface IQuery<TResponse> : IRequest<Result<TResponse>>
 {
 }

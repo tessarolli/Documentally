@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Documentally.Application.Abstractions.Authentication;
-using Documentally.Domain.Entities;
+using Documentally.Domain.User;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -37,10 +37,11 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
         var claims = new[]
         {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
-                new Claim(JwtRegisteredClaimNames.Jti, user.Id.Value.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
         };
 
         var jwtSecurityToken = new JwtSecurityToken(

@@ -28,6 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentic
 	ProjectSection(SolutionItems) = preProject
 		LoginRequest.http = LoginRequest.http
 		RegisterRequest.http = RegisterRequest.http
+		TestRequest.http = TestRequest.http
 	EndProjectSection
 EndProject
 Global

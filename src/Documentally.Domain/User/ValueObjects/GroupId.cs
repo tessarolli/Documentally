@@ -1,23 +1,23 @@
-﻿// <copyright file="UserId.cs" company="Documentally">
+﻿// <copyright file="GroupId.cs" company="Documentally">
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
 using System.Diagnostics;
-using Documentally.Domain.BaseClasses.DDD;
+using Documentally.Domain.Common.DDD;
 
-namespace Documentally.Domain.ValueObjects
+namespace Documentally.Domain.User.ValueObjects
 {
     /// <summary>
-    /// User Id Value Object.
+    /// Group Id Value Object.
     /// </summary>
     [DebuggerDisplay("{Value}")]
-    public sealed class UserId : ValueObject
+    public sealed class GroupId : ValueObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserId"/> class.
+        /// Initializes a new instance of the <see cref="GroupId"/> class.
         /// </summary>
         /// <param name="id">Id value if exists.</param>
-        public UserId(long? id = null)
+        public GroupId(long? id = null)
         {
             if (id is null)
             {
@@ -30,7 +30,7 @@ namespace Documentally.Domain.ValueObjects
         }
 
         /// <summary>
-        /// Gets the User ID.
+        /// Gets the Group ID.
         /// </summary>
         public long Value { get; }
 

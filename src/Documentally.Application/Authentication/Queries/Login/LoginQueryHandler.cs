@@ -3,19 +3,19 @@
 // </copyright>
 
 using Documentally.Application.Abstractions.Authentication;
+using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Authentication.Common;
 using Documentally.Application.Authentication.Errors;
-using Documentally.Domain.Entities;
+using Documentally.Domain.User;
 using FluentResults;
-using MediatR;
 
 namespace Documentally.Application.Authentication.Queries.Login;
 
 /// <summary>
 /// Implementation for the Login Query.
 /// </summary>
-public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<AuthenticationResult>>
+public class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResult>
 {
     private readonly IJwtTokenGenerator jwtTokenGenerator;
     private readonly IUserRepository userRepository;
@@ -37,20 +37,21 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Result<Authenticati
         await Task.CompletedTask;
 
         // Check if User with given e-mail already exists
-        if (await userRepository.GetByEmailAsync(query.Email) is not User user)
+        Result<User> userResult = await userRepository.GetByEmailAsync(query.Email);
+        if (userResult.IsFailed)
         {
-            return Result.Fail(new UserWithEmailNotFoundError());
+            return Result.Fail(userResult.Errors);
         }
 
         // Validate the Password
-        if (user.Password.Value != query.Password)
+        if (userResult.Value.Password.Value != query.Password)
         {
             return Result.Fail(new InvalidPasswordError());
         }
 
         // Generate Token
-        var token = jwtTokenGenerator.GenerateToken(user);
+        var token = jwtTokenGenerator.GenerateToken(userResult.Value);
 
-        return new AuthenticationResult(user, token);
+        return new AuthenticationResult(userResult.Value, token);
     }
 }

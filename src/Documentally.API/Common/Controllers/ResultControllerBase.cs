@@ -3,7 +3,7 @@
 // </copyright>
 
 using Documentally.Application.Common.Errors;
-using Documentally.Domain.BaseClasses;
+using Documentally.Domain.Common;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
@@ -19,6 +19,22 @@ namespace Documentally.API.Common.Controllers;
 public class ResultControllerBase : ControllerBase
 {
     /// <summary>
+    /// ILogger instance.
+    /// </summary>
+#pragma warning disable SA1401 // Fields should be private
+    protected readonly ILogger logger;
+#pragma warning restore SA1401 // Fields should be private
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ResultControllerBase"/> class.
+    /// </summary>
+    /// <param name="logger">ILogger injected.</param>
+    public ResultControllerBase(ILogger logger)
+    {
+        this.logger = logger;
+    }
+
+    /// <summary>
     /// Validates the result.
     /// </summary>
     /// <typeparam name="T">Type.</typeparam>
@@ -31,12 +47,16 @@ public class ResultControllerBase : ControllerBase
     {
         if (result.IsSuccess)
         {
+            logger.LogInformation("Request Success");
+
             return success.Invoke();
         }
 
         failure.Invoke();
 
         var errorMessages = result.Errors.Select(e => e.Message).ToList();
+
+        logger.LogInformation("Request Failure with message(s):\n{errorMessages}", errorMessages);
 
         var status = GetStatusCode(result);
 

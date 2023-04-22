@@ -4,7 +4,7 @@
 
 using FluentResults;
 
-namespace Documentally.Domain.BaseClasses;
+namespace Documentally.Domain.Common;
 
 /// <summary>
 /// Base class to identify that an Validation Error ocurred.

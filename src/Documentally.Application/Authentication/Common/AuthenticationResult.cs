@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.Entities;
+using Documentally.Domain.User;
 
 namespace Documentally.Application.Authentication.Common;
 

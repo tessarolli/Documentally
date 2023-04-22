@@ -1,19 +1,14 @@
-﻿// <copyright file="LoginQuery.cs" company="Documentally">
+﻿// <copyright file="UserCreatedDomainEvent.cs" company="Documentally">
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Application.Abstractions.Messaging;
-using Documentally.Application.Authentication.Common;
+using Documentally.Domain.Common.Abstractions;
 
-namespace Documentally.Application.Authentication.Queries.Login;
+namespace Documentally.Domain.User.Events;
 
 /// <summary>
-/// Contract for the Login Query.
+/// Event that occurs after the user registration proccess is concluded with success.
 /// </summary>
-/// <param name="Email"></param>
-/// <param name="Password"></param>
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Reviewed")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1009:Closing parenthesis should be spaced correctly", Justification = "Reviewed")]
-public record LoginQuery(
-    string Email,
-    string Password) : IQuery<AuthenticationResult>;
+public record UserCreatedDomainEvent(User User) : IDomainEvent;

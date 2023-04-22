@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.Entities;
+using Documentally.Domain.User;
 using FluentResults;
 
 namespace Documentally.Application.Abstractions.Repositories;
@@ -16,15 +16,15 @@ public interface IUserRepository
     /// Get an element from the User Repository by it's id.
     /// </summary>
     /// <param name="id">The Id of the element to fetch.</param>
-    /// <returns>The element instance, if it exists.</returns>
-    Task<User?> GetByIdAsync(long id);
+    /// <returns>The Result of the GetById.</returns>
+    Task<Result<User>> GetByIdAsync(long id);
 
     /// <summary>
     /// Get an element from the User Repository by it's email address.
     /// </summary>
     /// <param name="email">The email address of the element to fetch.</param>
-    /// <returns>The element instance, if it exists.</returns>
-    Task<User?> GetByEmailAsync(string email);
+    /// <returns>The Result of GetByEmail.</returns>
+    Task<Result<User>> GetByEmailAsync(string email);
 
     /// <summary>
     /// Add an User to the user Repository.

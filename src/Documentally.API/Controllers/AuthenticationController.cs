@@ -2,10 +2,13 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using Documentally.API.Common.Attributes;
 using Documentally.API.Common.Controllers;
 using Documentally.Application.Authentication.Commands.Register;
 using Documentally.Application.Authentication.Queries.Login;
 using Documentally.Contracts.Authentication;
+using Documentally.Domain.Enums;
+using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -27,7 +30,9 @@ public class AuthenticationController : ResultControllerBase
     /// </summary>
     /// <param name="mediator">Injected mediator.</param>
     /// <param name="mapper">Injected mapper.</param>
-    public AuthenticationController(IMediator mediator, IMapper mapper)
+    /// <param name="logger">Injected logger.</param>
+    public AuthenticationController(IMediator mediator, IMapper mapper, ILogger<AuthenticationController> logger)
+        : base(logger)
     {
         this.mediator = mediator;
         this.mapper = mapper;
@@ -42,6 +47,8 @@ public class AuthenticationController : ResultControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> RegisterAsync(RegisterRequest request)
     {
+        logger.LogInformation("POST /Register called");
+
         var registerCommand = mapper.Map<RegisterCommand>(request);
         var authenticationResult = await mediator.Send(registerCommand);
 
@@ -60,12 +67,32 @@ public class AuthenticationController : ResultControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> LoginAsync(LoginRequest request)
     {
+        logger.LogInformation("POST /Login called");
+
         var loginQuery = mapper.Map<LoginQuery>(request);
         var authenticationResult = await mediator.Send(loginQuery);
 
         return ValidateResult(
             authenticationResult,
             () => Ok(mapper.Map<AuthenticationResponse>(authenticationResult.Value)),
+            () => Problem());
+    }
+
+    /// <summary>
+    /// Endpoint for a testing the authorization.
+    /// </summary>
+    /// <returns>The result of the test.</returns>
+    [HttpGet("test")]
+    [RoleAuthorize(new[] { Roles.Manager, Roles.Admin })]
+    public IActionResult Test()
+    {
+        logger.LogInformation("GET /Test called");
+
+        var result = Result.Ok("Authorized");
+
+        return ValidateResult(
+            result,
+            () => Ok(result.Value),
             () => Problem());
     }
 }

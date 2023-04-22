@@ -2,21 +2,23 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.BaseClasses.DDD;
+using Documentally.Domain.Common.DDD;
 using Documentally.Domain.Enums;
-using Documentally.Domain.ValueObjects;
+using Documentally.Domain.User.Events;
+using Documentally.Domain.User.ValueObjects;
 using FluentResults;
 
-namespace Documentally.Domain.Entities;
+namespace Documentally.Domain.User;
 
 /// <summary>
 /// User Entity.
 /// </summary>
-public class User : Entity<UserId>
+public sealed class User : AggregateRoot
 {
-    private User(UserId id)
+    private User(long? id)
         : base(id)
     {
+        Id = id ?? 0;
     }
 
     /// <summary>
@@ -47,17 +49,24 @@ public class User : Entity<UserId>
     /// <summary>
     /// Gets User's Creation Date on utc.
     /// </summary>
-    public DateTime CreatedAtUtc { get; private set; }
+    public DateTime? CreatedAtUtc { get; private set; }
 
     /// <summary>
-    /// Creates a new User.
+    /// Gets a value indicating whether this user is registered or not.
     /// </summary>
+    public bool IsRegistered { get; private set; }
+
+    /// <summary>
+    /// Creates a new User Entity instance.
+    /// </summary>
+    /// <param name="id">User's id, can be null.</param>
     /// <param name="firstName">User's First Name.</param>
     /// <param name="lastName">User's Last Name.</param>
     /// <param name="email">User's Email.</param>
     /// <param name="password">User's Password.</param>
+    /// <param name="role">User's Role. can be null.</param>
     /// <returns>New User's instance or error.</returns>
-    public static Result<User> Create(string firstName, string lastName, string email, string password)
+    public static Result<User> Create(long? id, string firstName, string lastName, string email, string password, Roles role = Roles.User, DateTime? createdOnUtc = null)
     {
         var passwordResult = Password.Create(password);
 
@@ -66,13 +75,24 @@ public class User : Entity<UserId>
             return Result.Fail(passwordResult.Errors);
         }
 
-        return new User(new UserId())
+        return new User(id)
         {
             FirstName = firstName,
             LastName = lastName,
             Email = email,
             Password = passwordResult.Value,
-            Role = Roles.User,
+            Role = role,
+            IsRegistered = id is not null,
+            CreatedAtUtc = createdOnUtc,
         };
+    }
+
+    /// <summary>
+    /// Initiates a User Registration Process.
+    /// </summary>
+    public void RaiseUserCreatedDomainEvent()
+    {
+        IsRegistered = true;
+        RaiseDomainEvent(new UserCreatedDomainEvent(this));
     }
 }

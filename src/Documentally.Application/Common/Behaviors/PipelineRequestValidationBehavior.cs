@@ -1,31 +1,29 @@
-﻿// <copyright file="RequestValidationBehavior.cs" company="Documentally">
+﻿// <copyright file="PipelineRequestValidationBehavior.cs" company="Documentally">
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Application.Abstractions.Messaging;
-using Documentally.Domain.BaseClasses;
+using Documentally.Domain.Common;
 using FluentResults;
 using FluentValidation;
-using FluentValidation.Results;
 using MediatR;
 
-namespace Documentally.Application.Common.Validation;
+namespace Documentally.Application.Common.Behaviors;
 
 /// <summary>
 /// Provides a generic Validation Behavior for incoming requests.
 /// </summary>
 /// <typeparam name="TRequest">The type of the incoming request contract.</typeparam>
 /// <typeparam name="TResponse">The type of the request's response contract.</typeparam>
-public class RequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class PipelineRequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     private readonly IEnumerable<IValidator<TRequest>> validators;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RequestValidationBehavior{TRequest, TResponse}"/> class.
+    /// Initializes a new instance of the <see cref="PipelineRequestValidationBehavior{TRequest, TResponse}"/> class.
     /// </summary>
     /// <param name="validators">Injected validators.</param>
-    public RequestValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
+    public PipelineRequestValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
     {
         this.validators = validators;
     }
@@ -55,7 +53,7 @@ public class RequestValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
                 .MakeGenericType(typeof(TResponse).GenericTypeArguments[0])
                 .GetMethods()
                 .First(x => x.Name == "WithErrors")
-                .Invoke(Activator.CreateInstance(typeof(TResponse)), new object?[] { errors }) !;
+                .Invoke(Activator.CreateInstance(typeof(TResponse)), new object?[] { errors })!;
         }
 
         return await next();

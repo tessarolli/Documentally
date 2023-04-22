@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-namespace Documentally.Domain.BaseClasses.DDD;
+namespace Documentally.Domain.Common.DDD;
 
 /// <summary>
 /// An abstract class that should be implemented to represent an Value Object.

@@ -2,17 +2,17 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.API.DependencyInjection;
-using Documentally.Application.DependencyInjection;
-using Documentally.Infrastructure.DependencyInjection;
+using Documentally.API;
+using Documentally.Application;
+using Documentally.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Services
-        .AddPresentation()
+        .AddInfrastructure(builder.Configuration)
         .AddApplication()
-        .AddInfrastructure(builder.Configuration);
+        .AddPresentation();
 }
 
 var app = builder.Build();

@@ -4,7 +4,7 @@
 
 using Documentally.API.Common.Mappings;
 
-namespace Documentally.API.DependencyInjection;
+namespace Documentally.API;
 
 /// <summary>
 /// Dependency Injection.

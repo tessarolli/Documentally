@@ -2,10 +2,10 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.BaseClasses.DDD;
+using Documentally.Domain.Common.DDD;
 using FluentResults;
 
-namespace Documentally.Domain.ValueObjects;
+namespace Documentally.Domain.User.ValueObjects;
 
 /// <summary>
 /// Password Value Object.

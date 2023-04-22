@@ -7,7 +7,11 @@ using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Authentication.Common;
 using Documentally.Application.Authentication.Errors;
-using Documentally.Domain.Entities;
+using Documentally.Application.Common.Errors;
+using Documentally.Application.EventBus;
+using Documentally.Application.Extensions;
+using Documentally.Domain.User;
+using Documentally.Domain.User.Events;
 using FluentResults;
 using MediatR;
 
@@ -20,49 +24,65 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, Authentic
 {
     private readonly IJwtTokenGenerator jwtTokenGenerator;
     private readonly IUserRepository userRepository;
+    private readonly IDomainEventBus domainEventBus;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RegisterCommandHandler"/> class.
     /// </summary>
-    /// <param name="userRepository">UserRepository being injected.</param>
-    /// <param name="jwtTokenGenerator">JwtTokenGenerator being injected.</param>
-    public RegisterCommandHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator)
+    /// <param name="userRepository">IUserRepository being injected.</param>
+    /// <param name="jwtTokenGenerator">IJwtTokenGenerator being injected.</param>
+    /// <param name="domainEventBus">IDomainEventBus being injected.</param>
+    public RegisterCommandHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator, IDomainEventBus domainEventBus)
     {
         this.jwtTokenGenerator = jwtTokenGenerator;
         this.userRepository = userRepository;
+        this.domainEventBus = domainEventBus;
     }
 
     /// <summary>
-    /// The actual command Handler.
+    /// The actual command Handler implementation for registering a new user.
     /// </summary>
     /// <param name="command">RegisterCommand.</param>
     /// <param name="cancellationToken">Async CancellationToken.</param>
     /// <returns>FluentResult for the operation.</returns>
     public async Task<Result<AuthenticationResult>> Handle(RegisterCommand command, CancellationToken cancellationToken)
     {
-        // Check if User with given e-mail already exists
-        if (await userRepository.GetByEmailAsync(command.Email) is not null)
+        // Check if a user with the given e-mail already exists
+        // Although this is a business rule, it's more of an application complexity than a domain complexity
+        // Therefore, we can handle this rule enforcement here in the application layer.
+        var getUserByEmailResult = await userRepository.GetByEmailAsync(command.Email);
+        if (getUserByEmailResult.IsFailed)
+        {
+            if (!getUserByEmailResult.HasError<NotFoundError>())
+            {
+                return Result.Fail(getUserByEmailResult.Errors);
+            }
+        }
+        else
         {
             return Result.Fail(new UserWithEmailAlreadyExistsError());
         }
 
-        // Create a new user
-        var userResult = User.Create(command.FirstName, command.LastName, command.Email, command.Password);
+        // Now that we Ensure the Business Rule, we can carry on with the User Creation
+        // and persisting it to the repository.
+        var userResult = User.Create(null, command.FirstName, command.LastName, command.Email, command.Password);
         if (userResult.IsFailed)
         {
             return Result.Fail(userResult.Errors);
         }
 
-        // Add to the Database
+        // Persist newly created User Entity Instance to the Repository
         var persistResult = await userRepository.AddAsync(userResult.Value);
         if (persistResult.IsFailed)
         {
             return Result.Fail(persistResult.Errors);
         }
 
-        // Generate Token
-        var token = jwtTokenGenerator.GenerateToken(userResult.Value);
+        domainEventBus.DispatchDomainEvent(new UserCreatedDomainEvent(persistResult.Value));
 
-        return new AuthenticationResult(userResult.Value, token);
+        // Generate Token
+        var token = jwtTokenGenerator.GenerateToken(persistResult.Value);
+
+        return new AuthenticationResult(persistResult.Value, token);
     }
 }

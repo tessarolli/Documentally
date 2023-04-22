@@ -4,9 +4,12 @@
 
 using Dapper;
 using Documentally.Application.Abstractions.Repositories;
-using Documentally.Domain.Entities;
+using Documentally.Application.Common.Errors;
+using Documentally.Domain.User;
 using Documentally.Infrastructure.Abstractions;
+using Documentally.Infrastructure.DataTransferObjects;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace Documentally.Infrastructure.Repository;
@@ -17,27 +20,32 @@ namespace Documentally.Infrastructure.Repository;
 public class UserRepository : IUserRepository
 {
     private readonly IPostgresSqlConnectionFactory postgresSqlConnectionFactory;
+    private readonly ILogger logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserRepository"/> class.
     /// </summary>
-    /// <param name="postgresSqlConnectionFactory">to inject.</param>
-    public UserRepository(IPostgresSqlConnectionFactory postgresSqlConnectionFactory)
+    /// <param name="postgresSqlConnectionFactory">IPostgresSqlConnectionFactory to inject.</param>
+    /// <param name="logger">ILogger to inject.</param>
+    public UserRepository(IPostgresSqlConnectionFactory postgresSqlConnectionFactory, ILogger<UserRepository> logger)
     {
         this.postgresSqlConnectionFactory = postgresSqlConnectionFactory;
+        this.logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task<Result<User>> AddAsync(User user)
     {
+        logger.LogInformation("UserRepository.AddAsync()");
+
         await using var connection = postgresSqlConnectionFactory.CreateConnection();
 
-        var sql = "INSERT INTO \"Users\" (" +
-                      "\"FirstName\"," +
-                      "\"LastName\"," +
-                      "\"Email\"," +
-                      "\"Password\"," +
-                      "\"Role\") " +
+        var sql = "INSERT INTO users (" +
+                      "first_name," +
+                      "last_name," +
+                      "email," +
+                      "password," +
+                      "role) " +
                   "VALUES (" +
                       "@FirstName," +
                       "@LastName," +
@@ -45,7 +53,7 @@ public class UserRepository : IUserRepository
                       "@Password," +
                       "@Role) " +
                   "RETURNING " +
-                      "\"Id\"";
+                      "id";
 
         var parameters = new
         {
@@ -63,72 +71,123 @@ public class UserRepository : IUserRepository
             var newId = await connection.ExecuteScalarAsync<int>(sql, parameters);
 
             await connection.CloseAsync();
+
+            var newUserResult = User.Create(
+                newId,
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.Password.Value,
+                user.Role,
+                user.CreatedAtUtc);
+
+            if (newUserResult.IsFailed)
+            {
+                var errMsg = "The new user was persisted on the database, but the entity creation failed somehow.";
+
+                logger.LogError("{errMsg}", errMsg);
+
+                return Result.Fail(errMsg);
+            }
+
+            return Result.Ok(newUserResult.Value);
         }
         catch (PostgresException pex)
         {
-            // LogException(pex);
-            return Result.Fail("User database insertion failed");
-        }
+            logger.LogError(pex, "Error while inserting user into the database.");
 
-        // user.Id = new UserId(newId);
-        return Result.Ok(user);
+            return Result.Fail("There was a problem when persisting the User to the database.");
+        }
     }
 
     /// <inheritdoc/>
-    public async Task<User?> GetByEmailAsync(string email)
+    public async Task<Result<User>> GetByEmailAsync(string email)
     {
+        logger.LogInformation("UserRepository.GetByEmailAsync({email})", email);
+
         await using var connection = postgresSqlConnectionFactory.CreateConnection();
 
-        var sql = "SELECT * from \"Users\" where \"Email\" = @Email";
+        var sql = "SELECT * FROM users WHERE email = @email";
 
         var parameters = new
         {
-            Email = email,
+            email,
         };
 
         try
         {
             await connection.OpenAsync();
 
-            var user = await connection.QueryFirstOrDefaultAsync<User>(sql, parameters);
+            var userDto = await connection.QueryFirstOrDefaultAsync<UserDto>(sql, parameters);
 
             await connection.CloseAsync();
 
-            return user;
+            return CreateUserResultFromUserDto(userDto);
         }
         catch (PostgresException pex)
         {
-            // LogException(pex);
-            return null;
+            logger.LogError(pex, "Error while retrieving user by Email from the database.");
+
+            return Result.Fail("There was an error while retrieving the User from the Database.");
         }
     }
 
     /// <inheritdoc/>
-    public async Task<User?> GetByIdAsync(long id)
+    public async Task<Result<User>> GetByIdAsync(long id)
     {
+        logger.LogInformation("UserRepository.GetByIdAsync({id})", id);
+
         await using var connection = postgresSqlConnectionFactory.CreateConnection();
 
-        var sql = "SELECT * from \"Users\" where \"Id\" = @Id";
+        var sql = "SELECT * FROM users WHERE id = @id";
 
         var parameters = new
         {
-            Id = id,
+            id,
         };
 
         try
         {
             await connection.OpenAsync();
 
-            var user = await connection.QueryFirstOrDefaultAsync<User>(sql, parameters);
+            var userDto = await connection.QueryFirstOrDefaultAsync<UserDto>(sql, parameters);
 
             await connection.CloseAsync();
 
-            return user;
+            return CreateUserResultFromUserDto(userDto);
         }
         catch (PostgresException pex)
         {
-            // LogException(pex);
-            return null;
+            logger.LogError(pex, "Error while retrieving user by Email from the database.");
+
+            return Result.Fail("There was an error while retrieving the User from the Database.");
         }
+    }
+
+    /// <summary>
+    /// Creates a new instance of the User Entity, using the Create factory method.
+    /// </summary>
+    /// <param name="userDto">The User Data Transfer Object.</param>
+    /// <returns>An Result indicating the status of the operation.</returns>
+    private static Result<User> CreateUserResultFromUserDto(UserDto? userDto)
+    {
+        if (userDto is not null)
+        {
+            var userResult = User.Create(
+                userDto.id,
+                userDto.first_name,
+                userDto.last_name,
+                userDto.email,
+                userDto.password,
+                userDto.role);
+            if (userResult.IsSuccess)
+            {
+                return Result.Ok(userResult.Value);
+            }
+
+            return Result.Fail(userResult.Errors);
+        }
+
+        return Result.Fail(new NotFoundError($"User with the provided E-Mail was not found."));
     }
 }
