@@ -5,9 +5,9 @@
 using Documentally.Application.Abstractions.Authentication;
 using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
-using Documentally.Application.Authentication.Common;
 using Documentally.Application.Authentication.Errors;
-using Documentally.Domain.User;
+using Documentally.Application.Authentication.Results;
+using Documentally.Domain.UserAggregate;
 using FluentResults;
 
 namespace Documentally.Application.Authentication.Queries.Login;
@@ -37,7 +37,7 @@ public class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResult>
         await Task.CompletedTask;
 
         // Check if User with given e-mail already exists
-        Result<User> userResult = await userRepository.GetByEmailAsync(query.Email);
+        Result<Domain.UserAggregate.User> userResult = await userRepository.GetByEmailAsync(query.Email);
         if (userResult.IsFailed)
         {
             return Result.Fail(userResult.Errors);

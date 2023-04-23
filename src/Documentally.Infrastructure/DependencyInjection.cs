@@ -5,10 +5,11 @@
 using System.Text;
 using Documentally.Application.Abstractions.Authentication;
 using Documentally.Application.Abstractions.Repositories;
+using Documentally.Domain.Common.Abstractions;
 using Documentally.Infrastructure;
 using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.Authentication;
-using Documentally.Infrastructure.Repository;
+using Documentally.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,6 +42,8 @@ public static class DependencyInjection
             .AddPersistance()
             .AddAuthentication(configuration);
 
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+
         return services;
     }
 
@@ -52,6 +55,7 @@ public static class DependencyInjection
     public static IServiceCollection AddPersistance(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IGroupRepository, GroupRepository>();
 
         services.AddScoped<IPostgresSqlConnectionFactory, PostgresSqlConnectionFactory>();
 

@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.Common.DDD;
+using Documentally.Domain.Common.Abstractions;
 using MediatR;
 
 namespace Documentally.Application.Extensions;
@@ -20,7 +20,7 @@ public static class MediatorExtension
     /// <param name="entity">entity instance.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public static async Task DispatchDomainEventsAsync<T>(this IMediator mediator, T entity)
-        where T : Entity
+        where T : IEntity
     {
         var tasks = entity.DomainEvents
             .Select(async (domainEvent) =>

@@ -77,22 +77,4 @@ public class AuthenticationController : ResultControllerBase
             () => Ok(mapper.Map<AuthenticationResponse>(authenticationResult.Value)),
             () => Problem());
     }
-
-    /// <summary>
-    /// Endpoint for a testing the authorization.
-    /// </summary>
-    /// <returns>The result of the test.</returns>
-    [HttpGet("test")]
-    [RoleAuthorize(new[] { Roles.Manager, Roles.Admin })]
-    public IActionResult Test()
-    {
-        logger.LogInformation("GET /Test called");
-
-        var result = Result.Ok("Authorized");
-
-        return ValidateResult(
-            result,
-            () => Ok(result.Value),
-            () => Problem());
-    }
 }

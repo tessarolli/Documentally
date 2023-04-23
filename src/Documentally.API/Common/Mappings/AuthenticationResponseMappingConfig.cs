@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Application.Authentication.Common;
+using Documentally.Application.Authentication.Results;
 using Documentally.Contracts.Authentication;
 using Mapster;
 
@@ -18,7 +18,7 @@ public class AuthenticationResponseMappingConfig : IRegister
     {
         config.NewConfig<AuthenticationResult, AuthenticationResponse>()
             .Map(dest => dest.Token, src => src.Token)
-            .Map(dest => dest.Id, src => src.User.Id)
+            .Map(dest => dest.Id, src => src.User.Id.Value)
             .Map(dest => dest, src => src.User);
     }
 }

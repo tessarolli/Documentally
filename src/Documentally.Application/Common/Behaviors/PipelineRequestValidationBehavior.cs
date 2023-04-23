@@ -53,7 +53,7 @@ public class PipelineRequestValidationBehavior<TRequest, TResponse> : IPipelineB
                 .MakeGenericType(typeof(TResponse).GenericTypeArguments[0])
                 .GetMethods()
                 .First(x => x.Name == "WithErrors")
-                .Invoke(Activator.CreateInstance(typeof(TResponse)), new object?[] { errors })!;
+                .Invoke(Activator.CreateInstance(typeof(TResponse)), new object?[] { errors }) !;
         }
 
         return await next();

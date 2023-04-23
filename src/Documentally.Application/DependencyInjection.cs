@@ -3,6 +3,7 @@
 // </copyright>
 
 using Documentally.Application;
+using Documentally.Application.Authentication.Services;
 using Documentally.Application.Common.Behaviors;
 using Documentally.Application.EventBus;
 using FluentValidation;
@@ -27,6 +28,7 @@ public static class DependencyInjection
 
         services.AddMediatR(assembly);
 
+        services.AddTransient<IAuthenticatedUserService, AuthenticatedUserService>();
 
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 

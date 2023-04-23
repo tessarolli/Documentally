@@ -18,6 +18,8 @@ public static class DependencyInjection
     /// <returns>IServiceCollection with dependencies injected.</returns>
     public static IServiceCollection AddPresentation(this IServiceCollection services)
     {
+        services.AddHttpContextAccessor();
+
         services.AddMappings();
 
         services.AddControllers();

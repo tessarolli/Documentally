@@ -3,7 +3,7 @@
 // </copyright>
 
 using Documentally.Application.Abstractions.Messaging;
-using Documentally.Application.Authentication.Common;
+using Documentally.Application.Authentication.Results;
 
 namespace Documentally.Application.Authentication.Queries.Login;
 

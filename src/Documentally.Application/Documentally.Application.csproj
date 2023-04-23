@@ -31,4 +31,9 @@
     <ProjectReference Include="..\Documentally.Domain\Documentally.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Group\DomainEventHandlers\" />
+    <Folder Include="Group\Errors\" />
+  </ItemGroup>
+
 </Project>

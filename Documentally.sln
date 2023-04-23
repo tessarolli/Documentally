@@ -28,7 +28,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentic
 	ProjectSection(SolutionItems) = preProject
 		LoginRequest.http = LoginRequest.http
 		RegisterRequest.http = RegisterRequest.http
-		TestRequest.http = TestRequest.http
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Group", "Group", "{815290EB-1716-4AC8-891A-8CC1FB912B6E}"
+	ProjectSection(SolutionItems) = preProject
+		AddGroup.http = AddGroup.http
+		AddUserToGroup.http = AddUserToGroup.http
+		DeleteGroup.http = DeleteGroup.http
+		GetGroupById.http = GetGroupById.http
+		GetGroupsList.http = GetGroupsList.http
+		RemoveUserFromGroup.http = RemoveUserFromGroup.http
+		UpdateGroup.http = UpdateGroup.http
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User", "User", "{BF60B2B3-101C-40A0-B5C5-301FDE65622C}"
+	ProjectSection(SolutionItems) = preProject
+		AddUser.http = AddUser.http
+		DeleteUser.http = DeleteUser.http
+		UpdateUser.http = UpdateUser.http
 	EndProjectSection
 EndProject
 Global
@@ -67,6 +84,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{35BD01C1-4279-4BFB-9C71-7D0C020B4566} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
+		{815290EB-1716-4AC8-891A-8CC1FB912B6E} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
+		{BF60B2B3-101C-40A0-B5C5-301FDE65622C} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4FC4D3CA-E266-48F0-8E90-A7623AAB730D}

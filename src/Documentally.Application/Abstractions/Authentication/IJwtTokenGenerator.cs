@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.User;
+using Documentally.Domain.UserAggregate;
 
 namespace Documentally.Application.Abstractions.Authentication;
 
@@ -16,5 +16,5 @@ public interface IJwtTokenGenerator
     /// </summary>
     /// <param name="user">The User to generate the token for.</param>
     /// <returns>The token.</returns>
-    string GenerateToken(User user);
+    string GenerateToken(Domain.UserAggregate.User user);
 }

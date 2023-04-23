@@ -5,15 +5,13 @@
 using Documentally.Application.Abstractions.Authentication;
 using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
-using Documentally.Application.Authentication.Common;
 using Documentally.Application.Authentication.Errors;
+using Documentally.Application.Authentication.Results;
 using Documentally.Application.Common.Errors;
 using Documentally.Application.EventBus;
-using Documentally.Application.Extensions;
-using Documentally.Domain.User;
-using Documentally.Domain.User.Events;
+using Documentally.Domain.UserAggregate;
+using Documentally.Domain.UserAggregate.Events;
 using FluentResults;
-using MediatR;
 
 namespace Documentally.Application.Authentication.Commands.Register;
 
@@ -65,7 +63,7 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, Authentic
 
         // Now that we Ensure the Business Rule, we can carry on with the User Creation
         // and persisting it to the repository.
-        var userResult = User.Create(null, command.FirstName, command.LastName, command.Email, command.Password);
+        var userResult = Domain.UserAggregate.User.Create(null, command.FirstName, command.LastName, command.Email, command.Password);
         if (userResult.IsFailed)
         {
             return Result.Fail(userResult.Errors);

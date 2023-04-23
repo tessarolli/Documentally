@@ -1,0 +1,11 @@
+@host=https://localhost:5001
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZmFtaWx5X25hbWUiOiJhIiwiZ2l2ZW5fbmFtZSI6ImEiLCJqdGkiOiIxIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiTWFuYWdlciIsImV4cCI6MTY4MjM1NzE2MSwiaXNzIjoiRG9jdW1lbnRhbGx5IiwiYXVkIjoiRG9jdW1lbnRhbGx5In0.scMW76I3oVyBPJ1Xb1ZUlEkZuJJkIVm8W21ckOQdoFE
+
+POST {{host}}/Groups
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "Name": "Grupo do Luiz",
+    "OwnerId": 5
+}
