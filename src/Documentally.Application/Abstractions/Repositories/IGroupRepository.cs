@@ -2,10 +2,10 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.GroupAggregate.ValueObjects;
-using Documentally.Domain.UserAggregate.ValueObjects;
+using Documentally.Domain.Group;
+using Documentally.Domain.Group.ValueObjects;
+using Documentally.Domain.User.ValueObjects;
 using FluentResults;
-using Group_ = Documentally.Domain.GroupAggregate.Group;
 
 namespace Documentally.Application.Abstractions.Repositories;
 
@@ -19,21 +19,21 @@ public interface IGroupRepository
     /// </summary>
     /// <param name="id">The Group Id.</param>
     /// <returns>A Result with the Group Aggregate, or a error message.</returns>
-    Task<Result<Group_>> GetByIdAsync(GroupId id);
+    Task<Result<Group>> GetByIdAsync(GroupId id);
 
     /// <summary>
     /// Add an Group into the Repository.
     /// </summary>
     /// <param name="group">The Group to Add.</param>
     /// <returns>A Result indicating the status of this operation.</returns>
-    Task<Result<Group_>> AddAsync(Group_ group);
+    Task<Result<Group>> AddAsync(Group group);
 
     /// <summary>
     /// Update the Group in the Repository.
     /// </summary>
     /// <param name="group">The Group to Add.</param>
     /// <returns>A Result indicating the status of this operation.</returns>
-    Task<Result<Group_>> UpdateAsync(Group_ group);
+    Task<Result<Group>> UpdateAsync(Group group);
 
     /// <summary>
     /// Remove the Group from the Repository.
@@ -46,7 +46,7 @@ public interface IGroupRepository
     /// Gets a List of all Groups from the repository.
     /// </summary>
     /// <returns>A Result indicating the status of this operation.</returns>
-    Task<Result<List<Group_>>> GetAllAsync();
+    Task<Result<List<Group>>> GetAllAsync();
 
     /// <summary>
     /// Adds an User to the Group in the Repository.
@@ -54,7 +54,7 @@ public interface IGroupRepository
     /// <param name="groupId">The Group Identifier.</param>
     /// <param name="userId">The User Identifier.</param>
     /// <returns>A Result indicating the status of this operation and updated instance of the Group Aggregate.</returns>
-    Task<Result<Group_>> AddUserToGroupAsync(GroupId groupId, UserId userId);
+    Task<Result<Group>> AddUserToGroupAsync(GroupId groupId, UserId userId);
 
     /// <summary>
     /// Removes an User from the Group in the Repository.
@@ -62,5 +62,5 @@ public interface IGroupRepository
     /// <param name="groupId">The Group Identifier.</param>
     /// <param name="userId">The User Identifier.</param>
     /// <returns>A Result indicating the status of this operation and updated instance of the Group Aggregate.</returns>
-    Task<Result<Group_>> RemoveUserFromGroupAsync(GroupId groupId, UserId userId);
+    Task<Result<Group>> RemoveUserFromGroupAsync(GroupId groupId, UserId userId);
 }

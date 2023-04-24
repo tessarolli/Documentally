@@ -4,10 +4,10 @@
 
 using Dapper;
 using Documentally.Application.Abstractions.Repositories;
-using Documentally.Domain.GroupAggregate;
-using Documentally.Domain.GroupAggregate.ValueObjects;
-using Documentally.Domain.UserAggregate;
-using Documentally.Domain.UserAggregate.ValueObjects;
+using Documentally.Domain.Group;
+using Documentally.Domain.Group.ValueObjects;
+using Documentally.Domain.User;
+using Documentally.Domain.User.ValueObjects;
 using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.DataTransferObjects;
 using Documentally.Infrastructure.Extensions;
@@ -280,17 +280,16 @@ public class GroupRepository : IGroupRepository
                 group_members (group_id, user_id) 
             VALUES 
                 (@GroupId, @UserId);";
-
         try
         {
             await connection.ExecuteAsync(insertSql, new { GroupId = groupId.Value, UserId = userId.Value });
-
-            return await GetByIdAsync(groupId);
         }
         catch (Exception ex)
         {
             return Result.Fail(ex.GetPrettyMessage(logger));
         }
+
+        return await GetByIdAsync(groupId);
     }
 
     /// <inheritdoc/>
@@ -308,17 +307,16 @@ public class GroupRepository : IGroupRepository
             WHERE 
                 group_id = @GroupId 
                 AND user_id = @UserId;";
-
         try
         {
             await connection.ExecuteAsync(deleteSql, new { GroupId = groupId.Value, UserId = userId.Value });
-
-            return await GetByIdAsync(groupId);
         }
         catch (Exception ex)
         {
             return Result.Fail(ex.GetPrettyMessage(logger));
         }
+
+        return await GetByIdAsync(groupId);
     }
 
     private Result<Group> MapDtoToGroup(GroupDto group, List<GroupMemberDto> members)

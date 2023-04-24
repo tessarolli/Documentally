@@ -5,17 +5,21 @@
 using System.Text;
 using Documentally.Application.Abstractions.Authentication;
 using Documentally.Application.Abstractions.Repositories;
+using Documentally.Application.Abstractions.Services;
 using Documentally.Domain.Common.Abstractions;
 using Documentally.Infrastructure;
 using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.Authentication;
 using Documentally.Infrastructure.Repositories;
+using Documentally.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Azure.Storage.Blobs;
 
 namespace Documentally.Infrastructure;
 
@@ -39,7 +43,7 @@ public static class DependencyInjection
                 builder.AddConsole();
                 builder.AddDebug();
             })
-            .AddPersistance()
+            .AddPersistance(configuration)
             .AddAuthentication(configuration);
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -51,13 +55,24 @@ public static class DependencyInjection
     /// Add Persistence dependencies.
     /// </summary>
     /// <param name="services">Injected services.</param>
+    /// <param name="configuration">Injected configuration.</param>
     /// <returns>Services with dependencies injected.</returns>
-    public static IServiceCollection AddPersistance(this IServiceCollection services)
+    public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IDocumentRepository, DocumentRepository>();
+
+        services.AddScoped<ICloudFileStorageService, CloudFileStorageService>();
 
         services.AddScoped<IPostgresSqlConnectionFactory, PostgresSqlConnectionFactory>();
+
+        // Create a blob service client
+        var connectionString = configuration["AzureBlobStorageConnectionString"]?.Trim();
+        var blobServiceClient = new BlobServiceClient(connectionString);
+
+        // Register the blob service client in the DI container
+        services.AddSingleton(blobServiceClient);
 
         return services;
     }

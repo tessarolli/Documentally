@@ -32,8 +32,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Group\DomainEventHandlers\" />
-    <Folder Include="Group\Errors\" />
+    <Folder Include="Documents\Commands\DeleteDocument\" />
+    <Folder Include="Documents\Queries\GetDocumentsList\" />
+    <Folder Include="Documents\Queries\GetDocumentById\" />
+    <Folder Include="Groups\DomainEventHandlers\" />
+    <Folder Include="Groups\Errors\" />
   </ItemGroup>
 
 </Project>

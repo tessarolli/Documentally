@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.UserAggregate.Events;
+using Documentally.Domain.User.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

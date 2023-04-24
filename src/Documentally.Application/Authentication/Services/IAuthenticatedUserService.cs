@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.UserAggregate;
+using Documentally.Domain.User;
 
 namespace Documentally.Application.Authentication.Services;
 
@@ -15,5 +15,5 @@ public interface IAuthenticatedUserService
     /// Gets the Authenticated User Entity from the Json Web Token.
     /// </summary>
     /// <returns>The Authenticated User Entity instance.</returns>
-    Task<Domain.UserAggregate.User?> GetAuthenticatedUserAsync();
+    Task<Domain.User.User?> GetAuthenticatedUserAsync();
 }

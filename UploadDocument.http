@@ -1,0 +1,29 @@
+@host=http://localhost:5000
+@token=a
+
+POST {{host}} /Documents HTTP/1.1
+Content-Type: multipart/form-data, boundary=abcdef
+Authorization: Bearer {{token}}
+
+--563771302305981310971868
+Content-Disposition: form-data; name="UserId"
+
+1
+--563771302305981310971868
+Content-Disposition: form-data; name="Name"
+
+sample.pdf
+--563771302305981310971868
+Content-Disposition: form-data; name="Description"
+
+This is a sample PDF file
+--563771302305981310971868
+Content-Disposition: form-data; name="Category"
+
+General
+--563771302305981310971868
+Content-Disposition: form-data; name="File"; filename="sample.pdf"
+Content-Type: application/pdf
+
+JVBERi0xLjMKJcfsj6IKNSAwIG9iago8PCAvVHlwZSAvUGFnZXMgMiAwIFIvTWVkaWFCb3hbMCAwIDU5OCA3MTJdCi9Qcm9kdWNlciiRydW5RQ2xpY2tSZWdpc3RyeSBUcmFuc3BhcmVuY3kKPj4KZW5kb2JqCjYgMCBvYmoKPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFsgNCAwIFIgXQovQ291bnQgMQovS2lkc1sgMyAwIFIgXQovSW5mbyA0IDAgUgo+PgpzdGFydHhyZWYKMzU1NwolJUVPRgo=
+--563771302305981310971868

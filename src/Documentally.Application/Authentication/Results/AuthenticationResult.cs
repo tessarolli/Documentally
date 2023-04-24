@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Documentally.Domain.UserAggregate;
+using Documentally.Domain.User;
 
 namespace Documentally.Application.Authentication.Results;
 
@@ -13,5 +13,5 @@ namespace Documentally.Application.Authentication.Results;
 /// <param name="Token"></param>
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Reviewed")]
 public record AuthenticationResult(
-    Domain.UserAggregate.User User,
+    Domain.User.User User,
     string Token);

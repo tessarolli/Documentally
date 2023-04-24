@@ -6,8 +6,8 @@ using Dapper;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Common.Errors;
 using Documentally.Domain.Common.Abstractions;
-using Documentally.Domain.UserAggregate;
-using Documentally.Domain.UserAggregate.ValueObjects;
+using Documentally.Domain.User;
+using Documentally.Domain.User.ValueObjects;
 using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.DataTransferObjects;
 using Documentally.Infrastructure.Extensions;
@@ -198,7 +198,7 @@ public class UserRepository : IUserRepository
             user.FirstName,
             user.LastName,
             user.Email,
-            Password = user.Password.Value,
+            Password = user.Password.HashedPassword,
             Role = (int)user.Role,
         };
 
@@ -217,7 +217,7 @@ public class UserRepository : IUserRepository
                 user.FirstName,
                 user.LastName,
                 user.Email,
-                user.Password.Value,
+                user.Password.HashedPassword,
                 user.Role,
                 user.CreatedAtUtc);
 
@@ -262,11 +262,11 @@ public class UserRepository : IUserRepository
 
         var parameters = new
         {
-            user.Id,
+            user.Id.Value,
             user.FirstName,
             user.LastName,
             user.Email,
-            user.Password,
+            user.Password.HashedPassword,
             user.Role,
         };
 
@@ -306,9 +306,14 @@ public class UserRepository : IUserRepository
 
             await connection.OpenAsync();
 
-            await connection.ExecuteAsync(sql, parameters);
+            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
 
             await connection.CloseAsync();
+
+            if (affectedRecordsCount == 0)
+            {
+                return Result.Fail(new NotFoundError());
+            }
 
             return Result.Ok();
         }

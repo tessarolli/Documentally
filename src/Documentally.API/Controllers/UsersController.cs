@@ -4,11 +4,11 @@
 
 using Documentally.API.Common.Attributes;
 using Documentally.API.Common.Controllers;
-using Documentally.Application.User.Commands.AddUser;
-using Documentally.Application.User.Commands.DeleteUser;
-using Documentally.Application.User.Commands.UpdateUser;
-using Documentally.Application.User.Queries.GetUserById;
-using Documentally.Application.User.Queries.GetUsersList;
+using Documentally.Application.Users.Commands.AddUser;
+using Documentally.Application.Users.Commands.DeleteUser;
+using Documentally.Application.Users.Commands.UpdateUser;
+using Documentally.Application.Users.Queries.GetUserById;
+using Documentally.Application.Users.Queries.GetUsersList;
 using Documentally.Contracts.User.Requests;
 using Documentally.Contracts.User.Responses;
 using Documentally.Domain.Enums;
@@ -83,7 +83,7 @@ public class UsersController : ResultControllerBase
     /// <param name="request">User data.</param>
     /// <returns>The User instance created with Id.</returns>
     [HttpPost]
-    [RoleAuthorize(new[] { Roles.Manager, Roles.Admin })]
+    [RoleAuthorize(Roles.Admin)]
     public async Task<ActionResult<UserResponse>> AddUser(AddUserRequest request)
     {
         logger.LogInformation("POST /Users called");
@@ -104,7 +104,7 @@ public class UsersController : ResultControllerBase
     /// <param name="request">User data.</param>
     /// <returns>The User instance created with Id.</returns>
     [HttpPut]
-    [RoleAuthorize(new[] { Roles.Manager, Roles.Admin })]
+    [RoleAuthorize(Roles.Admin)]
     public async Task<ActionResult<UserResponse>> UpdateUser(UpdateUserRequest request)
     {
         logger.LogInformation("PUT /Users called");
@@ -125,7 +125,7 @@ public class UsersController : ResultControllerBase
     /// <param name="request">User Id.</param>
     /// <returns>The Action Result of the delete operation.</returns>
     [HttpDelete]
-    [RoleAuthorize(new[] { Roles.Manager, Roles.Admin })]
+    [RoleAuthorize(Roles.Admin)]
     public async Task<ActionResult> DeleteUser(DeleteUserRequest request)
     {
         logger.LogInformation("DELETE /Users called");

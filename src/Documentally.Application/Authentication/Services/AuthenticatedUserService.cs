@@ -3,8 +3,8 @@
 // </copyright>
 
 using Documentally.Application.Abstractions.Repositories;
-using Documentally.Domain.UserAggregate;
-using Documentally.Domain.UserAggregate.ValueObjects;
+using Documentally.Domain.User;
+using Documentally.Domain.User.ValueObjects;
 using Microsoft.AspNetCore.Http;
 
 namespace Documentally.Application.Authentication.Services;
@@ -29,7 +29,7 @@ public class AuthenticatedUserService : IAuthenticatedUserService
     }
 
     /// <inheritdoc/>
-    public async Task<Domain.UserAggregate.User?> GetAuthenticatedUserAsync()
+    public async Task<Domain.User.User?> GetAuthenticatedUserAsync()
     {
         var userId = httpContextAccessor?.HttpContext?.User.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
 

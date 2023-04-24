@@ -48,6 +48,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User", "User", "{BF60B2B3-1
 		UpdateUser.http = UpdateUser.http
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{D0824117-F4CF-43CE-8608-6856A836D349}"
+	ProjectSection(SolutionItems) = preProject
+		UploadDocument.http = UploadDocument.http
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +91,7 @@ Global
 		{35BD01C1-4279-4BFB-9C71-7D0C020B4566} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
 		{815290EB-1716-4AC8-891A-8CC1FB912B6E} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
 		{BF60B2B3-101C-40A0-B5C5-301FDE65622C} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
+		{D0824117-F4CF-43CE-8608-6856A836D349} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4FC4D3CA-E266-48F0-8E90-A7623AAB730D}

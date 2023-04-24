@@ -4,13 +4,13 @@
 
 using Documentally.API.Common.Attributes;
 using Documentally.API.Common.Controllers;
-using Documentally.Application.Group.Commands.AddGroup;
-using Documentally.Application.Group.Commands.AddUserToGroup;
-using Documentally.Application.Group.Commands.DeleteGroup;
-using Documentally.Application.Group.Commands.RemoveUserFromGroup;
-using Documentally.Application.Group.Commands.UpdateGroup;
-using Documentally.Application.Group.Queries.GetGroupById;
-using Documentally.Application.Group.Queries.GetGroupsList;
+using Documentally.Application.Groups.Commands.AddGroup;
+using Documentally.Application.Groups.Commands.AddUserToGroup;
+using Documentally.Application.Groups.Commands.DeleteGroup;
+using Documentally.Application.Groups.Commands.RemoveUserFromGroup;
+using Documentally.Application.Groups.Commands.UpdateGroup;
+using Documentally.Application.Groups.Queries.GetGroupById;
+using Documentally.Application.Groups.Queries.GetGroupsList;
 using Documentally.Contracts.Group.Requests;
 using Documentally.Contracts.Group.Responses;
 using Documentally.Domain.Enums;
@@ -85,7 +85,7 @@ public class GroupsController : ResultControllerBase
     /// <param name="request">Group data.</param>
     /// <returns>The group instance created with Id.</returns>
     [HttpPost]
-    [RoleAuthorize(new[] { Roles.Manager, Roles.Admin })]
+    [RoleAuthorize(Roles.Admin)]
     public async Task<ActionResult<GroupResponse>> AddGroup(AddGroupRequest request)
     {
         logger.LogInformation("POST /Groups called");
@@ -106,7 +106,7 @@ public class GroupsController : ResultControllerBase
     /// <param name="request">Group data.</param>
     /// <returns>The group instance created with Id.</returns>
     [HttpPut]
-    [RoleAuthorize(new[] { Roles.Manager, Roles.Admin })]
+    [RoleAuthorize(Roles.Admin)]
     public async Task<ActionResult<GroupResponse>> UpdateGroup(UpdateGroupRequest request)
     {
         logger.LogInformation("PUT /Groups called");
@@ -127,7 +127,7 @@ public class GroupsController : ResultControllerBase
     /// <param name="request">Group Id.</param>
     /// <returns>The Action Result of the delete operation.</returns>
     [HttpDelete]
-    [RoleAuthorize(new[] { Roles.Manager, Roles.Admin })]
+    [RoleAuthorize(Roles.Admin)]
     public async Task<ActionResult> DeleteGroup(DeleteGroupRequest request)
     {
         logger.LogInformation("DELETE /Groups called");
@@ -148,7 +148,7 @@ public class GroupsController : ResultControllerBase
     /// <param name="request">Group Id.</param>
     /// <returns>The Action Result of the delete operation.</returns>
     [HttpPost("user")]
-    [RoleAuthorize]
+    [RoleAuthorize(Roles.Admin)]
     public async Task<ActionResult<GroupResponse>> AddUserToGroup(AddUserToGroupRequest request)
     {
         logger.LogInformation("PUT /Groups/user called");
@@ -169,7 +169,7 @@ public class GroupsController : ResultControllerBase
     /// <param name="request">Group Id.</param>
     /// <returns>The Action Result of the delete operation.</returns>
     [HttpDelete("user")]
-    [RoleAuthorize]
+    [RoleAuthorize(Roles.Admin)]
     public async Task<ActionResult<GroupResponse>> RemoveUserFromGroup(RemoveUserFromGroupRequest request)
     {
         logger.LogInformation("DELETE /Groups/user called");
