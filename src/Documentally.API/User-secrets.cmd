@@ -1,6 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
+dotnet user-secrets clear
+
 :: -------------- JwtSettings --------------------------
 
 :: Decrypt Secret Key
