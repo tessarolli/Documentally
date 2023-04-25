@@ -3,11 +3,11 @@
 // </copyright>
 
 using Documentally.Application.Abstractions.Repositories;
+using Documentally.Application.Abstractions.Services;
 using Documentally.Domain.User;
-using Documentally.Domain.User.ValueObjects;
 using Microsoft.AspNetCore.Http;
 
-namespace Documentally.Application.Authentication.Services;
+namespace Documentally.Infrastructure.Services;
 
 /// <summary>
 /// Get the Authenticated User Entity from the Json Web Token.
@@ -29,7 +29,7 @@ public class AuthenticatedUserService : IAuthenticatedUserService
     }
 
     /// <inheritdoc/>
-    public async Task<Domain.User.User?> GetAuthenticatedUserAsync()
+    public async Task<User?> GetAuthenticatedUserAsync()
     {
         var userId = httpContextAccessor?.HttpContext?.User.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
 

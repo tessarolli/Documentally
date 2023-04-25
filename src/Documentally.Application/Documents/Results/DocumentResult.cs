@@ -10,9 +10,11 @@ namespace Documentally.Application.Documents.Results;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = ".")]
 public record DocumentResult(
     long Id,
+    long OwnerId,
     string Name,
     string? Description,
     string? Category,
     long Size,
     string BlobUrl,
+    string CloudFileName,
     DateTime PostedAtUtc);

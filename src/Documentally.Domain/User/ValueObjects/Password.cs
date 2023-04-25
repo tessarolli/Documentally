@@ -16,8 +16,8 @@ public class Password : ValueObject
     /// Initializes a new instance of the <see cref="Password"/> class.
     /// </summary>
     /// <param name="plainTextPassword">The password string value.</param>
-    /// <param name="hasher">the IPasswordHasher instance.</param>
-    public Password(string plainTextPassword, IPasswordHasher? hasher = null)
+    /// <param name="hasher">the IPasswordHashingService instance.</param>
+    public Password(string plainTextPassword, IPasswordHashingService? hasher = null)
     {
         if (string.IsNullOrEmpty(plainTextPassword))
         {
@@ -48,9 +48,9 @@ public class Password : ValueObject
     /// Validates the informed password agains the existing password.
     /// </summary>
     /// <param name="password">The new password string value to validate.</param>
-    /// <param name="hasher">The IPasswordHasher instace.</param>
+    /// <param name="hasher">The IPasswordHashingService instace.</param>
     /// <returns>True if passwords match.</returns>
-    public bool Verify(string password, IPasswordHasher hasher)
+    public bool Verify(string password, IPasswordHashingService hasher)
     {
         if (string.IsNullOrEmpty(password))
         {
@@ -71,7 +71,7 @@ public class Password : ValueObject
     /// Perform Password Hashing logic on demand.
     /// </summary>
     /// <param name="passwordHasher">The PasswordHasher Instance.</param>
-    public void HashPassword(IPasswordHasher passwordHasher)
+    public void HashPassword(IPasswordHashingService passwordHasher)
     {
         HashedPassword = passwordHasher.HashPassword(Value);
     }

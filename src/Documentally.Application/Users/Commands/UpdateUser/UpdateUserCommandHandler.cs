@@ -16,14 +16,14 @@ namespace Documentally.Application.Users.Commands.UpdateUser;
 public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, UserResult>
 {
     private readonly IUserRepository userRepository;
-    private readonly IPasswordHasher passwordHasher;
+    private readonly IPasswordHashingService passwordHasher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateUserCommandHandler"/> class.
     /// </summary>
     /// <param name="userRepository">Injected userRepository.</param>
     /// <param name="passwordHasher">Injected passwordHasher.</param>
-    public UpdateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
+    public UpdateUserCommandHandler(IUserRepository userRepository, IPasswordHashingService passwordHasher)
     {
         this.userRepository = userRepository;
         this.passwordHasher = passwordHasher;

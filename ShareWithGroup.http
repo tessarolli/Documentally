@@ -1,0 +1,11 @@
+@host=https://localhost:5001
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyNSIsImZhbWlseV9uYW1lIjoiQWRtaW4iLCJnaXZlbl9uYW1lIjoiQWRtaW4iLCJqdGkiOiIyNSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNjgyNDU2NzI5LCJpc3MiOiJEb2N1bWVudGFsbHkiLCJhdWQiOiJEb2N1bWVudGFsbHkifQ.7RkiA4sYPWcnq2QcxleyY-5Tr2Lju_AImwwJoNti_YY
+
+POST {{host}}/Documents/ShareWithGroup
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "DocumentId": 12,
+    "GroupId": 8
+}

@@ -12,9 +12,11 @@ namespace Documentally.Contracts.Document.Responses;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = ".")]
 public record DocumentResponse(
     long Id,
+    long OwnerId,
     string Name,
     string? Description,
     string? Category,
     long Size,
     string BlobUrl,
+    string CloudFileName,
     DateTime PostedAtUtc);

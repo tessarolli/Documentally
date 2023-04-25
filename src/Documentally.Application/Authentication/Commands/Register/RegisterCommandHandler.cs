@@ -9,6 +9,7 @@ using Documentally.Application.Authentication.Errors;
 using Documentally.Application.Authentication.Results;
 using Documentally.Application.Common.Errors;
 using Documentally.Application.EventBus;
+using Documentally.Domain.Common.Abstractions;
 using Documentally.Domain.User;
 using Documentally.Domain.User.Events;
 using FluentResults;
@@ -23,6 +24,7 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, Authentic
     private readonly IJwtTokenGenerator jwtTokenGenerator;
     private readonly IUserRepository userRepository;
     private readonly IDomainEventBus domainEventBus;
+    private readonly IPasswordHashingService passwordHasher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RegisterCommandHandler"/> class.
@@ -30,11 +32,13 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, Authentic
     /// <param name="userRepository">IUserRepository being injected.</param>
     /// <param name="jwtTokenGenerator">IJwtTokenGenerator being injected.</param>
     /// <param name="domainEventBus">IDomainEventBus being injected.</param>
-    public RegisterCommandHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator, IDomainEventBus domainEventBus)
+    /// <param name="passwordHasher">IPasswordHashingService being injected.</param>
+    public RegisterCommandHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator, IDomainEventBus domainEventBus, IPasswordHashingService passwordHasher)
     {
         this.jwtTokenGenerator = jwtTokenGenerator;
         this.userRepository = userRepository;
         this.domainEventBus = domainEventBus;
+        this.passwordHasher = passwordHasher;
     }
 
     /// <summary>
@@ -63,7 +67,7 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, Authentic
 
         // Now that we Ensure the Business Rule, we can carry on with the User Creation
         // and persisting it to the repository.
-        var userResult = Domain.User.User.Create(null, command.FirstName, command.LastName, command.Email, command.Password);
+        var userResult = User.Create(null, command.FirstName, command.LastName, command.Email, command.Password, passwordHasher: passwordHasher);
         if (userResult.IsFailed)
         {
             return Result.Fail(userResult.Errors);

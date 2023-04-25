@@ -1,0 +1,9 @@
+@host=https://localhost:5001
+
+POST {{host}}/authentication/login
+Content-Type: application/json
+
+{
+    "email": "admin@documentally.com",
+    "password": "admin"
+}

@@ -26,8 +26,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentally.Contracts", "s
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentication", "{35BD01C1-4279-4BFB-9C71-7D0C020B4566}"
 	ProjectSection(SolutionItems) = preProject
-		LoginRequest.http = LoginRequest.http
+		AdminLogin.http = AdminLogin.http
+		ManagerLogin.http = ManagerLogin.http
 		RegisterRequest.http = RegisterRequest.http
+		UserLogin.http = UserLogin.http
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Group", "Group", "{815290EB-1716-4AC8-891A-8CC1FB912B6E}"
@@ -45,12 +47,32 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User", "User", "{BF60B2B3-1
 	ProjectSection(SolutionItems) = preProject
 		AddUser.http = AddUser.http
 		DeleteUser.http = DeleteUser.http
+		GetUserById.http = GetUserById.http
 		UpdateUser.http = UpdateUser.http
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{D0824117-F4CF-43CE-8608-6856A836D349}"
 	ProjectSection(SolutionItems) = preProject
+		DeleteDocument.http = DeleteDocument.http
+		DownloadDocument.http = DownloadDocument.http
+		GetDocumentById.http = GetDocumentById.http
+		GetDocumentsSharedWithUser.http = GetDocumentsSharedWithUser.http
+		GetUserDocuments.http = GetUserDocuments.http
 		UploadDocument.http = UploadDocument.http
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Document Sharing", "Document Sharing", "{B712B2F8-E836-49A5-95EC-558D04D17DA9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Share Documents", "Share Documents", "{8A5A29DD-091A-4F00-8D15-2A137E99EA3A}"
+	ProjectSection(SolutionItems) = preProject
+		ShareWithGroup.http = ShareWithGroup.http
+		ShareWithUser.http = ShareWithUser.http
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unshare Documents", "Unshare Documents", "{47DAE209-2ADF-4F96-A4D8-841DAD0FBA80}"
+	ProjectSection(SolutionItems) = preProject
+		UnshareWithGroup.http = UnshareWithGroup.http
+		UnshareWithUser.http = UnshareWithUser.http
 	EndProjectSection
 EndProject
 Global
@@ -92,6 +114,9 @@ Global
 		{815290EB-1716-4AC8-891A-8CC1FB912B6E} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
 		{BF60B2B3-101C-40A0-B5C5-301FDE65622C} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
 		{D0824117-F4CF-43CE-8608-6856A836D349} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
+		{B712B2F8-E836-49A5-95EC-558D04D17DA9} = {D0824117-F4CF-43CE-8608-6856A836D349}
+		{8A5A29DD-091A-4F00-8D15-2A137E99EA3A} = {B712B2F8-E836-49A5-95EC-558D04D17DA9}
+		{47DAE209-2ADF-4F96-A4D8-841DAD0FBA80} = {B712B2F8-E836-49A5-95EC-558D04D17DA9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4FC4D3CA-E266-48F0-8E90-A7623AAB730D}

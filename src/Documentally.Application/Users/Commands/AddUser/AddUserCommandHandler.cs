@@ -17,14 +17,14 @@ namespace Documentally.Application.Users.Commands.AddUser;
 public class AddUserCommandHandler : ICommandHandler<AddUserCommand, UserResult>
 {
     private readonly IUserRepository userRepository;
-    private readonly IPasswordHasher passwordHasher;
+    private readonly IPasswordHashingService passwordHasher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AddUserCommandHandler"/> class.
     /// </summary>
     /// <param name="userRepository">Injected UserRepository.</param>
     /// <param name="passwordHasher">Injected PasswordHasher.</param>
-    public AddUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
+    public AddUserCommandHandler(IUserRepository userRepository, IPasswordHashingService passwordHasher)
     {
         this.userRepository = userRepository;
         this.passwordHasher = passwordHasher;

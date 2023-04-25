@@ -2,7 +2,6 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Azure.Core;
 using Azure.Storage.Blobs;
 using Documentally.Application.Abstractions.Services;
 using FluentResults;
@@ -28,7 +27,7 @@ public class CloudFileStorageService : ICloudFileStorageService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<string>> UploadFileAsync(IFormFile formFile)
+    public async Task<Result<(string, string)>> UploadFileAsync(IFormFile formFile)
     {
         try
         {
@@ -37,11 +36,12 @@ public class CloudFileStorageService : ICloudFileStorageService
             // 1. Get the File Extension
             var extension = Path.GetExtension(formFile.FileName);
             BlobClient blobClient;
+            string newFileName;
 
             // Generate a Unique File Name in the format of Guid.extension.
             do
             {
-                var newFileName = Guid.NewGuid().ToString() + extension;
+                newFileName = Guid.NewGuid().ToString() + extension;
 
                 blobClient = containerClient.GetBlobClient(newFileName);
             }
@@ -51,7 +51,7 @@ public class CloudFileStorageService : ICloudFileStorageService
             await blobClient.UploadAsync(formFile.OpenReadStream(), true);
 
             // Returns the URI for accessing the file
-            return Result.Ok(blobClient.Uri.ToString());
+            return Result.Ok((newFileName, blobClient.Uri.ToString()));
         }
         catch (Exception ex)
         {
@@ -60,13 +60,13 @@ public class CloudFileStorageService : ICloudFileStorageService
     }
 
     /// <inheritdoc/>
-    public async Task<Result<Stream>> DownloadFileAsync(string uri)
+    public async Task<Result<Stream>> DownloadFileAsync(string fileName)
     {
         try
         {
             var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
-            var blobClient = containerClient.GetBlobClient(uri);
+            var blobClient = containerClient.GetBlobClient(fileName);
 
             var response = await blobClient.DownloadAsync();
 
@@ -79,17 +79,21 @@ public class CloudFileStorageService : ICloudFileStorageService
     }
 
     /// <inheritdoc/>
-    public async Task<Result> DeleteFileAsync(string uri)
+    public async Task<Result> DeleteFileAsync(string fileName)
     {
         try
         {
             var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 
-            var blobClient = containerClient.GetBlobClient(uri);
+            var blobClient = containerClient.GetBlobClient(fileName);
 
-            await blobClient.DeleteIfExistsAsync();
+            var deleteResult = await blobClient.DeleteIfExistsAsync();
+            if (deleteResult)
+            {
+                return Result.Ok();
+            }
 
-            return Result.Ok();
+            return Result.Fail("We couldnt delete the file from the cloud storage.");
         }
         catch (Exception ex)
         {

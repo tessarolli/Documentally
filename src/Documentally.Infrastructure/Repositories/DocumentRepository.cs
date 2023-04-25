@@ -122,7 +122,7 @@ public class DocumentRepository : IDocumentRepository
 
             await connection.OpenAsync();
 
-            var documentDtos = await connection.QueryAsync<DocumentDto>(sql);
+            var documentDtos = await connection.QueryAsync<DocumentDto>(sql, parameters);
 
             await connection.CloseAsync();
 
@@ -146,7 +146,7 @@ public class DocumentRepository : IDocumentRepository
         logger.LogInformation("DocumentRepository.GetAllDocumentsSharedToUserIdAsync()");
 
         var sql = @"
-            SELECT 
+            SELECT DISTINCT
                 d.*
             FROM 
                 documents d 
@@ -177,7 +177,7 @@ public class DocumentRepository : IDocumentRepository
 
             await connection.OpenAsync();
 
-            var documentDtos = await connection.QueryAsync<DocumentDto>(sql);
+            var documentDtos = await connection.QueryAsync<DocumentDto>(sql, parameters);
 
             await connection.CloseAsync();
 
@@ -256,23 +256,25 @@ public class DocumentRepository : IDocumentRepository
 
         var sql = @"
             INSERT INTO 
-                Documents ( 
+                documents ( 
                     owner_id,
                     doc_name,
                     doc_description,
                     doc_category,
                     doc_size,
-                    blob_url
-                ) +
-            VALUES ( +
-                @OwnerId, +
-                @Name, +
-                @Description, +
-                @Category, +
+                    blob_url,
+                    cloud_file_name
+                )
+            VALUES (
+                @OwnerId,
+                @Name,
+                @Description,
+                @Category,
                 @Size,  
-                @BlobUrl   
-            )  +
-            RETURNING  +
+                @BlobUrl,
+                @CloudFileName
+            ) 
+            RETURNING 
                 id
             ;";
 
@@ -284,6 +286,7 @@ public class DocumentRepository : IDocumentRepository
             document.Category,
             document.Size,
             document.BlobUrl,
+            document.CloudFileName,
         };
 
         try
@@ -311,14 +314,15 @@ public class DocumentRepository : IDocumentRepository
 
         var sql = @"
             UPDATE 
-                Documents 
+                documents 
             SET
                 owner_id = @OwnerId,
                 doc_name = @Name,
                 doc_description = @Description,
                 doc_category = @Category,
                 doc_size = @Size,
-                blob_url = @BlobUrl
+                blob_url = @BlobUrl,
+                cloud_file_name = @CloudFileName
             WHERE 
                 id = @Id";
 
@@ -331,6 +335,7 @@ public class DocumentRepository : IDocumentRepository
             document.Category,
             document.Size,
             document.BlobUrl,
+            document.CloudFileName,
         };
 
         try
@@ -361,7 +366,9 @@ public class DocumentRepository : IDocumentRepository
     {
         logger.LogInformation("DocumentRepository.RemoveAsync({DocumentId})", documentId.Value);
 
-        var sql = "DELETE FROM Documents WHERE id = @Id";
+        await RemoveDocumentFromAllSharedAccessAsync(documentId);
+
+        var sql = "DELETE FROM documents WHERE id = @Id";
 
         var parameters = new
         {
@@ -370,9 +377,6 @@ public class DocumentRepository : IDocumentRepository
 
         try
         {
-
-            // TODO delete from cloud, remove record from document_access
-
             await using var connection = postgresSqlConnectionFactory.CreateConnection();
 
             await connection.OpenAsync();
@@ -488,6 +492,78 @@ public class DocumentRepository : IDocumentRepository
         }
     }
 
+    /// <inheritdoc/>
+    public async Task<Result> RemoveDocumentShareFromUserAsync(DocId documentId, long userId)
+    {
+        logger.LogInformation("DocumentRepository.RemoveDocumentShareFromUserAsync({DocumentId},{userId})", documentId.Value, userId);
+
+        var sql = "DELETE FROM document_access WHERE document_id = @Id AND user_id = @GroupId";
+
+        var parameters = new
+        {
+            Id = documentId.Value,
+            UserId = userId,
+        };
+
+        try
+        {
+            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+
+            await connection.OpenAsync();
+
+            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
+
+            await connection.CloseAsync();
+
+            if (affectedRecordsCount > 0)
+            {
+                return Result.Ok();
+            }
+
+            return Result.Fail(new NotFoundError());
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(ex.GetPrettyMessage(logger));
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result> RemoveDocumentShareFromGroupAsync(DocId documentId, long groupId)
+    {
+        logger.LogInformation("DocumentRepository.RemoveDocumentShareFromGroupAsync({DocumentId},{groupId})", documentId.Value, groupId);
+
+        var sql = "DELETE FROM document_access WHERE document_id = @Id AND group_id = @GroupId";
+
+        var parameters = new
+        {
+            Id = documentId.Value,
+            GroupId = groupId,
+        };
+
+        try
+        {
+            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+
+            await connection.OpenAsync();
+
+            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
+
+            await connection.CloseAsync();
+
+            if (affectedRecordsCount > 0)
+            {
+                return Result.Ok();
+            }
+
+            return Result.Fail(new NotFoundError());
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(ex.GetPrettyMessage(logger));
+        }
+    }
+
     /// <summary>
     /// Creates a new instance of the Document Entity, using the Create factory method.
     /// </summary>
@@ -505,6 +581,7 @@ public class DocumentRepository : IDocumentRepository
                 documentDto.doc_category,
                 documentDto.doc_size,
                 documentDto.blob_url,
+                documentDto.cloud_file_name,
                 documentDto.posted_date_utc,
                 new Lazy<User>(() => User.Empty));
 
@@ -517,5 +594,37 @@ public class DocumentRepository : IDocumentRepository
         }
 
         return Result.Fail(new NotFoundError($"Document with the provided E-Mail was not found."));
+    }
+
+    /// <summary>
+    /// Removes this document from all shared instances.
+    /// </summary>
+    /// <param name="documentId">The document Id to remove.</param>
+    /// <returns>awaitable task.</returns>
+    private async Task RemoveDocumentFromAllSharedAccessAsync(DocId documentId)
+    {
+        logger.LogInformation("DocumentRepository.RemoveAsync({DocumentId})", documentId.Value);
+
+        var sql = "DELETE FROM document_access WHERE document_id = @Id";
+
+        var parameters = new
+        {
+            Id = documentId.Value,
+        };
+
+        try
+        {
+            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+
+            await connection.OpenAsync();
+
+            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
+
+            await connection.CloseAsync();
+        }
+        catch (Exception ex)
+        {
+            ex.GetPrettyMessage(logger);
+        }
     }
 }

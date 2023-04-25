@@ -9,7 +9,6 @@ using Documentally.Application.Documents.Results;
 using Documentally.Application.Users.Commands.UploadDocument;
 using Documentally.Domain.User.ValueObjects;
 using FluentResults;
-using Microsoft.AspNetCore.Server.HttpSys;
 
 namespace Documentally.Application.Documents.Commands.UploadDocument;
 
@@ -20,21 +19,30 @@ public class UploadDocumentCommandHandler : ICommandHandler<UploadDocumentComman
 {
     private readonly IDocumentRepository documentRepository;
     private readonly ICloudFileStorageService cloudFileStorageService;
+    private readonly IAuthenticatedUserService authenticatedUserService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UploadDocumentCommandHandler"/> class.
     /// </summary>
     /// <param name="documentRepository">Injected DocumentRepository.</param>
     /// <param name="cloudFileStorageService">Injected CloudFileStorageService.</param>
-    public UploadDocumentCommandHandler(IDocumentRepository documentRepository, ICloudFileStorageService cloudFileStorageService)
+    /// <param name="authenticatedUserService">Injected IAuthenticatedUserService.</param>
+    public UploadDocumentCommandHandler(IDocumentRepository documentRepository, ICloudFileStorageService cloudFileStorageService, IAuthenticatedUserService authenticatedUserService)
     {
         this.documentRepository = documentRepository;
         this.cloudFileStorageService = cloudFileStorageService;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     /// <inheritdoc/>
     public async Task<Result<DocumentResult>> Handle(UploadDocumentCommand request, CancellationToken cancellationToken)
     {
+        var authenticatedUser = await authenticatedUserService.GetAuthenticatedUserAsync();
+        if (authenticatedUser is null)
+        {
+            return Result.Fail("Please Login Again!");
+        }
+
         // 1. Upload the File to the Cloud Storage.
         var uploadResult = await cloudFileStorageService.UploadFileAsync(request.File);
         if (uploadResult.IsFailed)
@@ -45,34 +53,45 @@ public class UploadDocumentCommandHandler : ICommandHandler<UploadDocumentComman
         // 2. Create the Document Aggregate Instance.
         var documentResult = Domain.Document.Document.Create(
                    null,
-                   new UserId(request.UserId),
+                   new UserId(authenticatedUser.Id.Value),
                    request.FileName,
                    request.Description,
                    request.Category,
                    request.File.Length,
-                   string.Empty);
+                   uploadResult.Value.Item2,
+                   uploadResult.Value.Item1);
 
         // 3. Persist the Document Aggregate in the Document Repository
         if (documentResult.IsSuccess)
         {
-            return Result.Ok();
+            var addResult = await documentRepository.AddAsync(documentResult.Value);
+            if (addResult.IsSuccess)
+            {
+                var doc = new DocumentResult(
+                    addResult.Value.Id.Value,
+                    addResult.Value.OwnerId.Value,
+                    addResult.Value.Name,
+                    addResult.Value.Description,
+                    addResult.Value.Category,
+                    addResult.Value.Size,
+                    addResult.Value.BlobUrl,
+                    addResult.Value.CloudFileName,
+                    addResult.Value.PostedAtUtc);
 
-            //var addResult = await documentRepository.AddAsync(documentResult.Value);
-            //if (addResult.IsSuccess)
-            //{
-            //    return Result.Ok(new DocumentResult(
-            //        addResult.Value.Id.Value,
-            //        addResult.Value.FirstName,
-            //        addResult.Value.LastName,
-            //        addResult.Value.Email,
-            //        addResult.Value.Password.HashedPassword,
-            //        (int)addResult.Value.Role,
-            //        addResult.Value.CreatedAtUtc));
-            //}
-            //else
-            //{
-            //    return Result.Fail(addResult.Errors);
-            //}
+                // 4. Return the success result reponse.
+                return doc;
+            }
+            else
+            {
+                // in case of error delete the uploaded file from the cloud storage.
+                var deleteResult = await cloudFileStorageService.DeleteFileAsync(uploadResult.Value.Item1);
+                if (deleteResult.IsFailed)
+                {
+                    return Result.Fail("An error ocurred when we were adding this document to the repository, but it failed, so we have to delete the file from the cloud storage, and then this deletion also failed.");
+                }
+
+                return Result.Fail(addResult.Errors);
+            }
         }
         else
         {

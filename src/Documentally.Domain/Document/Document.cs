@@ -45,6 +45,11 @@ public sealed class Document : AggregateRoot<DocId>
     public string Name { get; private set; } = null!;
 
     /// <summary>
+    /// Gets Document's Cloud File Name.
+    /// </summary>
+    public string CloudFileName { get; private set; } = null!;
+
+    /// <summary>
     /// Gets Document's Description.
     /// </summary>
     public string? Description { get; private set; }
@@ -79,6 +84,7 @@ public sealed class Document : AggregateRoot<DocId>
     /// <param name="category">Document's Category.</param>
     /// <param name="size">Document's Size.</param>
     /// <param name="blobUrl">Document's Blob Url.</param>
+    /// <param name="newFileName">Document's Cloud File Name.</param>
     /// <param name="postedOnUtc">Document's posted date.</param>
     /// <param name="owner">Document's Lazy{User} instance.</param>
     /// <returns>New Document's instance or error.</returns>
@@ -90,6 +96,7 @@ public sealed class Document : AggregateRoot<DocId>
         string? category,
         long size,
         string blobUrl,
+        string newFileName,
         DateTime? postedOnUtc = null,
         Lazy<User_>? owner = null)
     {
@@ -101,6 +108,7 @@ public sealed class Document : AggregateRoot<DocId>
             Category = category,
             Size = size,
             BlobUrl = blobUrl,
+            CloudFileName = newFileName,
             PostedAtUtc = postedOnUtc ?? DateTime.UtcNow.AddYears(-100),
         };
 

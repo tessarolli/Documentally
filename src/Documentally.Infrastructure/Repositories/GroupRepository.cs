@@ -192,6 +192,23 @@ public class GroupRepository : IGroupRepository
         {
             var deleteSql = @"
                 DELETE FROM 
+                    document_access
+                WHERE 
+                    group_id = @GroupId;";
+
+            var x = await connection.ExecuteAsync(deleteSql, new { GroupId = groupId.Value });
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+
+            return Result.Fail(ex.GetPrettyMessage(logger));
+        }
+
+        try
+        {
+            var deleteSql = @"
+                DELETE FROM 
                     group_members
                 WHERE 
                     group_id = @GroupId;";

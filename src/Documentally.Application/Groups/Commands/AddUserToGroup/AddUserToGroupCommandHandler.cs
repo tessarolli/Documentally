@@ -4,7 +4,7 @@
 
 using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
-using Documentally.Application.Authentication.Services;
+using Documentally.Application.Abstractions.Services;
 using Documentally.Application.Common.Errors;
 using Documentally.Application.Groups.Results;
 using Documentally.Domain.Enums;

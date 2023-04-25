@@ -14,7 +14,6 @@ namespace Documentally.Application.Users.Commands.UploadDocument;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1009:Closing parenthesis should be spaced correctly", Justification = ".")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = ".")]
 public record UploadDocumentCommand(
-    long UserId,
     string FileName,
     string? Description,
     string? Category,

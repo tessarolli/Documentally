@@ -16,8 +16,8 @@ public interface ICloudFileStorageService
     /// Uploads a File to the File Storage Cloud Provider.
     /// </summary>
     /// <param name="formFile">The IFormFile for uploading.</param>
-    /// <returns>A Url string for the uploaded file location.</returns>
-    Task<Result<string>> UploadFileAsync(IFormFile formFile);
+    /// <returns>Item1 = Cloud File Name, Item2 = URI.</returns>
+    Task<Result<(string, string)>> UploadFileAsync(IFormFile formFile);
 
     /// <summary>
     /// Downloads a File from the Cloud Provider.

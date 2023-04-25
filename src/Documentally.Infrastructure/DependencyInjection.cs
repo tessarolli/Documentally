@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Text;
+using Azure.Storage.Blobs;
 using Documentally.Application.Abstractions.Authentication;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Abstractions.Services;
@@ -13,13 +14,11 @@ using Documentally.Infrastructure.Authentication;
 using Documentally.Infrastructure.Repositories;
 using Documentally.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Azure.Storage.Blobs;
 
 namespace Documentally.Infrastructure;
 
@@ -46,7 +45,8 @@ public static class DependencyInjection
             .AddPersistance(configuration)
             .AddAuthentication(configuration);
 
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IPasswordHashingService, PasswordHashingService>();
+        services.AddScoped<IMimeTypeMappingService, MimeTypeMappingService>();
 
         return services;
     }
@@ -104,6 +104,9 @@ public static class DependencyInjection
                 ValidAudience = jwtSettings.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
             });
+
+        services.AddTransient<IAuthenticatedUserService, AuthenticatedUserService>();
+
         return services;
     }
 }

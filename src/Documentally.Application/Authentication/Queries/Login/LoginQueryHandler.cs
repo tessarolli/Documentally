@@ -7,6 +7,7 @@ using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Authentication.Errors;
 using Documentally.Application.Authentication.Results;
+using Documentally.Domain.Common.Abstractions;
 using Documentally.Domain.User;
 using FluentResults;
 
@@ -19,16 +20,19 @@ public class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResult>
 {
     private readonly IJwtTokenGenerator jwtTokenGenerator;
     private readonly IUserRepository userRepository;
+    private readonly IPasswordHashingService passwordHasher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LoginQueryHandler"/> class.
     /// </summary>
     /// <param name="userRepository">Injected UserRepository.</param>
     /// <param name="jwtTokenGenerator">Injected JwtTokenGenerator.</param>
-    public LoginQueryHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator)
+    /// <param name="passwordHasher">Injected PasswordHasher.</param>
+    public LoginQueryHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator, IPasswordHashingService passwordHasher)
     {
         this.userRepository = userRepository;
         this.jwtTokenGenerator = jwtTokenGenerator;
+        this.passwordHasher = passwordHasher;
     }
 
     /// <inheritdoc/>
@@ -37,14 +41,14 @@ public class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResult>
         await Task.CompletedTask;
 
         // Check if User with given e-mail already exists
-        Result<Domain.User.User> userResult = await userRepository.GetByEmailAsync(query.Email);
+        Result<User> userResult = await userRepository.GetByEmailAsync(query.Email);
         if (userResult.IsFailed)
         {
             return Result.Fail(userResult.Errors);
         }
 
         // Validate the Password
-        if (userResult.Value.Password.Value != query.Password)
+        if (!passwordHasher.VerifyPassword(query.Password, userResult.Value.Password.Value))
         {
             return Result.Fail(new InvalidPasswordError());
         }

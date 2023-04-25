@@ -2,6 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using System.Data;
 using Dapper;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Common.Errors;
@@ -13,7 +14,6 @@ using Documentally.Infrastructure.DataTransferObjects;
 using Documentally.Infrastructure.Extensions;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 
 namespace Documentally.Infrastructure.Repositories;
 
@@ -24,15 +24,15 @@ public class UserRepository : IUserRepository
 {
     private readonly IPostgresSqlConnectionFactory postgresSqlConnectionFactory;
     private readonly ILogger logger;
-    private readonly IPasswordHasher passwordHasher;
+    private readonly IPasswordHashingService passwordHasher;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserRepository"/> class.
     /// </summary>
     /// <param name="postgresSqlConnectionFactory">IPostgresSqlConnectionFactory to inject.</param>
-    /// <param name="passwordHasher">IPasswordHasher to inject.</param>
+    /// <param name="passwordHasher">IPasswordHashingService to inject.</param>
     /// <param name="logger">ILogger to inject.</param>
-    public UserRepository(IPostgresSqlConnectionFactory postgresSqlConnectionFactory, ILogger<UserRepository> logger, IPasswordHasher passwordHasher)
+    public UserRepository(IPostgresSqlConnectionFactory postgresSqlConnectionFactory, ILogger<UserRepository> logger, IPasswordHashingService passwordHasher)
     {
         this.postgresSqlConnectionFactory = postgresSqlConnectionFactory;
         this.logger = logger;
@@ -293,11 +293,9 @@ public class UserRepository : IUserRepository
     {
         logger.LogInformation("UserRepository.RemoveAsync({userId})", userId);
 
-        var sql = "DELETE FROM users WHERE id = @id";
-
         var parameters = new
         {
-            id = userId.Value,
+            removing_user_id = userId.Value,
         };
 
         try
@@ -306,7 +304,11 @@ public class UserRepository : IUserRepository
 
             await connection.OpenAsync();
 
-            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
+            // Executes Stored Procedure for user removal
+            int affectedRecordsCount = await connection.ExecuteAsync(
+                "remove_user",
+                parameters,
+                commandType: CommandType.StoredProcedure);
 
             await connection.CloseAsync();
 
@@ -347,6 +349,6 @@ public class UserRepository : IUserRepository
             return Result.Fail(userResult.Errors);
         }
 
-        return Result.Fail(new NotFoundError($"User with the provided E-Mail was not found."));
+        return Result.Fail(new NotFoundError($"User not found."));
     }
 }

@@ -16,10 +16,6 @@ public class UploadDocumentCommandValidator : AbstractValidator<UploadDocumentCo
     /// </summary>
     public UploadDocumentCommandValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotNull()
-            .WithMessage("First Name cannot be larger than 50 characteres");
-
         RuleFor(x => x.FileName)
             .NotEmpty()
             .WithMessage("File Name cannot be empty")
@@ -29,6 +25,5 @@ public class UploadDocumentCommandValidator : AbstractValidator<UploadDocumentCo
         RuleFor(x => x.File)
             .NotNull()
             .WithMessage("The File Is Required");
-
     }
 }

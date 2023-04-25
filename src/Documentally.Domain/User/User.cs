@@ -74,7 +74,7 @@ public sealed class User : AggregateRoot<UserId>
     /// <param name="createdOnUtc">User's creation date.</param>
     /// <param name="passwordHasher">Password hasher.</param>
     /// <returns>New User's instance or error.</returns>
-    public static Result<User> Create(long? id, string firstName, string lastName, string email, string password, Roles role = Roles.User, DateTime? createdOnUtc = null, IPasswordHasher? passwordHasher = null)
+    public static Result<User> Create(long? id, string firstName, string lastName, string email, string password, Roles role = Roles.User, DateTime? createdOnUtc = null, IPasswordHashingService? passwordHasher = null)
     {
         Password hashedPassword;
         try

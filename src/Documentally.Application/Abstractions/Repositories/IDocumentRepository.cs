@@ -85,4 +85,20 @@ public interface IDocumentRepository
     /// <param name="userId">The User Id.</param>
     /// <returns>A Result of the operation.</returns>
     Task<Result> ShareDocumentWithUserAsync(DocId documentId, long userId);
+
+    /// <summary>
+    /// Removes this document from the shared group.
+    /// </summary>
+    /// <param name="documentId">The document Id to remove.</param>
+    /// <param name="groupId">The group Id to remove.</param>
+    /// <returns>The Result of the operation.</returns>
+    Task<Result> RemoveDocumentShareFromGroupAsync(DocId documentId, long groupId);
+
+    /// <summary>
+    /// Removes this document from the shared user.
+    /// </summary>
+    /// <param name="documentId">The document Id to remove.</param>
+    /// <param name="userId">The user Id to remove.</param>
+    /// <returns>The Result of the operation.</returns>
+    Task<Result> RemoveDocumentShareFromUserAsync(DocId documentId, long userId);
 }

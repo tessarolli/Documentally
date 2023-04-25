@@ -16,4 +16,5 @@ public record DocumentDto(
     string? doc_category,
     long doc_size,
     string blob_url,
-    DateTime posted_date_utc);
+    DateTime posted_date_utc,
+    string cloud_file_name);
