@@ -20,59 +20,57 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requests", "Requests", "{2243F9D7-B5C5-460D-A196-37D2DA22E32A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentally.Contracts", "src\Documentally.Contracts\Documentally.Contracts.csproj", "{95AB91F9-6335-4499-BE0F-46B9220A9BEA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentication", "{35BD01C1-4279-4BFB-9C71-7D0C020B4566}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requests", "Requests", "{FC5CA935-B5AF-4E76-BC72-762D51C2EFE0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Users", "Users", "{A132639A-2F1D-444E-A130-0CD038903765}"
 	ProjectSection(SolutionItems) = preProject
-		AdminLogin.http = AdminLogin.http
-		ManagerLogin.http = ManagerLogin.http
-		RegisterRequest.http = RegisterRequest.http
-		UserLogin.http = UserLogin.http
+		Requests\Users\AddUser.http = Requests\Users\AddUser.http
+		Requests\Users\DeleteUser.http = Requests\Users\DeleteUser.http
+		Requests\Users\GetUserById.http = Requests\Users\GetUserById.http
+		Requests\Users\GetUserDocuments.http = Requests\Users\GetUserDocuments.http
+		Requests\Users\UpdateUser.http = Requests\Users\UpdateUser.http
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Group", "Group", "{815290EB-1716-4AC8-891A-8CC1FB912B6E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentication", "Authentication", "{6A85622C-622A-4579-B06E-CE4DC590169D}"
 	ProjectSection(SolutionItems) = preProject
-		AddGroup.http = AddGroup.http
-		AddUserToGroup.http = AddUserToGroup.http
-		DeleteGroup.http = DeleteGroup.http
-		GetGroupById.http = GetGroupById.http
-		GetGroupsList.http = GetGroupsList.http
-		RemoveUserFromGroup.http = RemoveUserFromGroup.http
-		UpdateGroup.http = UpdateGroup.http
+		Requests\Authentication\AdminLogin.http = Requests\Authentication\AdminLogin.http
+		Requests\Authentication\ManagerLogin.http = Requests\Authentication\ManagerLogin.http
+		Requests\Authentication\RegisterRequest.http = Requests\Authentication\RegisterRequest.http
+		Requests\Authentication\UserLogin.http = Requests\Authentication\UserLogin.http
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User", "User", "{BF60B2B3-101C-40A0-B5C5-301FDE65622C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Groups", "Groups", "{A486C5AD-F5B3-4046-8434-39C6BF7CE38C}"
 	ProjectSection(SolutionItems) = preProject
-		AddUser.http = AddUser.http
-		DeleteUser.http = DeleteUser.http
-		GetUserById.http = GetUserById.http
-		UpdateUser.http = UpdateUser.http
+		Requests\Groups\AddGroup.http = Requests\Groups\AddGroup.http
+		Requests\Groups\AddUserToGroup.http = Requests\Groups\AddUserToGroup.http
+		Requests\Groups\DeleteGroup.http = Requests\Groups\DeleteGroup.http
+		Requests\Groups\GetGroupById.http = Requests\Groups\GetGroupById.http
+		Requests\Groups\GetGroupsList.http = Requests\Groups\GetGroupsList.http
+		Requests\Groups\RemoveUserFromGroup.http = Requests\Groups\RemoveUserFromGroup.http
+		Requests\Groups\UpdateGroup.http = Requests\Groups\UpdateGroup.http
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{D0824117-F4CF-43CE-8608-6856A836D349}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{CF3E9EDA-3DB5-4749-BD93-203E6EDA0B82}"
 	ProjectSection(SolutionItems) = preProject
-		DeleteDocument.http = DeleteDocument.http
-		DownloadDocument.http = DownloadDocument.http
-		GetDocumentById.http = GetDocumentById.http
-		GetDocumentsSharedWithUser.http = GetDocumentsSharedWithUser.http
-		GetUserDocuments.http = GetUserDocuments.http
-		UploadDocument.http = UploadDocument.http
+		Requests\Documents\DeleteDocument.http = Requests\Documents\DeleteDocument.http
+		Requests\Documents\GetDocumentById.http = Requests\Documents\GetDocumentById.http
+		Requests\Documents\GetDocumentsSharedWithUser.http = Requests\Documents\GetDocumentsSharedWithUser.http
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Document Sharing", "Document Sharing", "{B712B2F8-E836-49A5-95EC-558D04D17DA9}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Share Documents", "Share Documents", "{8A5A29DD-091A-4F00-8D15-2A137E99EA3A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents Sharing", "Documents Sharing", "{10A260FF-1434-4E76-8519-B94D9F50FACD}"
 	ProjectSection(SolutionItems) = preProject
-		ShareWithGroup.http = ShareWithGroup.http
-		ShareWithUser.http = ShareWithUser.http
+		Requests\Documents\Share Document\ShareWithGroup.http = Requests\Documents\Share Document\ShareWithGroup.http
+		Requests\Documents\Share Document\ShareWithUser.http = Requests\Documents\Share Document\ShareWithUser.http
+		Requests\Documents\Share Document\UnshareWithGroup.http = Requests\Documents\Share Document\UnshareWithGroup.http
+		Requests\Documents\Share Document\UnshareWithUser.http = Requests\Documents\Share Document\UnshareWithUser.http
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unshare Documents", "Unshare Documents", "{47DAE209-2ADF-4F96-A4D8-841DAD0FBA80}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Upload Download", "Upload Download", "{5BB27F1E-FA21-4F3C-8CB4-9244A855B96B}"
 	ProjectSection(SolutionItems) = preProject
-		UnshareWithGroup.http = UnshareWithGroup.http
-		UnshareWithUser.http = UnshareWithUser.http
+		Requests\Documents\Upload Download\DownloadDocument.http = Requests\Documents\Upload Download\DownloadDocument.http
+		Requests\Documents\Upload Download\UploadDocument.http = Requests\Documents\Upload Download\UploadDocument.http
 	EndProjectSection
 EndProject
 Global
@@ -110,13 +108,12 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{35BD01C1-4279-4BFB-9C71-7D0C020B4566} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
-		{815290EB-1716-4AC8-891A-8CC1FB912B6E} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
-		{BF60B2B3-101C-40A0-B5C5-301FDE65622C} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
-		{D0824117-F4CF-43CE-8608-6856A836D349} = {2243F9D7-B5C5-460D-A196-37D2DA22E32A}
-		{B712B2F8-E836-49A5-95EC-558D04D17DA9} = {D0824117-F4CF-43CE-8608-6856A836D349}
-		{8A5A29DD-091A-4F00-8D15-2A137E99EA3A} = {B712B2F8-E836-49A5-95EC-558D04D17DA9}
-		{47DAE209-2ADF-4F96-A4D8-841DAD0FBA80} = {B712B2F8-E836-49A5-95EC-558D04D17DA9}
+		{A132639A-2F1D-444E-A130-0CD038903765} = {FC5CA935-B5AF-4E76-BC72-762D51C2EFE0}
+		{6A85622C-622A-4579-B06E-CE4DC590169D} = {FC5CA935-B5AF-4E76-BC72-762D51C2EFE0}
+		{A486C5AD-F5B3-4046-8434-39C6BF7CE38C} = {FC5CA935-B5AF-4E76-BC72-762D51C2EFE0}
+		{CF3E9EDA-3DB5-4749-BD93-203E6EDA0B82} = {FC5CA935-B5AF-4E76-BC72-762D51C2EFE0}
+		{10A260FF-1434-4E76-8519-B94D9F50FACD} = {CF3E9EDA-3DB5-4749-BD93-203E6EDA0B82}
+		{5BB27F1E-FA21-4F3C-8CB4-9244A855B96B} = {CF3E9EDA-3DB5-4749-BD93-203E6EDA0B82}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4FC4D3CA-E266-48F0-8E90-A7623AAB730D}
