@@ -2,16 +2,20 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using Azure.Core;
 using Documentally.API.Common.Attributes;
 using Documentally.API.Common.Controllers;
+using Documentally.Application.Abstractions.Services;
 using Documentally.Application.Users.Commands.AddUser;
 using Documentally.Application.Users.Commands.DeleteUser;
 using Documentally.Application.Users.Commands.UpdateUser;
 using Documentally.Application.Users.Queries.GetUserById;
 using Documentally.Application.Users.Queries.GetUsersList;
+using Documentally.Application.Users.Results;
 using Documentally.Contracts.User.Requests;
 using Documentally.Contracts.User.Responses;
 using Documentally.Domain.Enums;
+using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -22,22 +26,18 @@ namespace Documentally.API.Controllers;
 /// Users Controller.
 /// </summary>
 [Route("[controller]")]
-public class UsersController : ResultControllerBase
+public class UsersController : ResultControllerBase<UsersController>
 {
-    private readonly IMediator mediator;
-    private readonly IMapper mapper;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="UsersController"/> class.
     /// </summary>
     /// <param name="mediator">Injected mediator.</param>
     /// <param name="mapper">Injected mapper.</param>
     /// <param name="logger">Injected logger.</param>
-    public UsersController(IMediator mediator, IMapper mapper, ILogger<UsersController> logger)
-        : base(logger)
+    /// <param name="exceptionHandlingService">Injected exceptionHandlingService.</param>
+    public UsersController(IMediator mediator, IMapper mapper, ILogger<UsersController> logger, IExceptionHandlingService exceptionHandlingService)
+        : base(mediator, mapper, logger, exceptionHandlingService)
     {
-        this.mediator = mediator;
-        this.mapper = mapper;
     }
 
     /// <summary>
@@ -46,17 +46,8 @@ public class UsersController : ResultControllerBase
     /// <returns>The list of Users.</returns>
     [HttpGet]
     [RoleAuthorize]
-    public async Task<ActionResult<IEnumerable<UserResponse>>> GetUsers()
-    {
-        logger.LogInformation("GET /Users/ called");
-
-        var result = await mediator.Send(new GetUsersListQuery());
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<List<UserResponse>>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> GetUsers() =>
+        await HandleRequestAsync<GetUsersListQuery, List<UserResult>, List<UserResponse>>();
 
     /// <summary>
     /// Gets a User by its Id.
@@ -65,17 +56,8 @@ public class UsersController : ResultControllerBase
     /// <returns>The User Aggregate.</returns>
     [HttpGet("{id:long}")]
     [RoleAuthorize]
-    public async Task<ActionResult<UserResponse>> GetUserById(long id)
-    {
-        logger.LogInformation("GET /Users/Id called");
-
-        var result = await mediator.Send(new GetUserByIdQuery(id));
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<UserResponse>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> GetUserById(long id) =>
+        await HandleRequestAsync<GetUserByIdQuery, UserResult, UserResponse>(id);
 
     /// <summary>
     /// Add a User to the User Repository.
@@ -84,19 +66,8 @@ public class UsersController : ResultControllerBase
     /// <returns>The User instance created with Id.</returns>
     [HttpPost]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult<UserResponse>> AddUser(AddUserRequest request)
-    {
-        logger.LogInformation("POST /Users called");
-
-        var addUserCommand = mapper.Map<AddUserCommand>(request);
-
-        var result = await mediator.Send(addUserCommand);
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<UserResponse>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> AddUser(AddUserRequest request) =>
+        await HandleRequestAsync<AddUserCommand, UserResult, UserResponse>(request);
 
     /// <summary>
     /// Updates a User in the User Repository.
@@ -105,19 +76,8 @@ public class UsersController : ResultControllerBase
     /// <returns>The User instance created with Id.</returns>
     [HttpPut]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult<UserResponse>> UpdateUser(UpdateUserRequest request)
-    {
-        logger.LogInformation("PUT /Users called");
-
-        var updateUserCommand = mapper.Map<UpdateUserCommand>(request);
-
-        var result = await mediator.Send(updateUserCommand);
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<UserResponse>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> UpdateUser(UpdateUserRequest request) =>
+        await HandleRequestAsync<UpdateUserCommand, UserResult, UserResponse>(request);
 
     /// <summary>
     /// Deletes a User from the User Repository.
@@ -126,17 +86,6 @@ public class UsersController : ResultControllerBase
     /// <returns>The Action Result of the delete operation.</returns>
     [HttpDelete]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult> DeleteUser(DeleteUserRequest request)
-    {
-        logger.LogInformation("DELETE /Users called");
-
-        var deleteUserCommand = mapper.Map<DeleteUserCommand>(request);
-
-        var result = await mediator.Send(deleteUserCommand);
-
-        return ValidateResult<object>(
-            result,
-            () => Ok(),
-            () => Problem());
-    }
+    public async Task<IActionResult> DeleteUser(DeleteUserRequest request) =>
+        await HandleRequestAsync<DeleteUserCommand, Result, object>(request);
 }

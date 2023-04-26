@@ -12,6 +12,7 @@ using Documentally.Domain.User.ValueObjects;
 using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.DataTransferObjects;
 using Documentally.Infrastructure.Extensions;
+using Documentally.Infrastructure.Utilities;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -24,6 +25,7 @@ public class DocumentRepository : IDocumentRepository
 {
     private readonly IPostgresSqlConnectionFactory postgresSqlConnectionFactory;
     private readonly ILogger logger;
+    private readonly DapperUtility db;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DocumentRepository"/> class.
@@ -34,6 +36,7 @@ public class DocumentRepository : IDocumentRepository
     {
         this.postgresSqlConnectionFactory = postgresSqlConnectionFactory;
         this.logger = logger;
+        this.db = new DapperUtility(postgresSqlConnectionFactory);
     }
 
     /// <inheritdoc/>
@@ -48,29 +51,14 @@ public class DocumentRepository : IDocumentRepository
             Id = documentId.Value,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var documentDto = await db.QueryFirstOrDefaultAsync<DocumentDto>(sql, parameters);
 
-            await connection.OpenAsync();
-
-            var documentDto = await connection.QueryFirstOrDefaultAsync<DocumentDto>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            return CreateDocumentResultFromdocumentDto(documentDto);
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return CreateDocumentResultFromdocumentDto(documentDto);
     }
 
     /// <inheritdoc/>
     public async Task<Result<List<Document>>> GetByIdsAsync(DocId[] ids)
     {
-        logger.LogInformation("DocumentRepository.GetByIdsAsync({ids})", ids);
-
         var sql = "SELECT * FROM documents WHERE id = ANY(@Ids)";
 
         var parameters = new
@@ -78,37 +66,20 @@ public class DocumentRepository : IDocumentRepository
             Ids = ids.Select(x => x.Value),
         };
 
-        try
-        {
-            using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var documentDtos = await db.QueryAsync<DocumentDto>(sql, parameters);
 
-            await connection.OpenAsync();
+        var documents = documentDtos
+            .Select(CreateDocumentResultFromdocumentDto)
+            .Where(x => x.IsSuccess)
+            .Select(x => x.Value)
+            .ToList();
 
-            var documentDtos = await connection.QueryAsync<DocumentDto>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            var documents = documentDtos
-                .Select(CreateDocumentResultFromdocumentDto)
-                .Where(x => x.IsSuccess)
-                .Select(x => x.Value)
-                .ToList();
-
-            return documents;
-        }
-        catch (Exception ex)
-        {
-            ex.GetPrettyMessage(logger);
-        }
-
-        return new List<Document>();
+        return documents;
     }
 
     /// <inheritdoc/>
     public async Task<Result<List<Document>>> GetAllDocumentsFromUserIdAsync(long userId)
     {
-        logger.LogInformation("DocumentRepository.GetAllAsync()");
-
         var sql = "SELECT * FROM documents WHERE owner_id = @Id";
 
         var parameters = new
@@ -116,35 +87,20 @@ public class DocumentRepository : IDocumentRepository
             Id = userId,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var documentDtos = await db.QueryAsync<DocumentDto>(sql, parameters);
 
-            await connection.OpenAsync();
+        var documents = documentDtos
+            .Select(CreateDocumentResultFromdocumentDto)
+            .Where(x => x.IsSuccess)
+            .Select(x => x.Value)
+            .ToList();
 
-            var documentDtos = await connection.QueryAsync<DocumentDto>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            var documents = documentDtos
-                .Select(CreateDocumentResultFromdocumentDto)
-                .Where(x => x.IsSuccess)
-                .Select(x => x.Value)
-                .ToList();
-
-            return documents;
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return documents;
     }
 
     /// <inheritdoc/>
     public async Task<Result<List<Document>>> GetAllDocumentsSharedToUserIdAsync(long userId)
     {
-        logger.LogInformation("DocumentRepository.GetAllDocumentsSharedToUserIdAsync()");
-
         var sql = @"
             SELECT DISTINCT
                 d.*
@@ -171,35 +127,20 @@ public class DocumentRepository : IDocumentRepository
             UserId = userId,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var documentDtos = await db.QueryAsync<DocumentDto>(sql, parameters);
 
-            await connection.OpenAsync();
+        var documents = documentDtos
+            .Select(CreateDocumentResultFromdocumentDto)
+            .Where(x => x.IsSuccess)
+            .Select(x => x.Value)
+            .ToList();
 
-            var documentDtos = await connection.QueryAsync<DocumentDto>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            var documents = documentDtos
-                .Select(CreateDocumentResultFromdocumentDto)
-                .Where(x => x.IsSuccess)
-                .Select(x => x.Value)
-                .ToList();
-
-            return documents;
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return documents;
     }
 
     /// <inheritdoc/>
     public async Task<Result> VerifyUserIdHasAccessToDocIdAsync(DocId documentId, long userId)
     {
-        logger.LogInformation("DocumentRepository.VerifyUserIdHasAccessToDocIdAsync()");
-
         var sql = @"
             SELECT 
                 COUNT(*) > 0 as has_access
@@ -226,34 +167,19 @@ public class DocumentRepository : IDocumentRepository
             UserId = userId,
         };
 
-        try
+        var has_access = await db.QueryFirstOrDefaultAsync<bool>(sql, parameters);
+
+        if (has_access)
         {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-            await connection.OpenAsync();
-
-            var has_access = await connection.QuerySingleAsync<bool>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            if (has_access)
-            {
-                return Result.Ok();
-            }
-
-            return Result.Fail(new UnauthorizedError());
+            return Result.Ok();
         }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+
+        return Result.Fail(new UnauthorizedError());
     }
 
     /// <inheritdoc/>
     public async Task<Result<Document>> AddAsync(Document document)
     {
-        logger.LogInformation("DocumentRepository.AddAsync()");
-
         var sql = @"
             INSERT INTO 
                 documents ( 
@@ -289,29 +215,14 @@ public class DocumentRepository : IDocumentRepository
             document.CloudFileName,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var newId = await db.ExecuteScalarAsync(sql, parameters);
 
-            await connection.OpenAsync();
-
-            var newId = await connection.ExecuteScalarAsync<int>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            return await GetByIdAsync(new DocId(newId));
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return await GetByIdAsync(new DocId(newId));
     }
 
     /// <inheritdoc/>
     public async Task<Result<Document>> UpdateAsync(Document document)
     {
-        logger.LogInformation("DocumentRepository.UpdateAsync({Document})", document);
-
         var sql = @"
             UPDATE 
                 documents 
@@ -338,34 +249,14 @@ public class DocumentRepository : IDocumentRepository
             document.CloudFileName,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        await db.ExecuteAsync(sql, parameters);
 
-            await connection.OpenAsync();
-
-            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
-
-            await connection.CloseAsync();
-
-            if (affectedRecordsCount > 0)
-            {
-                return Result.Ok(document);
-            }
-
-            return Result.Fail(new NotFoundError());
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return Result.Ok(document);
     }
 
     /// <inheritdoc/>
     public async Task<Result> RemoveAsync(DocId documentId)
     {
-        logger.LogInformation("DocumentRepository.RemoveAsync({DocumentId})", documentId.Value);
-
         await RemoveDocumentFromAllSharedAccessAsync(documentId);
 
         var sql = "DELETE FROM documents WHERE id = @Id";
@@ -375,34 +266,14 @@ public class DocumentRepository : IDocumentRepository
             Id = documentId.Value,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        await db.ExecuteAsync(sql, parameters);
 
-            await connection.OpenAsync();
-
-            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
-
-            await connection.CloseAsync();
-
-            if (affectedRecordsCount == 0)
-            {
-                return Result.Fail(new NotFoundError());
-            }
-
-            return Result.Ok();
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return Result.Ok();
     }
 
     /// <inheritdoc/>
     public async Task<Result> ShareDocumentWithGroupAsync(DocId documentId, long groupId)
     {
-        logger.LogInformation("DocumentRepository.ShareDocumentWithGroupAsync({a},{b})", documentId.Value, groupId);
-
         var sql = @"
             INSERT INTO 
                 document_access 
@@ -422,34 +293,14 @@ public class DocumentRepository : IDocumentRepository
             GroupId = groupId,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        await db.ExecuteAsync(sql, parameters);
 
-            await connection.OpenAsync();
-
-            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
-
-            await connection.CloseAsync();
-
-            if (affectedRecordsCount > 0)
-            {
-                return Result.Ok();
-            }
-
-            return Result.Fail("Couldnt share this document with the group, because some internal error ocurred in the server.");
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return Result.Ok();
     }
 
     /// <inheritdoc/>
     public async Task<Result> ShareDocumentWithUserAsync(DocId documentId, long userId)
     {
-        logger.LogInformation("DocumentRepository.ShareDocumentWithUserAsync({a},{b})", documentId.Value, userId);
-
         var sql = @"
             INSERT INTO 
                 document_access 
@@ -469,34 +320,14 @@ public class DocumentRepository : IDocumentRepository
             UserId = userId,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        await db.ExecuteAsync(sql, parameters);
 
-            await connection.OpenAsync();
-
-            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
-
-            await connection.CloseAsync();
-
-            if (affectedRecordsCount > 0)
-            {
-                return Result.Ok();
-            }
-
-            return Result.Fail("Couldnt share this document with the user, because some internal error ocurred in the server.");
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return Result.Ok();
     }
 
     /// <inheritdoc/>
     public async Task<Result> RemoveDocumentShareFromUserAsync(DocId documentId, long userId)
     {
-        logger.LogInformation("DocumentRepository.RemoveDocumentShareFromUserAsync({DocumentId},{userId})", documentId.Value, userId);
-
         var sql = "DELETE FROM document_access WHERE document_id = @Id AND user_id = @GroupId";
 
         var parameters = new
@@ -505,34 +336,14 @@ public class DocumentRepository : IDocumentRepository
             UserId = userId,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        await db.ExecuteAsync(sql, parameters);
 
-            await connection.OpenAsync();
-
-            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
-
-            await connection.CloseAsync();
-
-            if (affectedRecordsCount > 0)
-            {
-                return Result.Ok();
-            }
-
-            return Result.Fail(new NotFoundError());
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return Result.Ok();
     }
 
     /// <inheritdoc/>
     public async Task<Result> RemoveDocumentShareFromGroupAsync(DocId documentId, long groupId)
     {
-        logger.LogInformation("DocumentRepository.RemoveDocumentShareFromGroupAsync({DocumentId},{groupId})", documentId.Value, groupId);
-
         var sql = "DELETE FROM document_access WHERE document_id = @Id AND group_id = @GroupId";
 
         var parameters = new
@@ -541,27 +352,9 @@ public class DocumentRepository : IDocumentRepository
             GroupId = groupId,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        await db.ExecuteAsync(sql, parameters);
 
-            await connection.OpenAsync();
-
-            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
-
-            await connection.CloseAsync();
-
-            if (affectedRecordsCount > 0)
-            {
-                return Result.Ok();
-            }
-
-            return Result.Fail(new NotFoundError());
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return Result.Ok();
     }
 
     /// <summary>
@@ -603,8 +396,6 @@ public class DocumentRepository : IDocumentRepository
     /// <returns>awaitable task.</returns>
     private async Task RemoveDocumentFromAllSharedAccessAsync(DocId documentId)
     {
-        logger.LogInformation("DocumentRepository.RemoveAsync({DocumentId})", documentId.Value);
-
         var sql = "DELETE FROM document_access WHERE document_id = @Id";
 
         var parameters = new
@@ -612,19 +403,6 @@ public class DocumentRepository : IDocumentRepository
             Id = documentId.Value,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-            await connection.OpenAsync();
-
-            var affectedRecordsCount = await connection.ExecuteAsync(sql, parameters);
-
-            await connection.CloseAsync();
-        }
-        catch (Exception ex)
-        {
-            ex.GetPrettyMessage(logger);
-        }
+        await db.ExecuteAsync(sql, parameters);
     }
 }

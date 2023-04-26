@@ -4,6 +4,7 @@
 
 using Documentally.API.Common.Attributes;
 using Documentally.API.Common.Controllers;
+using Documentally.Application.Abstractions.Services;
 using Documentally.Application.Groups.Commands.AddGroup;
 using Documentally.Application.Groups.Commands.AddUserToGroup;
 using Documentally.Application.Groups.Commands.DeleteGroup;
@@ -11,9 +12,11 @@ using Documentally.Application.Groups.Commands.RemoveUserFromGroup;
 using Documentally.Application.Groups.Commands.UpdateGroup;
 using Documentally.Application.Groups.Queries.GetGroupById;
 using Documentally.Application.Groups.Queries.GetGroupsList;
+using Documentally.Application.Groups.Results;
 using Documentally.Contracts.Group.Requests;
 using Documentally.Contracts.Group.Responses;
 using Documentally.Domain.Enums;
+using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +27,7 @@ namespace Documentally.API.Controllers;
 /// Groups Controller.
 /// </summary>
 [Route("[controller]")]
-public class GroupsController : ResultControllerBase
+public class GroupsController : ResultControllerBase<GroupsController>
 {
     private readonly IMediator mediator;
     private readonly IMapper mapper;
@@ -35,8 +38,9 @@ public class GroupsController : ResultControllerBase
     /// <param name="mediator">Injected mediator.</param>
     /// <param name="mapper">Injected mapper.</param>
     /// <param name="logger">Injected logger.</param>
-    public GroupsController(IMediator mediator, IMapper mapper, ILogger<GroupsController> logger)
-        : base(logger)
+    /// <param name="exceptionHandlingService">Injected exceptionHandlingService.</param>
+    public GroupsController(IMediator mediator, IMapper mapper, ILogger<GroupsController> logger, IExceptionHandlingService exceptionHandlingService)
+        : base(mediator, mapper, logger, exceptionHandlingService)
     {
         this.mediator = mediator;
         this.mapper = mapper;
@@ -48,17 +52,8 @@ public class GroupsController : ResultControllerBase
     /// <returns>The list of Groups.</returns>
     [HttpGet]
     [RoleAuthorize]
-    public async Task<ActionResult<IEnumerable<GroupResponse>>> GetGroups()
-    {
-        logger.LogInformation("GET /Groups/ called");
-
-        var groupsListResult = await mediator.Send(new GetGroupsListQuery());
-
-        return ValidateResult(
-            groupsListResult,
-            () => Ok(mapper.Map<List<GroupResponse>>(groupsListResult.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> GetGroups() =>
+        await HandleRequestAsync<GetGroupsListQuery, List<GroupResult>, List<GroupResponse>>();
 
     /// <summary>
     /// Gets a Group by its Id.
@@ -67,17 +62,8 @@ public class GroupsController : ResultControllerBase
     /// <returns>The Group Aggregate.</returns>
     [HttpGet("{id:long}")]
     [RoleAuthorize]
-    public async Task<ActionResult<GroupResponse>> GetGroupById(long id)
-    {
-        logger.LogInformation("GET /Groups/Id called");
-
-        var result = await mediator.Send(new GetGroupByIdQuery(id));
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<GroupResponse>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> GetGroupById(long id) =>
+        await HandleRequestAsync<GetGroupByIdQuery, GroupResult, GroupResponse>(id);
 
     /// <summary>
     /// Add a group to the Group Repository.
@@ -86,19 +72,8 @@ public class GroupsController : ResultControllerBase
     /// <returns>The group instance created with Id.</returns>
     [HttpPost]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult<GroupResponse>> AddGroup(AddGroupRequest request)
-    {
-        logger.LogInformation("POST /Groups called");
-
-        var addGroupCommand = mapper.Map<AddGroupCommand>(request);
-
-        var groupResult = await mediator.Send(addGroupCommand);
-
-        return ValidateResult(
-            groupResult,
-            () => Ok(mapper.Map<GroupResponse>(groupResult.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> AddGroup(AddGroupRequest request) =>
+        await HandleRequestAsync<AddGroupCommand, GroupResult, GroupResponse>(request);
 
     /// <summary>
     /// Updates a group in the Group Repository.
@@ -107,19 +82,8 @@ public class GroupsController : ResultControllerBase
     /// <returns>The group instance created with Id.</returns>
     [HttpPut]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult<GroupResponse>> UpdateGroup(UpdateGroupRequest request)
-    {
-        logger.LogInformation("PUT /Groups called");
-
-        var updateGroupCommand = mapper.Map<UpdateGroupCommand>(request);
-
-        var groupResult = await mediator.Send(updateGroupCommand);
-
-        return ValidateResult(
-            groupResult,
-            () => Ok(mapper.Map<GroupResponse>(groupResult.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> UpdateGroup(UpdateGroupRequest request) =>
+        await HandleRequestAsync<UpdateGroupCommand, GroupResult, GroupResponse>(request);
 
     /// <summary>
     /// Deletes a group from the Group Repository.
@@ -128,19 +92,8 @@ public class GroupsController : ResultControllerBase
     /// <returns>The Action Result of the delete operation.</returns>
     [HttpDelete]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult> DeleteGroup(DeleteGroupRequest request)
-    {
-        logger.LogInformation("DELETE /Groups called");
-
-        var deleteGroupCommand = mapper.Map<DeleteGroupCommand>(request);
-
-        var groupResult = await mediator.Send(deleteGroupCommand);
-
-        return ValidateResult<object>(
-            groupResult,
-            () => Ok(),
-            () => Problem());
-    }
+    public async Task<IActionResult> DeleteGroup(DeleteGroupRequest request) =>
+        await HandleRequestAsync<DeleteGroupCommand, Result, object>(request);
 
     /// <summary>
     /// Add an user to the Group in the Group Repository.
@@ -149,19 +102,8 @@ public class GroupsController : ResultControllerBase
     /// <returns>The Action Result of the delete operation.</returns>
     [HttpPost("user")]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult<GroupResponse>> AddUserToGroup(AddUserToGroupRequest request)
-    {
-        logger.LogInformation("PUT /Groups/user called");
-
-        var command = mapper.Map<AddUserToGroupCommand>(request);
-
-        var result = await mediator.Send(command);
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<GroupResponse>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> AddUserToGroup(AddUserToGroupRequest request) =>
+        await HandleRequestAsync<AddUserToGroupCommand, GroupResult, GroupResponse>(request);
 
     /// <summary>
     /// Removes an user from the Group in the Group Repository.
@@ -170,17 +112,6 @@ public class GroupsController : ResultControllerBase
     /// <returns>The Action Result of the delete operation.</returns>
     [HttpDelete("user")]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult<GroupResponse>> RemoveUserFromGroup(RemoveUserFromGroupRequest request)
-    {
-        logger.LogInformation("DELETE /Groups/user called");
-
-        var command = mapper.Map<RemoveUserFromGroupCommand>(request);
-
-        var result = await mediator.Send(command);
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<GroupResponse>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> RemoveUserFromGroup(RemoveUserFromGroupRequest request) =>
+        await HandleRequestAsync<RemoveUserFromGroupCommand, GroupResult, GroupResponse>(request);
 }

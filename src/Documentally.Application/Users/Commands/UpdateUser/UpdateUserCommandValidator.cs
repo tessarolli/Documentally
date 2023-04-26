@@ -16,6 +16,11 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
     /// </summary>
     public UpdateUserCommandValidator()
     {
+        RuleFor(x => x.Id)
+            .NotNull()
+            .GreaterThan(0)
+            .WithMessage("User Id is required.");
+
         RuleFor(x => x.FirstName)
             .NotEmpty()
             .WithMessage("First Name cannot be empty")

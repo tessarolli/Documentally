@@ -9,7 +9,6 @@ namespace Documentally.Domain.Common.DDD;
 /// <summary>
 /// An abstract class that should be implemented to represent an Value Object.
 /// </summary>
-[DebuggerDisplay("{Value}")]
 public abstract class ValueObject : IEquatable<ValueObject>
 {
     /// <summary>

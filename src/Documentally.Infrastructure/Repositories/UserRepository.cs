@@ -11,7 +11,7 @@ using Documentally.Domain.User;
 using Documentally.Domain.User.ValueObjects;
 using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.DataTransferObjects;
-using Documentally.Infrastructure.Extensions;
+using Documentally.Infrastructure.Utilities;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -25,6 +25,7 @@ public class UserRepository : IUserRepository
     private readonly IPostgresSqlConnectionFactory postgresSqlConnectionFactory;
     private readonly ILogger logger;
     private readonly IPasswordHashingService passwordHasher;
+    private readonly DapperUtility db;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserRepository"/> class.
@@ -37,43 +38,22 @@ public class UserRepository : IUserRepository
         this.postgresSqlConnectionFactory = postgresSqlConnectionFactory;
         this.logger = logger;
         this.passwordHasher = passwordHasher;
+        this.db = new DapperUtility(postgresSqlConnectionFactory);
     }
 
     /// <inheritdoc/>
     public async Task<Result<User>> GetByIdAsync(long id)
     {
-        logger.LogInformation("UserRepository.GetByIdAsync({id})", id);
-
         var sql = "SELECT * FROM users WHERE id = @id";
 
-        var parameters = new
-        {
-            id,
-        };
+        var userDto = await db.QueryFirstOrDefaultAsync<UserDto>(sql, new { id }, CommandType.Text);
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-            await connection.OpenAsync();
-
-            var userDto = await connection.QueryFirstOrDefaultAsync<UserDto>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            return CreateUserResultFromUserDto(userDto);
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return CreateUserResultFromUserDto(userDto);
     }
 
     /// <inheritdoc/>
     public async Task<List<User>> GetByIdsAsync(long[] ids)
     {
-        logger.LogInformation("UserRepository.GetByIdsAsync({ids})", ids);
-
         var sql = "SELECT * FROM users WHERE id = ANY(@ids)";
 
         var parameters = new
@@ -81,61 +61,27 @@ public class UserRepository : IUserRepository
             ids,
         };
 
-        try
-        {
-            using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var userDtos = await db.QueryAsync<UserDto>(sql, new { ids }, CommandType.Text);
 
-            await connection.OpenAsync();
-
-            var userDtos = await connection.QueryAsync<UserDto>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            var users = userDtos
-                .Select(CreateUserResultFromUserDto)
-                .Where(x => x.IsSuccess)
-                .Select(x => x.Value)
-                .ToList();
-
-            return users;
-        }
-        catch (Exception ex)
-        {
-            ex.GetPrettyMessage(logger);
-        }
-
-        return new List<User>();
+        return userDtos
+            .Select(CreateUserResultFromUserDto)
+            .Where(x => x.IsSuccess)
+            .Select(x => x.Value)
+            .ToList();
     }
 
     /// <inheritdoc/>
     public async Task<Result<List<User>>> GetAllAsync()
     {
-        logger.LogInformation("UserRepository.GetAllAsync()");
-
         var sql = "SELECT * FROM users";
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var userDtos = await db.QueryAsync<UserDto>(sql, null, CommandType.Text);
 
-            await connection.OpenAsync();
-
-            var userDtos = await connection.QueryAsync<UserDto>(sql);
-
-            await connection.CloseAsync();
-
-            var users = userDtos
-                .Select(CreateUserResultFromUserDto)
-                .Where(x => x.IsSuccess)
-                .Select(x => x.Value)
-                .ToList();
-
-            return Result.Ok(users);
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return userDtos
+            .Select(CreateUserResultFromUserDto)
+            .Where(x => x.IsSuccess)
+            .Select(x => x.Value)
+            .ToList();
     }
 
     /// <inheritdoc/>
@@ -145,34 +91,14 @@ public class UserRepository : IUserRepository
 
         var sql = "SELECT * FROM users WHERE email = @email";
 
-        var parameters = new
-        {
-            email,
-        };
+        var userDto = await db.QueryFirstOrDefaultAsync<UserDto>(sql, new { email }, CommandType.Text);
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-            await connection.OpenAsync();
-
-            var userDto = await connection.QueryFirstOrDefaultAsync<UserDto>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            return CreateUserResultFromUserDto(userDto);
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return CreateUserResultFromUserDto(userDto);
     }
 
     /// <inheritdoc/>
     public async Task<Result<User>> AddAsync(User user)
     {
-        logger.LogInformation("UserRepository.AddAsync()");
-
         if (!user.Password.IsHashed)
         {
             user.Password.HashPassword(passwordHasher);
@@ -202,17 +128,9 @@ public class UserRepository : IUserRepository
             Role = (int)user.Role,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var newId = await db.ExecuteScalarAsync(sql, parameters, CommandType.Text);
 
-            await connection.OpenAsync();
-
-            var newId = await connection.ExecuteScalarAsync<int>(sql, parameters);
-
-            await connection.CloseAsync();
-
-            var newUserResult = User.Create(
+        var newUserResult = User.Create(
                 newId,
                 user.FirstName,
                 user.LastName,
@@ -221,108 +139,52 @@ public class UserRepository : IUserRepository
                 user.Role,
                 user.CreatedAtUtc);
 
-            if (newUserResult.IsFailed)
-            {
-                var errMsg = "The new user was persisted on the database, but the entity creation failed somehow.";
-
-                logger.LogError("{errMsg}", errMsg);
-
-                return Result.Fail(errMsg);
-            }
-
-            return Result.Ok(newUserResult.Value);
-        }
-        catch (Exception ex)
+        if (newUserResult.IsFailed)
         {
-            return Result.Fail(ex.GetPrettyMessage(logger));
+            var errMsg = "The new user was persisted on the database, but the entity creation failed somehow.";
+
+            logger.LogError("{errMsg}", errMsg);
+
+            return Result.Fail(errMsg);
         }
+
+        return Result.Ok(newUserResult.Value);
     }
 
     /// <inheritdoc/>
     public async Task<Result<User>> UpdateAsync(User user)
     {
-        logger.LogInformation("UserRepository.UpdateAsync({user})", user);
-
         if (!user.Password.IsHashed)
         {
             user.Password.HashPassword(passwordHasher);
         }
 
-        var sql = @"
-            UPDATE 
-                users 
-            SET
-                first_name = @FirsName,
-                last_name = @LastName,
-                email = @Email,
-                password = @Password,
-                role = @Role
-            WHERE 
-                id = @Id";
-
         var parameters = new
         {
-            user.Id.Value,
-            user.FirstName,
-            user.LastName,
-            user.Email,
-            user.Password.HashedPassword,
-            user.Role,
+            p_id = user.Id.Value,
+            p_first_name = user.FirstName,
+            p_last_name = user.LastName,
+            p_email = user.Email,
+            p_password = user.Password.HashedPassword,
+            p_role = user.Role,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var n = await db.ExecuteAsync("sp_update_user", parameters, CommandType.StoredProcedure);
 
-            await connection.OpenAsync();
-
-            await connection.ExecuteAsync(sql, parameters);
-
-            await connection.CloseAsync();
-
-            return Result.Ok(user);
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return Result.Ok(user);
     }
 
     /// <inheritdoc/>
     public async Task<Result> RemoveAsync(UserId userId)
     {
-        logger.LogInformation("UserRepository.RemoveAsync({userId})", userId);
-
         var parameters = new
         {
             removing_user_id = userId.Value,
         };
 
-        try
-        {
-            await using var connection = postgresSqlConnectionFactory.CreateConnection();
+        await db.ExecuteAsync("remove_user", parameters, CommandType.StoredProcedure);
 
-            await connection.OpenAsync();
-
-            // Executes Stored Procedure for user removal
-            int affectedRecordsCount = await connection.ExecuteAsync(
-                "remove_user",
-                parameters,
-                commandType: CommandType.StoredProcedure);
-
-            await connection.CloseAsync();
-
-            if (affectedRecordsCount == 0)
-            {
-                return Result.Fail(new NotFoundError());
-            }
-
-            return Result.Ok();
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return Result.Ok();
     }
 
     /// <summary>

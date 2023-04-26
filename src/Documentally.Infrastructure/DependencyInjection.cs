@@ -45,6 +45,7 @@ public static class DependencyInjection
             .AddPersistance(configuration)
             .AddAuthentication(configuration);
 
+        services.AddScoped<IExceptionHandlingService, ExceptionHandlingService>();
         services.AddScoped<IPasswordHashingService, PasswordHashingService>();
         services.AddScoped<IMimeTypeMappingService, MimeTypeMappingService>();
 

@@ -2,8 +2,10 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using Azure.Core;
 using Documentally.API.Common.Attributes;
 using Documentally.API.Common.Controllers;
+using Documentally.Application.Abstractions.Services;
 using Documentally.Application.Documents.Commands.ShareDocumentWithGroup;
 using Documentally.Application.Documents.Commands.ShareDocumentWithUser;
 using Documentally.Application.Documents.Commands.UnshareDocumentWithGroup;
@@ -11,13 +13,18 @@ using Documentally.Application.Documents.Commands.UnshareDocumentWithUser;
 using Documentally.Application.Documents.Commands.UpdateDocument;
 using Documentally.Application.Documents.Queries.DownloadDocumentQuery;
 using Documentally.Application.Documents.Queries.GetDocumentById;
+using Documentally.Application.Documents.Results;
 using Documentally.Application.UserDocuments.Queries.GetUserDocumentssList;
+using Documentally.Application.Users.Commands.AddUser;
 using Documentally.Application.Users.Commands.DeleteDocument;
 using Documentally.Application.Users.Commands.UploadDocument;
+using Documentally.Application.Users.Results;
 using Documentally.Contract.Documents.Requests;
 using Documentally.Contracts.Document.Requests;
 using Documentally.Contracts.Document.Responses;
+using Documentally.Contracts.User.Responses;
 using Documentally.Domain.Enums;
+using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +35,7 @@ namespace Documentally.API.Controllers;
 /// Documents Controller.
 /// </summary>
 [Route("[controller]")]
-public class DocumentsController : ResultControllerBase
+public class DocumentsController : ResultControllerBase<DocumentsController>
 {
     private readonly IMediator mediator;
     private readonly IMapper mapper;
@@ -39,8 +46,9 @@ public class DocumentsController : ResultControllerBase
     /// <param name="mediator">Injected mediator.</param>
     /// <param name="mapper">Injected mapper.</param>
     /// <param name="logger">Injected logger.</param>
-    public DocumentsController(IMediator mediator, IMapper mapper, ILogger<DocumentsController> logger)
-        : base(logger)
+    /// <param name="exceptionHandlingService">Injected exceptionHandlingService.</param>
+    public DocumentsController(IMediator mediator, IMapper mapper, ILogger<DocumentsController> logger, IExceptionHandlingService exceptionHandlingService)
+        : base(mediator, mapper, logger, exceptionHandlingService)
     {
         this.mediator = mediator;
         this.mapper = mapper;
@@ -53,7 +61,7 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The Document Aggregate.</returns>
     [HttpGet("{id:long}/download")]
     [RoleAuthorize]
-    public async Task<ActionResult<DocumentResponse>> DownloadDocument(long id)
+    public async Task<IActionResult> DownloadDocument(long id)
     {
         logger.LogInformation("GET /Documents/Id/Download called");
 
@@ -97,19 +105,8 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The Result of the operation.</returns>
     [HttpDelete]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult> DeleteDocument(DeleteDocumentRequest request)
-    {
-        logger.LogInformation("DELETE /Documents called");
-
-        var command = mapper.Map<DeleteDocumentCommand>(request);
-
-        var result = await mediator.Send(command);
-
-        return ValidateResult<object>(
-            result,
-            () => Ok(),
-            () => Problem());
-    }
+    public async Task<IActionResult> DeleteDocument(DeleteDocumentRequest request) =>
+        await HandleRequestAsync<DeleteDocumentCommand, Result, object>(request);
 
     /// <summary>
     /// Gets a list of Documents that the User Id owns.
@@ -118,17 +115,8 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The list of Documents.</returns>
     [HttpGet("user/{request:long}")]
     [RoleAuthorize]
-    public async Task<ActionResult<IEnumerable<DocumentResponse>>> GetUserDocuments(long request)
-    {
-        logger.LogInformation("GET /Documents/User/{request} called", request);
-
-        var result = await mediator.Send(new GetUserDocumentsListQuery(request));
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<List<DocumentResponse>>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> GetUserDocuments(long request) =>
+        await HandleRequestAsync<GetUserDocumentsListQuery, List<DocumentResult>, List<DocumentResponse>>(request);
 
     /// <summary>
     /// Gets a list of Documents that the User Id owns.
@@ -137,17 +125,8 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The list of Documents.</returns>
     [HttpGet("SharedWithUser/{request:long}")]
     [RoleAuthorize]
-    public async Task<ActionResult<IEnumerable<DocumentResponse>>> GetDocumentsSharedWithUser(long request)
-    {
-        logger.LogInformation("GET /Documents/User/{request} called", request);
-
-        var result = await mediator.Send(new GetDocumentsSharedWithUserQuery(request));
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<List<DocumentResponse>>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> GetDocumentsSharedWithUser(long request) =>
+        await HandleRequestAsync<GetDocumentsSharedWithUserQuery, List<DocumentResult>, List<DocumentResponse>>(request);
 
     /// <summary>
     /// Gets a Document by its Id.
@@ -156,17 +135,8 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The Document Aggregate.</returns>
     [HttpGet("{id:long}")]
     [RoleAuthorize]
-    public async Task<ActionResult<DocumentResponse>> GetDocumentById(long id)
-    {
-        logger.LogInformation("GET /Documents/Id called");
-
-        var result = await mediator.Send(new GetDocumentByIdQuery(id));
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<DocumentResponse>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> GetDocumentById(long id) =>
+        await HandleRequestAsync<GetDocumentByIdQuery, DocumentResult, DocumentResponse>(id);
 
     /// <summary>
     /// Updates a Document in the Document Repository.
@@ -175,19 +145,8 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The Document instance created with Id.</returns>
     [HttpPut]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult<DocumentResponse>> UpdateDocument(UpdateDocumentRequest request)
-    {
-        logger.LogInformation("PUT /Documents called");
-
-        var updateDocumentCommand = mapper.Map<UpdateDocumentCommand>(request);
-
-        var result = await mediator.Send(updateDocumentCommand);
-
-        return ValidateResult(
-            result,
-            () => Ok(mapper.Map<DocumentResponse>(result.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> UpdateDocument(UpdateDocumentRequest request) =>
+        await HandleRequestAsync<UpdateDocumentCommand, DocumentResult, DocumentResponse>(request);
 
     /// <summary>
     /// Shares a Document With an User.
@@ -196,19 +155,8 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The status of the operation.</returns>
     [HttpPost("ShareWithUser")]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult> ShareDocumentWithUser(ShareDocumentWithUserRequest request)
-    {
-        logger.LogInformation("PUT /Documents called");
-
-        var command = mapper.Map<ShareDocumentWithUserCommand>(request);
-
-        var result = await mediator.Send(command);
-
-        return ValidateResult<object>(
-            result,
-            () => Ok(),
-            () => Problem());
-    }
+    public async Task<IActionResult> ShareDocumentWithUser(ShareDocumentWithUserRequest request) =>
+        await HandleRequestAsync<ShareDocumentWithUserCommand, Result, object>(request);
 
     /// <summary>
     /// Shares a Document With an Group.
@@ -217,19 +165,8 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The status of the operation.</returns>
     [HttpPost("ShareWithGroup")]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult> ShareDocumentWithGroup(ShareDocumentWithGroupRequest request)
-    {
-        logger.LogInformation("PUT /Documents called");
-
-        var command = mapper.Map<ShareDocumentWithGroupCommand>(request);
-
-        var result = await mediator.Send(command);
-
-        return ValidateResult<object>(
-            result,
-            () => Ok(),
-            () => Problem());
-    }
+    public async Task<IActionResult> ShareDocumentWithGroup(ShareDocumentWithGroupRequest request) =>
+        await HandleRequestAsync<ShareDocumentWithGroupCommand, Result, object>(request);
 
     /// <summary>
     /// Unshares a Document With an User.
@@ -238,19 +175,8 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The status of the operation.</returns>
     [HttpPost("UnshareWithUser")]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult> UnshareDocumentWithUser(UnshareDocumentWithUserRequest request)
-    {
-        logger.LogInformation("PUT /Documents called");
-
-        var command = mapper.Map<UnshareDocumentWithUserCommand>(request);
-
-        var result = await mediator.Send(command);
-
-        return ValidateResult<object>(
-            result,
-            () => Ok(),
-            () => Problem());
-    }
+    public async Task<IActionResult> UnshareDocumentWithUser(UnshareDocumentWithUserRequest request) =>
+        await HandleRequestAsync<UnshareDocumentWithUserCommand, Result, object>(request);
 
     /// <summary>
     /// Unshares a Document With an Group.
@@ -259,17 +185,6 @@ public class DocumentsController : ResultControllerBase
     /// <returns>The status of the operation.</returns>
     [HttpPost("UnshareWithGroup")]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<ActionResult> UnshareDocumentWithGroup(UnshareDocumentWithGroupRequest request)
-    {
-        logger.LogInformation("PUT /Documents called");
-
-        var command = mapper.Map<UnshareDocumentWithGroupCommand>(request);
-
-        var result = await mediator.Send(command);
-
-        return ValidateResult<object>(
-            result,
-            () => Ok(),
-            () => Problem());
-    }
+    public async Task<IActionResult> UnshareDocumentWithGroup(UnshareDocumentWithGroupRequest request) =>
+        await HandleRequestAsync<UnshareDocumentWithGroupCommand, Result, object>(request);
 }

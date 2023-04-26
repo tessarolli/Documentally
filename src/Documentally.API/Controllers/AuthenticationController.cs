@@ -4,8 +4,10 @@
 
 using Documentally.API.Common.Attributes;
 using Documentally.API.Common.Controllers;
+using Documentally.Application.Abstractions.Services;
 using Documentally.Application.Authentication.Commands.Register;
 using Documentally.Application.Authentication.Queries.Login;
+using Documentally.Application.Authentication.Results;
 using Documentally.Contracts.Authentication;
 using Documentally.Domain.Enums;
 using FluentResults;
@@ -20,22 +22,18 @@ namespace Documentally.API.Controllers;
 /// Authentication Controller.
 /// </summary>
 [Route("authentication")]
-public class AuthenticationController : ResultControllerBase
+public class AuthenticationController : ResultControllerBase<AuthenticationController>
 {
-    private readonly IMediator mediator;
-    private readonly IMapper mapper;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="AuthenticationController"/> class.
     /// </summary>
     /// <param name="mediator">Injected mediator.</param>
     /// <param name="mapper">Injected mapper.</param>
     /// <param name="logger">Injected logger.</param>
-    public AuthenticationController(IMediator mediator, IMapper mapper, ILogger<AuthenticationController> logger)
-        : base(logger)
+    /// <param name="exceptionHandlingService">Injected exceptionHandlingService.</param>
+    public AuthenticationController(IMediator mediator, IMapper mapper, ILogger<AuthenticationController> logger, IExceptionHandlingService exceptionHandlingService)
+        : base(mediator, mapper, logger, exceptionHandlingService)
     {
-        this.mediator = mediator;
-        this.mapper = mapper;
     }
 
     /// <summary>
@@ -45,18 +43,8 @@ public class AuthenticationController : ResultControllerBase
     /// <returns>The result of the register operation.</returns>
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> RegisterAsync(RegisterRequest request)
-    {
-        logger.LogInformation("POST /Register called");
-
-        var registerCommand = mapper.Map<RegisterCommand>(request);
-        var authenticationResult = await mediator.Send(registerCommand);
-
-        return ValidateResult(
-            authenticationResult,
-            () => Ok(mapper.Map<AuthenticationResponse>(authenticationResult.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> RegisterAsync(RegisterRequest request) =>
+         await HandleRequestAsync<RegisterCommand, AuthenticationResult, AuthenticationResponse>(request);
 
     /// <summary>
     /// Endpoint for a user to perform Login.
@@ -65,16 +53,6 @@ public class AuthenticationController : ResultControllerBase
     /// <returns>The result of the login operation.</returns>
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> LoginAsync(LoginRequest request)
-    {
-        logger.LogInformation("POST /Login called");
-
-        var loginQuery = mapper.Map<LoginQuery>(request);
-        var authenticationResult = await mediator.Send(loginQuery);
-
-        return ValidateResult(
-            authenticationResult,
-            () => Ok(mapper.Map<AuthenticationResponse>(authenticationResult.Value)),
-            () => Problem());
-    }
+    public async Task<IActionResult> LoginAsync(LoginRequest request) =>
+       await HandleRequestAsync<LoginQuery, AuthenticationResult, AuthenticationResponse>(request);
 }

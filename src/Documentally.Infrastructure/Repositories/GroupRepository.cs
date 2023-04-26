@@ -2,7 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Dapper;
+using System.Data;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Domain.Group;
 using Documentally.Domain.Group.ValueObjects;
@@ -11,9 +11,9 @@ using Documentally.Domain.User.ValueObjects;
 using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.DataTransferObjects;
 using Documentally.Infrastructure.Extensions;
+using Documentally.Infrastructure.Utilities;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 
 namespace Documentally.Infrastructure.Repositories;
 
@@ -25,6 +25,7 @@ public class GroupRepository : IGroupRepository
     private readonly IPostgresSqlConnectionFactory postgresSqlConnectionFactory;
     private readonly ILogger logger;
     private readonly IUserRepository userRepository;
+    private readonly DapperUtility db;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GroupRepository"/> class.
@@ -37,19 +38,12 @@ public class GroupRepository : IGroupRepository
         this.postgresSqlConnectionFactory = postgresSqlConnectionFactory;
         this.logger = logger;
         this.userRepository = userRepository;
+        this.db = new DapperUtility(postgresSqlConnectionFactory);
     }
 
     /// <inheritdoc/>
     public async Task<Result<Group>> GetByIdAsync(GroupId id)
     {
-        logger.LogInformation("GroupRepository.GetByIdAsync({id})", id);
-
-        using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-        await connection.OpenAsync();
-
-        using var transaction = await connection.BeginTransactionAsync();
-
         const string groupSql = @"
             SELECT 
                 id, 
@@ -61,12 +55,10 @@ public class GroupRepository : IGroupRepository
             WHERE 
                 id = @Id;";
 
-        var group = await connection.QueryFirstOrDefaultAsync<GroupDto>(groupSql, new { Id = id.Value });
+        var group = await db.QueryFirstOrDefaultAsync<GroupDto>(groupSql, new { Id = id.Value }, System.Data.CommandType.Text);
 
         if (group == null)
         {
-            await transaction.RollbackAsync();
-
             return Result.Fail<Group>($"Group with id {id} not found.");
         }
 
@@ -79,9 +71,7 @@ public class GroupRepository : IGroupRepository
             WHERE 
                 group_id = @GroupId;";
 
-        var members = (await connection.QueryAsync<GroupMemberDto>(membersSql, new { GroupId = id.Value })).ToList();
-
-        await transaction.CommitAsync();
+        var members = await db.QueryAsync<GroupMemberDto>(membersSql, new { GroupId = id.Value }, System.Data.CommandType.Text);
 
         var mapped = MapDtoToGroup(group, members);
         if (mapped.IsSuccess)
@@ -97,15 +87,13 @@ public class GroupRepository : IGroupRepository
     /// <inheritdoc/>
     public async Task<Result<Group>> AddAsync(Group group)
     {
-        logger.LogInformation("GroupRepository.AddAsync({group})", group.Name);
-
         var insertSql = @"
             INSERT INTO 
                 groups (name, owner_id)
             VALUES 
                 (@Name, @OwnerId)
             RETURNING
-                id;";
+                id";
 
         var parameters = new
         {
@@ -113,29 +101,11 @@ public class GroupRepository : IGroupRepository
             OwnerId = group.OwnerId.Value,
         };
 
-        try
-        {
-            using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var x = await db.ExecuteScalarAsync(insertSql, parameters, System.Data.CommandType.Text);
 
-            await connection.OpenAsync();
+        await AddUserToGroupAsync(new GroupId(x), group.OwnerId);
 
-            var x = await connection.ExecuteScalarAsync<long>(insertSql, parameters);
-
-            await connection.CloseAsync();
-
-            if (x > 0)
-            {
-                await AddUserToGroupAsync(new GroupId(x), group.OwnerId);
-
-                return await GetByIdAsync(new GroupId(x));
-            }
-
-            return Result.Fail("Group Insertion into database failed");
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return await GetByIdAsync(new GroupId(x));
     }
 
     /// <inheritdoc/>
@@ -159,34 +129,15 @@ public class GroupRepository : IGroupRepository
             OwnerId = group.OwnerId.Value,
         };
 
-        try
-        {
-            using var connection = postgresSqlConnectionFactory.CreateConnection();
+        await db.ExecuteAsync(updateSql, parameters, System.Data.CommandType.Text);
 
-            await connection.OpenAsync();
-
-            var x = await connection.ExecuteAsync(updateSql, parameters);
-
-            await connection.CloseAsync();
-
-            return await GetByIdAsync(new GroupId(x));
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        return await GetByIdAsync(group.Id);
     }
 
     /// <inheritdoc/>
     public async Task<Result> RemoveAsync(GroupId groupId)
     {
-        logger.LogInformation("GroupRepository.RemoveAsync({group})", groupId);
-
-        using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-        await connection.OpenAsync();
-
-        using var transaction = await connection.BeginTransactionAsync();
+        var transaction = await db.BeginTransactionAsync();
 
         try
         {
@@ -196,13 +147,13 @@ public class GroupRepository : IGroupRepository
                 WHERE 
                     group_id = @GroupId;";
 
-            var x = await connection.ExecuteAsync(deleteSql, new { GroupId = groupId.Value });
+            var x = await db.ExecuteAsync(deleteSql, new { GroupId = groupId.Value }, transaction: transaction);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            await transaction.RollbackAsync();
+            transaction.Rollback();
 
-            return Result.Fail(ex.GetPrettyMessage(logger));
+            throw;
         }
 
         try
@@ -213,13 +164,13 @@ public class GroupRepository : IGroupRepository
                 WHERE 
                     group_id = @GroupId;";
 
-            var x = await connection.ExecuteAsync(deleteSql, new { GroupId = groupId.Value });
+            var x = await db.ExecuteAsync(deleteSql, new { GroupId = groupId.Value }, transaction: transaction);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             await transaction.RollbackAsync();
 
-            return Result.Fail(ex.GetPrettyMessage(logger));
+            throw;
         }
 
         try
@@ -230,16 +181,23 @@ public class GroupRepository : IGroupRepository
                 WHERE 
                     id = @GroupId;";
 
-            var y = await connection.ExecuteAsync(deleteSql, new { GroupId = groupId.Value });
+            var y = await db.ExecuteAsync(deleteSql, new { GroupId = groupId.Value }, CommandType.Text, transaction);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             await transaction.RollbackAsync();
 
-            return Result.Fail(ex.GetPrettyMessage(logger));
+            throw;
         }
 
-        await transaction.CommitAsync();
+        try
+        {
+            await transaction.CommitAsync();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Empty);
+        }
 
         return Result.Ok();
     }
@@ -247,14 +205,6 @@ public class GroupRepository : IGroupRepository
     /// <inheritdoc/>
     public async Task<Result<List<Group>>> GetAllAsync()
     {
-        logger.LogInformation("GroupRepository.GetAllAsync()");
-
-        using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-        await connection.OpenAsync();
-
-        using var transaction = await connection.BeginTransactionAsync();
-
         const string groupSql = @"
             SELECT 
                 id, 
@@ -264,7 +214,7 @@ public class GroupRepository : IGroupRepository
             FROM 
                 groups;";
 
-        var groups = (await connection.QueryAsync<GroupDto>(groupSql)).ToList();
+        var groups = (await db.QueryAsync<GroupDto>(groupSql)).ToList();
 
         const string membersSql = @"
             SELECT 
@@ -273,9 +223,7 @@ public class GroupRepository : IGroupRepository
             FROM 
                 group_members;";
 
-        var members = (await connection.QueryAsync<GroupMemberDto>(membersSql)).ToList();
-
-        await transaction.CommitAsync();
+        var members = (await db.QueryAsync<GroupMemberDto>(membersSql)).ToList();
 
         var result = new List<Group>();
         foreach (var group in groups)
@@ -293,8 +241,6 @@ public class GroupRepository : IGroupRepository
     /// <inheritdoc/>
     public async Task<Result<Group>> AddUserToGroupAsync(GroupId groupId, UserId userId)
     {
-        logger.LogInformation("GroupRepository.AddUserToGroupAsync({groupId}, {userId})", groupId.Value, userId.Value);
-
         const string insertSql = @"
             INSERT INTO 
                 group_members (group_id, user_id) 
@@ -307,20 +253,7 @@ public class GroupRepository : IGroupRepository
             UserId = userId.Value,
         };
 
-        try
-        {
-            using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-            await connection.OpenAsync();
-
-            await connection.ExecuteAsync(insertSql, parameters);
-
-            await connection.CloseAsync();
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        await db.ExecuteAsync(insertSql, parameters, System.Data.CommandType.Text);
 
         return await GetByIdAsync(groupId);
     }
@@ -328,8 +261,6 @@ public class GroupRepository : IGroupRepository
     /// <inheritdoc/>
     public async Task<Result<Group>> RemoveUserFromGroupAsync(GroupId groupId, UserId userId)
     {
-        logger.LogInformation("GroupRepository.RemoveUserFromGroupAsync({groupId}, {userId})", groupId.Value, userId.Value);
-
         const string deleteSql = @"
             DELETE FROM 
                 group_members
@@ -343,25 +274,12 @@ public class GroupRepository : IGroupRepository
             UserId = userId.Value,
         };
 
-        try
-        {
-            using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-            await connection.OpenAsync();
-
-            await connection.ExecuteAsync(deleteSql, parameters);
-
-            await connection.CloseAsync();
-        }
-        catch (Exception ex)
-        {
-            return Result.Fail(ex.GetPrettyMessage(logger));
-        }
+        await db.ExecuteAsync(deleteSql, parameters);
 
         return await GetByIdAsync(groupId);
     }
 
-    private Result<Group> MapDtoToGroup(GroupDto group, List<GroupMemberDto> members)
+    private Result<Group> MapDtoToGroup(GroupDto group, IEnumerable<GroupMemberDto> members)
     {
         var groupResult = Group.Create(
                 new GroupId(group.id),
