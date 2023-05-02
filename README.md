@@ -1,7 +1,8 @@
 # Documentally Project
 
 Documentally is a monolithic application built for scaling using .NET Core and PostgreSQL as the primary data storage. 
-It follows Clean Architecture, Domain-Driven Design (DDD) and CQRS (Commands and Queries Responsibility Seggregation) principles to ensure the code is organized, maintainable, and scalable. 
+It follows Clean Architecture, Domain-Driven Design (DDD) and CQRS (Commands and Queries Responsibility Seggregation) principles to ensure the code is organized, maintainable, and scalable.
+Its loose coupling design makes it easy to refactor into a microservices architecture with minimal changes. 
 The application provides an API for users to upload and download documents with metadata such as posted date, name, description, and category, as well as manage user groups and access permissions.
 
 ## Technologies Used
