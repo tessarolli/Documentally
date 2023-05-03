@@ -18,10 +18,10 @@ public interface IPasswordHashingService
     string HashPassword(string password, int iterations = 10000);
 
     /// <summary>
-    /// Verifies if the informad password is valid.
+    /// Verifies if the informed password is valid.
     /// </summary>
     /// <param name="passwordToVerify">The plain text password string.</param>
     /// <param name="hashedPassword">The hashed password string.</param>
-    /// <returns>Bool if they match.</returns>
+    /// <returns>True if they match.</returns>
     bool VerifyPassword(string passwordToVerify, string hashedPassword);
 }

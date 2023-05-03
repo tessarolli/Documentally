@@ -2,7 +2,6 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Dapper;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Common.Errors;
 using Documentally.Domain.Doc.ValueObjects;
@@ -11,7 +10,6 @@ using Documentally.Domain.User;
 using Documentally.Domain.User.ValueObjects;
 using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.DataTransferObjects;
-using Documentally.Infrastructure.Extensions;
 using Documentally.Infrastructure.Utilities;
 using FluentResults;
 using Microsoft.Extensions.Logging;

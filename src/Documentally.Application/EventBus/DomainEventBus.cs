@@ -10,7 +10,9 @@ using Microsoft.Extensions.Logging;
 namespace Documentally.Application.EventBus;
 
 /// <summary>
-/// Factory for dispatching Domain Events.
+/// This is just a proof of concept implementation of a simple Domain Event Dispatcher (Publishing with MediatR).
+/// In a real world scenario, this would be implemented using
+/// RabbitMQ/Kafka/Azure Service Bus, or some enterprise level messaging service.
 /// </summary>
 public class DomainEventBus : IDomainEventBus
 {
@@ -36,6 +38,7 @@ public class DomainEventBus : IDomainEventBus
                     catch (Exception ex)
                     {
                         logger.LogError(ex, "Error publishing domain event {EventType}", domainEvent.GetType().Name);
+                        throw;
                     }
                 }
 
@@ -45,8 +48,13 @@ public class DomainEventBus : IDomainEventBus
     }
 
     /// <inheritdoc/>
-    public void DispatchDomainEvent(IDomainEvent domainEvent)
+    public void DispatchDomainEvents(IEntity entity)
     {
-        domainEvents.Enqueue(domainEvent);
+        foreach (var domainEvent in entity.DomainEvents)
+        {
+            domainEvents.Enqueue(domainEvent);
+        }
+
+        entity.ClearDomainEvents();
     }
 }

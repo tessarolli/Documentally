@@ -2,7 +2,6 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Azure.Core;
 using Documentally.API.Common.Attributes;
 using Documentally.API.Common.Controllers;
 using Documentally.Application.Abstractions.Services;
@@ -73,7 +72,7 @@ public class UsersController : ResultControllerBase<UsersController>
     /// Updates a User in the User Repository.
     /// </summary>
     /// <param name="request">User data.</param>
-    /// <returns>The User instance created with Id.</returns>
+    /// <returns>The User instance updated with Id.</returns>
     [HttpPut]
     [RoleAuthorize(Roles.Admin)]
     public async Task<IActionResult> UpdateUser(UpdateUserRequest request) =>

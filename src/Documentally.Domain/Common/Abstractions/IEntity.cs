@@ -27,8 +27,7 @@ public interface IEntity
     void RaiseDomainEvent(IDomainEvent @event);
 
     /// <summary>
-    /// Remove an Domain Event from Entity's list of Domain Events.
+    /// Removes all Domain Events from Entity's list of Domain Events.
     /// </summary>
-    /// <param name="event">The event to remove.</param>
-    void ClearDomainEvent(IDomainEvent @event);
+    void ClearDomainEvents();
 }

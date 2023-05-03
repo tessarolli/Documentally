@@ -5,6 +5,7 @@
 using Documentally.Domain.Common.Abstractions;
 using Documentally.Domain.Common.DDD;
 using Documentally.Domain.Enums;
+using Documentally.Domain.User.Events;
 using Documentally.Domain.User.ValueObjects;
 using FluentResults;
 using FluentValidation;
@@ -100,6 +101,8 @@ public sealed class User : AggregateRoot<UserId>
         var validationResult = user.Validate();
         if (validationResult.IsSuccess)
         {
+            user.RaiseDomainEvent(new UserCreatedDomainEvent(user));
+
             return user;
         }
         else

@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Data;
-using Dapper;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Common.Errors;
 using Documentally.Domain.Common.Abstractions;
@@ -44,7 +43,7 @@ public class UserRepository : IUserRepository
     {
         var sql = "SELECT * FROM users WHERE id = @id";
 
-        var userDto = await db.QueryFirstOrDefaultAsync<UserDto>(sql, new { id }, CommandType.Text);
+        var userDto = await db.QueryFirstOrDefaultAsync<UserDto>(sql, new { id });
 
         return CreateUserResultFromUserDto(userDto);
     }
@@ -59,7 +58,7 @@ public class UserRepository : IUserRepository
             ids,
         };
 
-        var userDtos = await db.QueryAsync<UserDto>(sql, new { ids }, CommandType.Text);
+        var userDtos = await db.QueryAsync<UserDto>(sql, new { ids });
 
         return userDtos
             .Select(CreateUserResultFromUserDto)
@@ -73,7 +72,7 @@ public class UserRepository : IUserRepository
     {
         var sql = "SELECT * FROM users";
 
-        var userDtos = await db.QueryAsync<UserDto>(sql, null, CommandType.Text);
+        var userDtos = await db.QueryAsync<UserDto>(sql, null);
 
         return userDtos
             .Select(CreateUserResultFromUserDto)
@@ -89,7 +88,7 @@ public class UserRepository : IUserRepository
 
         var sql = "SELECT * FROM users WHERE email = @email";
 
-        var userDto = await db.QueryFirstOrDefaultAsync<UserDto>(sql, new { email }, CommandType.Text);
+        var userDto = await db.QueryFirstOrDefaultAsync<UserDto>(sql, new { email });
 
         return CreateUserResultFromUserDto(userDto);
     }
@@ -126,27 +125,9 @@ public class UserRepository : IUserRepository
             Role = (int)user.Role,
         };
 
-        var newId = await db.ExecuteScalarAsync(sql, parameters, CommandType.Text);
+        var newId = await db.ExecuteScalarAsync(sql, parameters);
 
-        var newUserResult = User.Create(
-                newId,
-                user.FirstName,
-                user.LastName,
-                user.Email,
-                user.Password.HashedPassword,
-                user.Role,
-                user.CreatedAtUtc);
-
-        if (newUserResult.IsFailed)
-        {
-            var errMsg = "The new user was persisted on the database, but the entity creation failed somehow.";
-
-            logger.LogError("{errMsg}", errMsg);
-
-            return Result.Fail(errMsg);
-        }
-
-        return Result.Ok(newUserResult.Value);
+        return await GetByIdAsync(newId);
     }
 
     /// <inheritdoc/>

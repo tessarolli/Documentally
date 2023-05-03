@@ -12,8 +12,8 @@ namespace Documentally.Application.EventBus;
 public interface IDomainEventBus
 {
     /// <summary>
-    /// Adds a Domain Event to the Dispatcher Queue.
+    /// Publishes all events in the queue for the referenced entity.
     /// </summary>
-    /// <param name="domainEvent">Event being dispatched.</param>
-    public void DispatchDomainEvent(IDomainEvent domainEvent);
+    /// <param name="entity">The entity instance for publishind the Domain Events.</param>
+    public void DispatchDomainEvents(IEntity entity);
 }

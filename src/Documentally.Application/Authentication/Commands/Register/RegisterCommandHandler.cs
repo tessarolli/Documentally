@@ -80,10 +80,14 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, Authentic
             return Result.Fail(persistResult.Errors);
         }
 
-        domainEventBus.DispatchDomainEvent(new UserCreatedDomainEvent(persistResult.Value));
+        // Add a User Registered Domain event to this entity's list of Domain Events.
+        persistResult.Value.RaiseDomainEvent(new UserRegisteredDomainEvent(persistResult.Value));
 
         // Generate Token
         var token = jwtTokenGenerator.GenerateToken(persistResult.Value);
+
+        // Publishes all pending Domain Events for this entity
+        domainEventBus.DispatchDomainEvents(persistResult.Value);
 
         return new AuthenticationResult(persistResult.Value, token);
     }

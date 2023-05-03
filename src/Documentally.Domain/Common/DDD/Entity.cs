@@ -15,7 +15,7 @@ namespace Documentally.Domain.Common.DDD;
 public abstract class Entity<TId> : IEntity, IEquatable<Entity<TId>>
     where TId : notnull
 {
-    private readonly List<IDomainEvent> domainEvents = new ();
+    private readonly List<IDomainEvent> domainEvents = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Entity{TId}"/> class.
@@ -87,9 +87,9 @@ public abstract class Entity<TId> : IEntity, IEquatable<Entity<TId>>
     }
 
     /// <inheritdoc/>
-    public void ClearDomainEvent(IDomainEvent @event)
+    public void ClearDomainEvents()
     {
-        domainEvents.Remove(@event);
+        domainEvents.Clear();
     }
 
     /// <summary>

@@ -2,7 +2,6 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Azure.Core;
 using Documentally.API.Common.Attributes;
 using Documentally.API.Common.Controllers;
 using Documentally.Application.Abstractions.Services;
@@ -15,14 +14,11 @@ using Documentally.Application.Documents.Queries.DownloadDocumentQuery;
 using Documentally.Application.Documents.Queries.GetDocumentById;
 using Documentally.Application.Documents.Results;
 using Documentally.Application.UserDocuments.Queries.GetUserDocumentssList;
-using Documentally.Application.Users.Commands.AddUser;
 using Documentally.Application.Users.Commands.DeleteDocument;
 using Documentally.Application.Users.Commands.UploadDocument;
-using Documentally.Application.Users.Results;
 using Documentally.Contract.Documents.Requests;
 using Documentally.Contracts.Document.Requests;
 using Documentally.Contracts.Document.Responses;
-using Documentally.Contracts.User.Responses;
 using Documentally.Domain.Enums;
 using FluentResults;
 using MapsterMapper;
@@ -79,7 +75,7 @@ public class DocumentsController : ResultControllerBase<DocumentsController>
     /// <param name="request">Document data.</param>
     /// <returns>The Document instance created with Id.</returns>
     [HttpPost]
-    [RoleAuthorize(Roles.Admin)]
+    [RoleAuthorize(new[] { Roles.Admin, Roles.Manager })]
     public async Task<ActionResult<DocumentResponse>> UploadDocument([FromForm] UploadDocumentRequest request)
     {
         logger.LogInformation("POST /Documents called");
