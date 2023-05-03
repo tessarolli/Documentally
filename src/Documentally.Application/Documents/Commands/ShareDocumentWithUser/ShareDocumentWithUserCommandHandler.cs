@@ -5,6 +5,8 @@
 using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Domain.Doc.ValueObjects;
+using Documentally.Domain.Group.ValueObjects;
+using Documentally.Domain.User.ValueObjects;
 using FluentResults;
 
 namespace Documentally.Application.Documents.Commands.ShareDocumentWithUser;
@@ -28,14 +30,29 @@ public class ShareDocumentWithUserCommandHandler : ICommandHandler<ShareDocument
     /// <inheritdoc/>
     public async Task<Result> Handle(ShareDocumentWithUserCommand request, CancellationToken cancellationToken)
     {
-        var updateResult = await documentRepository.ShareDocumentWithUserAsync(new DocId(request.DocumentId), request.UserId);
-        if (updateResult.IsSuccess)
+        // Gets the Document by its Id.
+        var documentResult = await documentRepository.GetByIdAsync(new DocId(request.DocumentId));
+        if (documentResult.IsFailed)
         {
-            return Result.Ok();
+            return Result.Fail(documentResult.Errors);
         }
-        else
+
+        var document = documentResult.Value;
+
+        // Add this UserId to the list of shared UserIds.
+        var operationResult = document.ShareWithUser(new UserId(request.UserId));
+        if (operationResult.IsFailed)
+        {
+            return Result.Fail(documentResult.Errors);
+        }
+
+        // Update the Document Repository
+        var updateResult = await documentRepository.UpdateAsync(document);
+        if (updateResult.IsFailed)
         {
             return Result.Fail(updateResult.Errors);
         }
+
+        return Result.Ok();
     }
 }

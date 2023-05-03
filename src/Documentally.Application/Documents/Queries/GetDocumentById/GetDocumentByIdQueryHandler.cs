@@ -41,6 +41,8 @@ public class GetDocumentByIdQueryHandler : IQueryHandler<GetDocumentByIdQuery, D
                 documentResult.Value.Size,
                 documentResult.Value.BlobUrl,
                 documentResult.Value.CloudFileName,
+                documentResult.Value.SharedGroupIds.Select(x => x.Value).ToList(),
+                documentResult.Value.SharedUserIds.Select(x => x.Value).ToList(),
                 documentResult.Value.PostedAtUtc));
         }
 

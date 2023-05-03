@@ -5,6 +5,7 @@
 using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Domain.Doc.ValueObjects;
+using Documentally.Domain.Group.ValueObjects;
 using FluentResults;
 
 namespace Documentally.Application.Documents.Commands.ShareDocumentWithGroup;
@@ -28,7 +29,24 @@ public class ShareDocumentWithGroupCommandHandler : ICommandHandler<ShareDocumen
     /// <inheritdoc/>
     public async Task<Result> Handle(ShareDocumentWithGroupCommand request, CancellationToken cancellationToken)
     {
-        var updateResult = await documentRepository.ShareDocumentWithGroupAsync(new DocId(request.DocumentId), request.GroupId);
+        // Gets the Document by its Id.
+        var documentResult = await documentRepository.GetByIdAsync(new DocId(request.DocumentId));
+        if (documentResult.IsFailed)
+        {
+            return Result.Fail(documentResult.Errors);
+        }
+
+        var document = documentResult.Value;
+
+        // Add this GroupId to the list of shared GroupIds.
+        var operationResult = document.ShareWithGroup(new GroupId(request.GroupId));
+        if (operationResult.IsFailed)
+        {
+            return Result.Fail(documentResult.Errors);
+        }
+
+        // Update the Document Repository
+        var updateResult = await documentRepository.UpdateAsync(document);
         if (updateResult.IsSuccess)
         {
             return Result.Ok();

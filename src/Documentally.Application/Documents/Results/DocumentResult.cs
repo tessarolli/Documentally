@@ -17,4 +17,6 @@ public record DocumentResult(
     long Size,
     string BlobUrl,
     string CloudFileName,
+    List<long> SharedGroupIds,
+    List<long> SharedUserIds,
     DateTime PostedAtUtc);

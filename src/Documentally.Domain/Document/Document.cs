@@ -6,6 +6,7 @@ using Documentally.Domain.Common.Abstractions;
 using Documentally.Domain.Common.DDD;
 using Documentally.Domain.Doc.ValueObjects;
 using Documentally.Domain.Document.Validators;
+using Documentally.Domain.Group.ValueObjects;
 using Documentally.Domain.User.ValueObjects;
 using FluentResults;
 using FluentValidation;
@@ -21,12 +22,17 @@ public sealed class Document : AggregateRoot<DocId>
     /// <summary>
     /// Gets a Empty Document instance.
     /// </summary>
-    public static readonly Document Empty = new (new DocId());
+    public static readonly Document Empty = new(new DocId());
 
-    private Document(DocId id, Lazy<User_>? owner = null)
+    private readonly List<UserId> sharedUserIds;
+    private readonly List<GroupId> sharedGroupIds;
+
+    private Document(DocId id, Lazy<User_>? owner = null, List<GroupId>? sharedGroupIds = null, List<UserId>? sharedUserIds = null)
         : base(id)
     {
         Owner = owner ?? new Lazy<User_>(() => User_.Empty);
+        this.sharedUserIds = sharedUserIds ?? new List<UserId>();
+        this.sharedGroupIds = sharedGroupIds ?? new List<GroupId>();
     }
 
     /// <summary>
@@ -75,6 +81,16 @@ public sealed class Document : AggregateRoot<DocId>
     public DateTime PostedAtUtc { get; private set; }
 
     /// <summary>
+    /// Gets the List of Group Ids that this doc is shared with.
+    /// </summary>
+    public List<GroupId> SharedGroupIds => sharedGroupIds.ToList();
+
+    /// <summary>
+    /// Gets the List of User Ids that this doc is shared with.
+    /// </summary>
+    public List<UserId> SharedUserIds => sharedUserIds.ToList();
+
+    /// <summary>
     /// Creates a new Document Entity instance.
     /// </summary>
     /// <param name="id">Document's id.</param>
@@ -87,6 +103,8 @@ public sealed class Document : AggregateRoot<DocId>
     /// <param name="newFileName">Document's Cloud File Name.</param>
     /// <param name="postedOnUtc">Document's posted date.</param>
     /// <param name="owner">Document's Lazy{User} instance.</param>
+    /// <param name="sharedGroupIds">Document's list of shared group ids.</param>
+    /// <param name="sharedUserIds">Document's list of shared user ids.</param>
     /// <returns>New Document's instance or error.</returns>
     public static Result<Document> Create(
         long? id,
@@ -98,9 +116,11 @@ public sealed class Document : AggregateRoot<DocId>
         string blobUrl,
         string newFileName,
         DateTime? postedOnUtc = null,
-        Lazy<User_>? owner = null)
+        Lazy<User_>? owner = null,
+        List<GroupId>? sharedGroupIds = null,
+        List<UserId>? sharedUserIds = null)
     {
-        var document = new Document(new DocId(id), owner)
+        var document = new Document(new DocId(id), owner, sharedGroupIds, sharedUserIds)
         {
             OwnerId = ownerId,
             Name = name,
@@ -121,6 +141,74 @@ public sealed class Document : AggregateRoot<DocId>
         {
             return Result.Fail(validationResult.Errors);
         }
+    }
+
+    /// <summary>
+    /// Shares this document with an User.
+    /// </summary>
+    /// <param name="userId">The User Id.</param>
+    /// <returns>The result of the operation.</returns>
+    public Result ShareWithUser(UserId userId)
+    {
+        if (sharedUserIds.Any(x => x.Equals(userId)))
+        {
+            return Result.Fail($"This Document is already shared with this User({userId.Value})");
+        }
+
+        sharedUserIds.Add(userId);
+
+        return Result.Ok();
+    }
+
+    /// <summary>
+    /// Shares this document with an Group.
+    /// </summary>
+    /// <param name="groupId">The Group Id.</param>
+    /// <returns>The result of the operation.</returns>
+    public Result ShareWithGroup(GroupId groupId)
+    {
+        if (sharedGroupIds.Any(x => x.Equals(groupId)))
+        {
+            return Result.Fail($"This Document is already shared with this Group({groupId.Value})");
+        }
+
+        sharedGroupIds.Add(groupId);
+
+        return Result.Ok();
+    }
+
+    /// <summary>
+    /// Unshares this document with an User.
+    /// </summary>
+    /// <param name="userId">The User Id.</param>
+    /// <returns>The result of the operation.</returns>
+    public Result UnshareWithUser(UserId userId)
+    {
+        if (!sharedUserIds.Contains(userId))
+        {
+            return Result.Fail($"This Document is not shared with this User({userId.Value})");
+        }
+
+        sharedUserIds.Remove(userId);
+
+        return Result.Ok();
+    }
+
+    /// <summary>
+    /// Unshares this document with an Group.
+    /// </summary>
+    /// <param name="groupId">The Group Id.</param>
+    /// <returns>The result of the operation.</returns>
+    public Result UnshareWithGroup(GroupId groupId)
+    {
+        if (!sharedGroupIds.Contains(groupId))
+        {
+            return Result.Fail($"This Document is not shared with this Group({groupId.Value})");
+        }
+
+        sharedGroupIds.Remove(groupId);
+
+        return Result.Ok();
     }
 
     /// <inheritdoc/>

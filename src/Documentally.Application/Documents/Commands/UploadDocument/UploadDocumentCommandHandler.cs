@@ -76,6 +76,8 @@ public class UploadDocumentCommandHandler : ICommandHandler<UploadDocumentComman
                     addResult.Value.Size,
                     addResult.Value.BlobUrl,
                     addResult.Value.CloudFileName,
+                    addResult.Value.SharedGroupIds.Select(x => x.Value).ToList(),
+                    addResult.Value.SharedUserIds.Select(x => x.Value).ToList(),
                     addResult.Value.PostedAtUtc);
 
                 // 4. Return the success result reponse.

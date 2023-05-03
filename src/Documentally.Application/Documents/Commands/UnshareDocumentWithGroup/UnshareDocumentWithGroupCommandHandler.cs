@@ -5,6 +5,8 @@
 using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Domain.Doc.ValueObjects;
+using Documentally.Domain.Group.ValueObjects;
+using Documentally.Domain.User.ValueObjects;
 using FluentResults;
 
 namespace Documentally.Application.Documents.Commands.UnshareDocumentWithGroup;
@@ -28,14 +30,29 @@ public class UnshareDocumentWithGroupCommandHandler : ICommandHandler<UnshareDoc
     /// <inheritdoc/>
     public async Task<Result> Handle(UnshareDocumentWithGroupCommand request, CancellationToken cancellationToken)
     {
-        var updateResult = await documentRepository.RemoveDocumentShareFromGroupAsync(new DocId(request.DocumentId), request.GroupId);
-        if (updateResult.IsSuccess)
+        // Gets the Document by its Id.
+        var documentResult = await documentRepository.GetByIdAsync(new DocId(request.DocumentId));
+        if (documentResult.IsFailed)
         {
-            return Result.Ok();
+            return Result.Fail(documentResult.Errors);
         }
-        else
+
+        var document = documentResult.Value;
+
+        // Remove this GroupId from the list of shared GroupIds.
+        var operationResult = document.UnshareWithGroup(new GroupId(request.GroupId));
+        if (operationResult.IsFailed)
+        {
+            return Result.Fail(documentResult.Errors);
+        }
+
+        // Update the Document Repository
+        var updateResult = await documentRepository.UpdateAsync(document);
+        if (updateResult.IsFailed)
         {
             return Result.Fail(updateResult.Errors);
         }
+
+        return Result.Ok();
     }
 }

@@ -5,6 +5,7 @@
 using Documentally.Application.Abstractions.Messaging;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Domain.Doc.ValueObjects;
+using Documentally.Domain.User.ValueObjects;
 using FluentResults;
 
 namespace Documentally.Application.Documents.Commands.UnshareDocumentWithUser;
@@ -28,14 +29,29 @@ public class UnshareDocumentWithUserCommandHandler : ICommandHandler<UnshareDocu
     /// <inheritdoc/>
     public async Task<Result> Handle(UnshareDocumentWithUserCommand request, CancellationToken cancellationToken)
     {
-        var updateResult = await documentRepository.RemoveDocumentShareFromUserAsync(new DocId(request.DocumentId), request.UserId);
-        if (updateResult.IsSuccess)
+        // Gets the Document by its Id.
+        var documentResult = await documentRepository.GetByIdAsync(new DocId(request.DocumentId));
+        if (documentResult.IsFailed)
         {
-            return Result.Ok();
+            return Result.Fail(documentResult.Errors);
         }
-        else
+
+        var document = documentResult.Value;
+
+        // Remove this UserId from the list of shared UserIds.
+        var operationResult = document.UnshareWithUser(new UserId(request.UserId));
+        if (operationResult.IsFailed)
+        {
+            return Result.Fail(documentResult.Errors);
+        }
+
+        // Update the Document Repository
+        var updateResult = await documentRepository.UpdateAsync(document);
+        if (updateResult.IsFailed)
         {
             return Result.Fail(updateResult.Errors);
         }
+
+        return Result.Ok();
     }
 }

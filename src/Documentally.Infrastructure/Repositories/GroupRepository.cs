@@ -226,7 +226,7 @@ public class GroupRepository : IGroupRepository
             INSERT INTO 
                 group_members (group_id, user_id) 
             VALUES 
-                (@GroupId, @UserId);";
+                (@GroupId, @UserId)";
 
         var insertParamsEnumerable = group.MemberIds.Select(userId => new { UserId = userId.Value, GroupId = newGroupId ?? group.Id.Value });
 

@@ -6,6 +6,7 @@ using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Common.Errors;
 using Documentally.Domain.Doc.ValueObjects;
 using Documentally.Domain.Document;
+using Documentally.Domain.Group.ValueObjects;
 using Documentally.Domain.User;
 using Documentally.Domain.User.ValueObjects;
 using Documentally.Infrastructure.Abstractions;
@@ -49,7 +50,7 @@ public class DocumentRepository : IDocumentRepository
 
         var documentDto = await db.QueryFirstOrDefaultAsync<DocumentDto>(sql, parameters);
 
-        return CreateDocumentResultFromDocumentDto(documentDto);
+        return await CreateDocumentResultFromDocumentDtoAsync(documentDto);
     }
 
     /// <inheritdoc/>
@@ -65,9 +66,9 @@ public class DocumentRepository : IDocumentRepository
         var documentDtos = await db.QueryAsync<DocumentDto>(sql, parameters);
 
         var documents = documentDtos
-            .Select(CreateDocumentResultFromDocumentDto)
-            .Where(x => x.IsSuccess)
-            .Select(x => x.Value)
+            .Select(async x => await CreateDocumentResultFromDocumentDtoAsync(x))
+            .Where(x => x.Result.IsSuccess)
+            .Select(x => x.Result.Value)
             .ToList();
 
         return documents;
@@ -86,9 +87,9 @@ public class DocumentRepository : IDocumentRepository
         var documentDtos = await db.QueryAsync<DocumentDto>(sql, parameters);
 
         var documents = documentDtos
-            .Select(CreateDocumentResultFromDocumentDto)
-            .Where(x => x.IsSuccess)
-            .Select(x => x.Value)
+            .Select(async x => await CreateDocumentResultFromDocumentDtoAsync(x))
+             .Where(x => x.Result.IsSuccess)
+            .Select(x => x.Result.Value)
             .ToList();
 
         return documents;
@@ -126,9 +127,9 @@ public class DocumentRepository : IDocumentRepository
         var documentDtos = await db.QueryAsync<DocumentDto>(sql, parameters);
 
         var documents = documentDtos
-            .Select(CreateDocumentResultFromDocumentDto)
-            .Where(x => x.IsSuccess)
-            .Select(x => x.Value)
+            .Select(async x => await CreateDocumentResultFromDocumentDtoAsync(x))
+            .Where(x => x.Result.IsSuccess)
+            .Select(x => x.Result.Value)
             .ToList();
 
         return documents;
@@ -219,7 +220,7 @@ public class DocumentRepository : IDocumentRepository
     /// <inheritdoc/>
     public async Task<Result<Document>> UpdateAsync(Document document)
     {
-        var sql = @"
+        var updateDocumentSql = @"
             UPDATE 
                 documents 
             SET
@@ -233,7 +234,7 @@ public class DocumentRepository : IDocumentRepository
             WHERE 
                 id = @Id";
 
-        var parameters = new
+        var updateDocumentParameters = new
         {
             Id = document.Id.Value,
             OwnerId = document.OwnerId.Value,
@@ -245,7 +246,34 @@ public class DocumentRepository : IDocumentRepository
             document.CloudFileName,
         };
 
-        await db.ExecuteAsync(sql, parameters);
+        await db.ExecuteAsync(updateDocumentSql, updateDocumentParameters);
+
+        await RemoveDocumentFromAllSharedAccessAsync(document.Id);
+
+        var insertSharedAccessSql = @"
+            INSERT INTO  
+                document_access 
+                ( 
+                    document_id, 
+                    user_id, 
+                    group_id
+                )
+            VALUES 
+            (
+                @DocumentId,
+                @UserId,
+                @GroupId
+            )";
+
+        /*                      docId, GroupId, UserId */
+        var paramsList = new List<(long, long?, long?)>();
+        paramsList.AddRange(document.SharedGroupIds.Select(x => (document.Id.Value, (long?)x.Value, (long?)null)));
+        paramsList.AddRange(document.SharedUserIds.Select(x => (document.Id.Value, (long?)null, (long?)x.Value)));
+
+        // Create an anonymous object for holding the parameters based on ParamsList Tuple.
+        var insertParamsEnumerable = paramsList.Select(x => new { DocumentId = x.Item1, GroupId = x.Item2, UserId = x.Item3 });
+
+        await db.ExecuteAsync(insertSharedAccessSql, insertParamsEnumerable);
 
         return Result.Ok(document);
     }
@@ -267,101 +295,17 @@ public class DocumentRepository : IDocumentRepository
         return Result.Ok();
     }
 
-    /// <inheritdoc/>
-    public async Task<Result> ShareDocumentWithGroupAsync(DocId documentId, long groupId)
-    {
-        var sql = @"
-            INSERT INTO 
-                document_access 
-                (
-                    document_id, 
-                    group_id
-                ) 
-            VALUES 
-            (
-                @DocumentId, 
-                @GroupId
-            )";
-
-        var parameters = new
-        {
-            DocumentId = documentId.Value,
-            GroupId = groupId,
-        };
-
-        await db.ExecuteAsync(sql, parameters);
-
-        return Result.Ok();
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result> ShareDocumentWithUserAsync(DocId documentId, long userId)
-    {
-        var sql = @"
-            INSERT INTO 
-                document_access 
-                (
-                    document_id, 
-                    user_id
-                ) 
-            VALUES 
-            (
-                @DocumentId, 
-                @UserId
-            )";
-
-        var parameters = new
-        {
-            DocumentId = documentId.Value,
-            UserId = userId,
-        };
-
-        await db.ExecuteAsync(sql, parameters);
-
-        return Result.Ok();
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result> RemoveDocumentShareFromUserAsync(DocId documentId, long userId)
-    {
-        var sql = "DELETE FROM document_access WHERE document_id = @Id AND user_id = @GroupId";
-
-        var parameters = new
-        {
-            Id = documentId.Value,
-            UserId = userId,
-        };
-
-        await db.ExecuteAsync(sql, parameters);
-
-        return Result.Ok();
-    }
-
-    /// <inheritdoc/>
-    public async Task<Result> RemoveDocumentShareFromGroupAsync(DocId documentId, long groupId)
-    {
-        var sql = "DELETE FROM document_access WHERE document_id = @Id AND group_id = @GroupId";
-
-        var parameters = new
-        {
-            Id = documentId.Value,
-            GroupId = groupId,
-        };
-
-        await db.ExecuteAsync(sql, parameters);
-
-        return Result.Ok();
-    }
-
     /// <summary>
     /// Creates a new instance of the Document Entity, using the Create factory method.
     /// </summary>
     /// <param name="documentDto">The Document Data Transfer Object.</param>
     /// <returns>An Result indicating the status of the operation.</returns>
-    private static Result<Document> CreateDocumentResultFromDocumentDto(DocumentDto? documentDto)
+    private async Task<Result<Document>> CreateDocumentResultFromDocumentDtoAsync(DocumentDto? documentDto)
     {
         if (documentDto is not null)
         {
+            var documentAccess = await GetListOfDocumentAccessForDocIdAsync(new DocId(documentDto.id));
+
             var documentResult = Document.Create(
                 documentDto.id,
                 new UserId(documentDto.owner_id),
@@ -372,7 +316,9 @@ public class DocumentRepository : IDocumentRepository
                 documentDto.blob_url,
                 documentDto.cloud_file_name,
                 documentDto.posted_date_utc,
-                new Lazy<User>(() => User.Empty));
+                new Lazy<User>(() => User.Empty),
+                documentAccess?.Where(x => x.group_id is not null).Select(x => new GroupId(x.group_id)).ToList(),
+                documentAccess?.Where(x => x.user_id is not null).Select(x => new UserId(x.user_id)).ToList());
 
             if (documentResult.IsSuccess)
             {
@@ -385,11 +331,18 @@ public class DocumentRepository : IDocumentRepository
         return Result.Fail(new NotFoundError($"Document with the provided E-Mail was not found."));
     }
 
-    /// <summary>
-    /// Removes this document from all shared instances.
-    /// </summary>
-    /// <param name="documentId">The document Id to remove.</param>
-    /// <returns>awaitable task.</returns>
+    private async Task<IEnumerable<DocumentAccessDto>> GetListOfDocumentAccessForDocIdAsync(DocId documentId)
+    {
+        var sql = "SELECT * FROM document_access WHERE document_id = @Id";
+
+        var parameters = new
+        {
+            Id = documentId.Value,
+        };
+
+        return await db.QueryAsync<DocumentAccessDto>(sql, parameters);
+    }
+
     private async Task RemoveDocumentFromAllSharedAccessAsync(DocId documentId)
     {
         var sql = "DELETE FROM document_access WHERE document_id = @Id";
