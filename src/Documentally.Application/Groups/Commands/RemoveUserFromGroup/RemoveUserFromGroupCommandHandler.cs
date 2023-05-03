@@ -56,29 +56,30 @@ public class RemoveUserFromGroupCommandHandler : ICommandHandler<RemoveUserFromG
                 authenticatedUser.Role == Roles.User)
             {
                 // Then he is not authorized to perform this action
-                return Result.Fail(new UnauthorizedError("Only the Group Creator or Admins/Managers can perform this action!"));
+                return new UnauthorizedError("Only the Group Creator or Admins/Managers can perform this action!");
             }
 
-            // Check if the requested user id is a member of this group
-            if (!group.MemberIds.Any(x => x.Value == request.UserId))
+            // Remove the user from the group domain group aggregate.
+            var removeMemberFromGroupResult = group.RemoveMember(new UserId(request.UserId));
+            if (removeMemberFromGroupResult.IsFailed)
             {
-                return Result.Fail(new NotFoundError("The specified user does not belong to this group."));
+                return new NotFoundError(removeMemberFromGroupResult.Errors.First().Message);
             }
 
-            // If we got here, it means that the authenticated user is allowed to access this resource.
-            var addResult = await groupRepository.RemoveUserFromGroupAsync(new GroupId(request.GroupId), new UserId(request.UserId));
-            if (addResult.IsSuccess)
+            // Update the Group Aggregate in the repository.
+            var updateGroupResult = await groupRepository.UpdateAsync(group);
+            if (updateGroupResult.IsSuccess)
             {
                 return Result.Ok(new GroupResult(
-                    addResult.Value.Id.Value,
-                    addResult.Value.Name,
-                    addResult.Value.OwnerId.Value,
-                    addResult.Value.MemberIds.Select(x => x.Value).ToList(),
-                    addResult.Value.CreatedAtUtc));
+                    updateGroupResult.Value.Id.Value,
+                    updateGroupResult.Value.Name,
+                    updateGroupResult.Value.OwnerId.Value,
+                    updateGroupResult.Value.MemberIds.Select(x => x.Value).ToList(),
+                    updateGroupResult.Value.CreatedAtUtc));
             }
             else
             {
-                return Result.Fail(addResult.Errors);
+                return Result.Fail(updateGroupResult.Errors);
             }
         }
         else

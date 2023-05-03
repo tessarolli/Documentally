@@ -32,7 +32,8 @@ public class AddGroupCommandHandler : ICommandHandler<AddGroupCommand, GroupResu
         var groupResult = Domain.Group.Group.Create(
                    null,
                    request.Name,
-                   new UserId(request.OwnerId));
+                   new UserId(request.OwnerId),
+                   new List<UserId> { new UserId(request.OwnerId) });
 
         if (groupResult.IsSuccess)
         {

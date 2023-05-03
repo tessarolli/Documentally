@@ -22,6 +22,12 @@ public interface IGroupRepository
     Task<Result<Group>> GetByIdAsync(GroupId id);
 
     /// <summary>
+    /// Gets a List of all Groups from the repository.
+    /// </summary>
+    /// <returns>A Result indicating the status of this operation.</returns>
+    Task<Result<List<Group>>> GetAllAsync();
+
+    /// <summary>
     /// Add an Group into the Repository.
     /// </summary>
     /// <param name="group">The Group to Add.</param>
@@ -31,36 +37,14 @@ public interface IGroupRepository
     /// <summary>
     /// Update the Group in the Repository.
     /// </summary>
-    /// <param name="group">The Group to Add.</param>
+    /// <param name="group">The Group to Update.</param>
     /// <returns>A Result indicating the status of this operation.</returns>
     Task<Result<Group>> UpdateAsync(Group group);
 
     /// <summary>
     /// Remove the Group from the Repository.
     /// </summary>
-    /// <param name="groupId">The Group to Add.</param>
+    /// <param name="groupId">The Group to Remove.</param>
     /// <returns>A Result indicating the status of this operation.</returns>
     Task<Result> RemoveAsync(GroupId groupId);
-
-    /// <summary>
-    /// Gets a List of all Groups from the repository.
-    /// </summary>
-    /// <returns>A Result indicating the status of this operation.</returns>
-    Task<Result<List<Group>>> GetAllAsync();
-
-    /// <summary>
-    /// Adds an User to the Group in the Repository.
-    /// </summary>
-    /// <param name="groupId">The Group Identifier.</param>
-    /// <param name="userId">The User Identifier.</param>
-    /// <returns>A Result indicating the status of this operation and updated instance of the Group Aggregate.</returns>
-    Task<Result<Group>> AddUserToGroupAsync(GroupId groupId, UserId userId);
-
-    /// <summary>
-    /// Removes an User from the Group in the Repository.
-    /// </summary>
-    /// <param name="groupId">The Group Identifier.</param>
-    /// <param name="userId">The User Identifier.</param>
-    /// <returns>A Result indicating the status of this operation and updated instance of the Group Aggregate.</returns>
-    Task<Result<Group>> RemoveUserFromGroupAsync(GroupId groupId, UserId userId);
 }

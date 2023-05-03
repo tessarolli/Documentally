@@ -109,25 +109,36 @@ public sealed class Group : Entity<GroupId>
     /// <summary>
     /// Adds an Member to this Group.
     /// </summary>
-    /// <param name="memberId">The member to add.</param>
-    public void AddMember(UserId memberId)
+    /// <param name="memberId">The Member Id to add.</param>
+    /// <returns>A Result indicating the status of the operation.</returns>
+    public Result AddMember(UserId memberId)
     {
         // check if user is already a member
         if (memberIds.Contains(memberId))
         {
-            return;
+            return Result.Fail($"This User({memberId.Value}) is already a member of this group.");
         }
 
         memberIds.Add(memberId);
+
+        return Result.Ok();
     }
 
     /// <summary>
     /// Removes a Member from this Group.
     /// </summary>
-    /// <param name="memberId">The Member to remove.</param>
-    public void RemoveMember(UserId memberId)
+    /// <param name="memberId">The Member Id to remove.</param>
+    /// <returns>A Result indicating the status of the operation.</returns>
+    public Result RemoveMember(UserId memberId)
     {
+        if (!memberIds.Contains(memberId))
+        {
+            return Result.Fail($"This User({memberId.Value}) is not a member of this group.");
+        }
+
         memberIds.Remove(memberId);
+
+        return Result.Ok();
     }
 
     /// <inheritdoc/>

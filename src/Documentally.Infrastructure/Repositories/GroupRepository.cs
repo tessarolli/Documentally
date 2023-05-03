@@ -52,7 +52,7 @@ public class GroupRepository : IGroupRepository
             WHERE 
                 id = @Id;";
 
-        var group = await db.QueryFirstOrDefaultAsync<GroupDto>(groupSql, new { Id = id.Value }, System.Data.CommandType.Text);
+        var group = await db.QueryFirstOrDefaultAsync<GroupDto>(groupSql, new { Id = id.Value });
 
         if (group == null)
         {
@@ -68,7 +68,7 @@ public class GroupRepository : IGroupRepository
             WHERE 
                 group_id = @GroupId;";
 
-        var members = await db.QueryAsync<GroupMemberDto>(membersSql, new { GroupId = id.Value }, System.Data.CommandType.Text);
+        var members = await db.QueryAsync<GroupMemberDto>(membersSql, new { GroupId = id.Value });
 
         var mapped = CreateGroupResultFromGroupDto(group, members);
         if (mapped.IsSuccess)
@@ -79,6 +79,42 @@ public class GroupRepository : IGroupRepository
         {
             return Result.Fail(mapped.Errors);
         }
+    }
+
+    /// <inheritdoc/>
+    public async Task<Result<List<Group>>> GetAllAsync()
+    {
+        const string groupSql = @"
+            SELECT 
+                id, 
+                name, 
+                owner_id,
+                created_at_utc
+            FROM 
+                groups";
+
+        var groups = (await db.QueryAsync<GroupDto>(groupSql)).ToList();
+
+        const string membersSql = @"
+            SELECT 
+                group_id, 
+                user_id
+            FROM 
+                group_members";
+
+        var members = (await db.QueryAsync<GroupMemberDto>(membersSql)).ToList();
+
+        var result = new List<Group>();
+        foreach (var group in groups)
+        {
+            var mapped = CreateGroupResultFromGroupDto(group, members);
+            if (mapped.IsSuccess)
+            {
+                result.Add(mapped.Value);
+            }
+        }
+
+        return Result.Ok(result);
     }
 
     /// <inheritdoc/>
@@ -98,9 +134,9 @@ public class GroupRepository : IGroupRepository
             OwnerId = group.OwnerId.Value,
         };
 
-        var x = await db.ExecuteScalarAsync(insertSql, parameters, System.Data.CommandType.Text);
+        var x = await db.ExecuteScalarAsync(insertSql, parameters);
 
-        await AddUserToGroupAsync(new GroupId(x), group.OwnerId);
+        await UpdateGroupUsersAsync(group, x);
 
         return await GetByIdAsync(new GroupId(x));
     }
@@ -126,7 +162,9 @@ public class GroupRepository : IGroupRepository
             OwnerId = group.OwnerId.Value,
         };
 
-        await db.ExecuteAsync(updateSql, parameters, System.Data.CommandType.Text);
+        await db.ExecuteAsync(updateSql, parameters);
+
+        await UpdateGroupUsersAsync(group);
 
         return await GetByIdAsync(group.Id);
     }
@@ -199,83 +237,44 @@ public class GroupRepository : IGroupRepository
         return Result.Ok();
     }
 
-    /// <inheritdoc/>
-    public async Task<Result<List<Group>>> GetAllAsync()
+    /// <summary>
+    /// Method to update the Group Users in the database.
+    /// </summary>
+    /// <param name="group">The group to update.</param>
+    /// <param name="newGroupId">In case of a newly added group, pass the Id here.</param>
+    /// <returns>Awaitable task.</returns>
+    private async Task UpdateGroupUsersAsync(Group group, long? newGroupId = null)
     {
-        const string groupSql = @"
-            SELECT 
-                id, 
-                name, 
-                owner_id,
-                created_at_utc
-            FROM 
-                groups";
+        const string deleteSql = @"
+            DELETE FROM 
+                group_members
+            WHERE 
+                group_id = @GroupId";
 
-        var groups = (await db.QueryAsync<GroupDto>(groupSql)).ToList();
-
-        const string membersSql = @"
-            SELECT 
-                group_id, 
-                user_id
-            FROM 
-                group_members";
-
-        var members = (await db.QueryAsync<GroupMemberDto>(membersSql)).ToList();
-
-        var result = new List<Group>();
-        foreach (var group in groups)
+        var deleteParameter = new
         {
-            var mapped = CreateGroupResultFromGroupDto(group, members);
-            if (mapped.IsSuccess)
-            {
-                result.Add(mapped.Value);
-            }
-        }
+            GroupId = group.Id.Value,
+        };
 
-        return Result.Ok(result);
-    }
+        await db.ExecuteAsync(deleteSql, deleteParameter);
 
-    /// <inheritdoc/>
-    public async Task<Result<Group>> AddUserToGroupAsync(GroupId groupId, UserId userId)
-    {
         const string insertSql = @"
             INSERT INTO 
                 group_members (group_id, user_id) 
             VALUES 
                 (@GroupId, @UserId);";
 
-        var parameters = new
-        {
-            GroupId = groupId.Value,
-            UserId = userId.Value,
-        };
+        var insertParamsEnumerable = group.MemberIds.Select(userId => new { UserId = userId.Value, GroupId = newGroupId ?? group.Id.Value });
 
-        await db.ExecuteAsync(insertSql, parameters, System.Data.CommandType.Text);
-
-        return await GetByIdAsync(groupId);
+        await db.ExecuteAsync(insertSql, insertParamsEnumerable);
     }
 
-    /// <inheritdoc/>
-    public async Task<Result<Group>> RemoveUserFromGroupAsync(GroupId groupId, UserId userId)
-    {
-        const string deleteSql = @"
-            DELETE FROM 
-                group_members
-            WHERE 
-                group_id = @GroupId 
-                AND user_id = @UserId;";
-
-        var parameters = new
-        {
-            GroupId = groupId.Value,
-            UserId = userId.Value,
-        };
-
-        await db.ExecuteAsync(deleteSql, parameters);
-
-        return await GetByIdAsync(groupId);
-    }
-
+    /// <summary>
+    /// Map the Group Data Transfer Object to a Result of Group.
+    /// </summary>
+    /// <param name="group">Group DTO.</param>
+    /// <param name="members">List of Group Members DTOs.</param>
+    /// <returns>The Result of Group.</returns>
     private Result<Group> CreateGroupResultFromGroupDto(GroupDto group, IEnumerable<GroupMemberDto> members)
     {
         var groupResult = Group.Create(
