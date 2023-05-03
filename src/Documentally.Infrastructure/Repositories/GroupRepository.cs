@@ -172,67 +172,31 @@ public class GroupRepository : IGroupRepository
     /// <inheritdoc/>
     public async Task<Result> RemoveAsync(GroupId groupId)
     {
-        var transaction = await db.BeginTransactionAsync();
+        var parameter = new { GroupId = groupId.Value };
 
-        try
-        {
-            var deleteSql = @"
+        var deleteDocumentAccessSql = @"
                 DELETE FROM 
                     document_access
                 WHERE 
                     group_id = @GroupId";
 
-            var x = await db.ExecuteAsync(deleteSql, new { GroupId = groupId.Value }, transaction: transaction);
-        }
-        catch (Exception)
-        {
-            transaction.Rollback();
+        await db.ExecuteAsync(deleteDocumentAccessSql, parameter);
 
-            throw;
-        }
-
-        try
-        {
-            var deleteSql = @"
+        var deleteGroupMembersSql = @"
                 DELETE FROM 
                     group_members
                 WHERE 
                     group_id = @GroupId";
 
-            var x = await db.ExecuteAsync(deleteSql, new { GroupId = groupId.Value }, transaction: transaction);
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync();
+        await db.ExecuteAsync(deleteGroupMembersSql, parameter);
 
-            throw;
-        }
-
-        try
-        {
-            var deleteSql = @"
+        var deleteGroupSql = @"
                 DELETE FROM 
                     groups
                 WHERE 
                     id = @GroupId";
 
-            var y = await db.ExecuteAsync(deleteSql, new { GroupId = groupId.Value }, CommandType.Text, transaction);
-        }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync();
-
-            throw;
-        }
-
-        try
-        {
-            await transaction.CommitAsync();
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, string.Empty);
-        }
+        await db.ExecuteAsync(deleteGroupSql, parameter);
 
         return Result.Ok();
     }
