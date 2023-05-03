@@ -2,10 +2,7 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using System.Security.Cryptography;
 using Documentally.Domain.Common.Abstractions;
-using Documentally.Domain.User.ValueObjects;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 
 namespace Documentally.Infrastructure.Services;

@@ -10,7 +10,6 @@ using Documentally.Domain.User;
 using Documentally.Domain.User.ValueObjects;
 using Documentally.Infrastructure.Abstractions;
 using Documentally.Infrastructure.DataTransferObjects;
-using Documentally.Infrastructure.Extensions;
 using Documentally.Infrastructure.Utilities;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -22,7 +21,6 @@ namespace Documentally.Infrastructure.Repositories;
 /// </summary>
 public class GroupRepository : IGroupRepository
 {
-    private readonly IPostgresSqlConnectionFactory postgresSqlConnectionFactory;
     private readonly ILogger logger;
     private readonly IUserRepository userRepository;
     private readonly DapperUtility db;
@@ -35,7 +33,6 @@ public class GroupRepository : IGroupRepository
     /// <param name="userRepository">IUserRepository to inject.</param>
     public GroupRepository(IPostgresSqlConnectionFactory postgresSqlConnectionFactory, ILogger<UserRepository> logger, IUserRepository userRepository)
     {
-        this.postgresSqlConnectionFactory = postgresSqlConnectionFactory;
         this.logger = logger;
         this.userRepository = userRepository;
         this.db = new DapperUtility(postgresSqlConnectionFactory);
@@ -73,7 +70,7 @@ public class GroupRepository : IGroupRepository
 
         var members = await db.QueryAsync<GroupMemberDto>(membersSql, new { GroupId = id.Value }, System.Data.CommandType.Text);
 
-        var mapped = MapDtoToGroup(group, members);
+        var mapped = CreateGroupResultFromGroupDto(group, members);
         if (mapped.IsSuccess)
         {
             return mapped.Value;
@@ -120,7 +117,7 @@ public class GroupRepository : IGroupRepository
                 name = @Name, 
                 owner_id = @OwnerId
             WHERE 
-                id = @Id;";
+                id = @Id";
 
         var parameters = new
         {
@@ -145,7 +142,7 @@ public class GroupRepository : IGroupRepository
                 DELETE FROM 
                     document_access
                 WHERE 
-                    group_id = @GroupId;";
+                    group_id = @GroupId";
 
             var x = await db.ExecuteAsync(deleteSql, new { GroupId = groupId.Value }, transaction: transaction);
         }
@@ -162,7 +159,7 @@ public class GroupRepository : IGroupRepository
                 DELETE FROM 
                     group_members
                 WHERE 
-                    group_id = @GroupId;";
+                    group_id = @GroupId";
 
             var x = await db.ExecuteAsync(deleteSql, new { GroupId = groupId.Value }, transaction: transaction);
         }
@@ -179,7 +176,7 @@ public class GroupRepository : IGroupRepository
                 DELETE FROM 
                     groups
                 WHERE 
-                    id = @GroupId;";
+                    id = @GroupId";
 
             var y = await db.ExecuteAsync(deleteSql, new { GroupId = groupId.Value }, CommandType.Text, transaction);
         }
@@ -212,7 +209,7 @@ public class GroupRepository : IGroupRepository
                 owner_id,
                 created_at_utc
             FROM 
-                groups;";
+                groups";
 
         var groups = (await db.QueryAsync<GroupDto>(groupSql)).ToList();
 
@@ -221,14 +218,14 @@ public class GroupRepository : IGroupRepository
                 group_id, 
                 user_id
             FROM 
-                group_members;";
+                group_members";
 
         var members = (await db.QueryAsync<GroupMemberDto>(membersSql)).ToList();
 
         var result = new List<Group>();
         foreach (var group in groups)
         {
-            var mapped = MapDtoToGroup(group, members);
+            var mapped = CreateGroupResultFromGroupDto(group, members);
             if (mapped.IsSuccess)
             {
                 result.Add(mapped.Value);
@@ -279,7 +276,7 @@ public class GroupRepository : IGroupRepository
         return await GetByIdAsync(groupId);
     }
 
-    private Result<Group> MapDtoToGroup(GroupDto group, IEnumerable<GroupMemberDto> members)
+    private Result<Group> CreateGroupResultFromGroupDto(GroupDto group, IEnumerable<GroupMemberDto> members)
     {
         var groupResult = Group.Create(
                 new GroupId(group.id),

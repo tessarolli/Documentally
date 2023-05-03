@@ -22,7 +22,6 @@ namespace Documentally.Infrastructure.Repositories;
 /// </summary>
 public class UserRepository : IUserRepository
 {
-    private readonly IPostgresSqlConnectionFactory postgresSqlConnectionFactory;
     private readonly ILogger logger;
     private readonly IPasswordHashingService passwordHasher;
     private readonly DapperUtility db;
@@ -35,7 +34,6 @@ public class UserRepository : IUserRepository
     /// <param name="logger">ILogger to inject.</param>
     public UserRepository(IPostgresSqlConnectionFactory postgresSqlConnectionFactory, ILogger<UserRepository> logger, IPasswordHashingService passwordHasher)
     {
-        this.postgresSqlConnectionFactory = postgresSqlConnectionFactory;
         this.logger = logger;
         this.passwordHasher = passwordHasher;
         this.db = new DapperUtility(postgresSqlConnectionFactory);

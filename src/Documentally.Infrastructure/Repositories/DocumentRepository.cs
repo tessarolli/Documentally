@@ -23,7 +23,6 @@ namespace Documentally.Infrastructure.Repositories;
 /// </summary>
 public class DocumentRepository : IDocumentRepository
 {
-    private readonly IPostgresSqlConnectionFactory postgresSqlConnectionFactory;
     private readonly ILogger logger;
     private readonly DapperUtility db;
 
@@ -34,7 +33,6 @@ public class DocumentRepository : IDocumentRepository
     /// <param name="logger">ILogger to inject.</param>
     public DocumentRepository(IPostgresSqlConnectionFactory postgresSqlConnectionFactory, ILogger<DocumentRepository> logger)
     {
-        this.postgresSqlConnectionFactory = postgresSqlConnectionFactory;
         this.logger = logger;
         this.db = new DapperUtility(postgresSqlConnectionFactory);
     }
@@ -53,7 +51,7 @@ public class DocumentRepository : IDocumentRepository
 
         var documentDto = await db.QueryFirstOrDefaultAsync<DocumentDto>(sql, parameters);
 
-        return CreateDocumentResultFromdocumentDto(documentDto);
+        return CreateDocumentResultFromDocumentDto(documentDto);
     }
 
     /// <inheritdoc/>
@@ -69,7 +67,7 @@ public class DocumentRepository : IDocumentRepository
         var documentDtos = await db.QueryAsync<DocumentDto>(sql, parameters);
 
         var documents = documentDtos
-            .Select(CreateDocumentResultFromdocumentDto)
+            .Select(CreateDocumentResultFromDocumentDto)
             .Where(x => x.IsSuccess)
             .Select(x => x.Value)
             .ToList();
@@ -90,7 +88,7 @@ public class DocumentRepository : IDocumentRepository
         var documentDtos = await db.QueryAsync<DocumentDto>(sql, parameters);
 
         var documents = documentDtos
-            .Select(CreateDocumentResultFromdocumentDto)
+            .Select(CreateDocumentResultFromDocumentDto)
             .Where(x => x.IsSuccess)
             .Select(x => x.Value)
             .ToList();
@@ -130,7 +128,7 @@ public class DocumentRepository : IDocumentRepository
         var documentDtos = await db.QueryAsync<DocumentDto>(sql, parameters);
 
         var documents = documentDtos
-            .Select(CreateDocumentResultFromdocumentDto)
+            .Select(CreateDocumentResultFromDocumentDto)
             .Where(x => x.IsSuccess)
             .Select(x => x.Value)
             .ToList();
@@ -362,7 +360,7 @@ public class DocumentRepository : IDocumentRepository
     /// </summary>
     /// <param name="documentDto">The Document Data Transfer Object.</param>
     /// <returns>An Result indicating the status of the operation.</returns>
-    private static Result<Document> CreateDocumentResultFromdocumentDto(DocumentDto? documentDto)
+    private static Result<Document> CreateDocumentResultFromDocumentDto(DocumentDto? documentDto)
     {
         if (documentDto is not null)
         {
