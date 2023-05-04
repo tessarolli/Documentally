@@ -2,6 +2,8 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using System.Data;
+using System.Data.Common;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Application.Common.Errors;
 using Documentally.Domain.Doc.ValueObjects;
@@ -198,8 +200,7 @@ public class DocumentRepository : IDocumentRepository
                 @CloudFileName
             ) 
             RETURNING 
-                id
-            ;";
+                id";
 
         var parameters = new
         {
@@ -220,60 +221,73 @@ public class DocumentRepository : IDocumentRepository
     /// <inheritdoc/>
     public async Task<Result<Document>> UpdateAsync(Document document)
     {
-        var updateDocumentSql = @"
-            UPDATE 
-                documents 
-            SET
-                owner_id = @OwnerId,
-                doc_name = @Name,
-                doc_description = @Description,
-                doc_category = @Category,
-                doc_size = @Size,
-                blob_url = @BlobUrl,
-                cloud_file_name = @CloudFileName
-            WHERE 
-                id = @Id";
+        using var trans = await db.BeginTransactionAsync();
 
-        var updateDocumentParameters = new
+        try
         {
-            Id = document.Id.Value,
-            OwnerId = document.OwnerId.Value,
-            document.Name,
-            document.Description,
-            document.Category,
-            document.Size,
-            document.BlobUrl,
-            document.CloudFileName,
-        };
+            var updateDocumentSql = @"
+                UPDATE 
+                    documents 
+                SET
+                    owner_id = @OwnerId,
+                    doc_name = @Name,
+                    doc_description = @Description,
+                    doc_category = @Category,
+                    doc_size = @Size,
+                    blob_url = @BlobUrl,
+                    cloud_file_name = @CloudFileName
+                WHERE 
+                    id = @Id";
 
-        await db.ExecuteAsync(updateDocumentSql, updateDocumentParameters);
+            var updateDocumentParameters = new
+            {
+                Id = document.Id.Value,
+                OwnerId = document.OwnerId.Value,
+                document.Name,
+                document.Description,
+                document.Category,
+                document.Size,
+                document.BlobUrl,
+                document.CloudFileName,
+            };
 
-        await RemoveDocumentFromAllSharedAccessAsync(document.Id);
+            await db.ExecuteAsync(updateDocumentSql, updateDocumentParameters, transaction: trans);
 
-        var insertSharedAccessSql = @"
-            INSERT INTO  
-                document_access 
-                ( 
-                    document_id, 
-                    user_id, 
-                    group_id
-                )
-            VALUES 
-            (
-                @DocumentId,
-                @UserId,
-                @GroupId
-            )";
+            await RemoveDocumentFromAllSharedAccessAsync(document.Id, trans);
 
-        /*                      docId, GroupId, UserId */
-        var paramsList = new List<(long, long?, long?)>();
-        paramsList.AddRange(document.SharedGroupIds.Select(x => (document.Id.Value, (long?)x.Value, (long?)null)));
-        paramsList.AddRange(document.SharedUserIds.Select(x => (document.Id.Value, (long?)null, (long?)x.Value)));
+            var insertSharedAccessSql = @"
+                INSERT INTO  
+                    document_access 
+                    ( 
+                        document_id, 
+                        user_id, 
+                        group_id
+                    )
+                VALUES 
+                (
+                    @DocumentId,
+                    @UserId,
+                    @GroupId
+                )";
 
-        // Create an anonymous object for holding the parameters based on ParamsList Tuple.
-        var insertParamsEnumerable = paramsList.Select(x => new { DocumentId = x.Item1, GroupId = x.Item2, UserId = x.Item3 });
+            /*                        docId,GroupId,UserId */
+            var paramsList = new List<(long, long?, long?)>();
+            paramsList.AddRange(document.SharedGroupIds.Select(x => (document.Id.Value, (long?)x.Value, (long?)null)));
+            paramsList.AddRange(document.SharedUserIds.Select(x => (document.Id.Value, (long?)null, (long?)x.Value)));
 
-        await db.ExecuteAsync(insertSharedAccessSql, insertParamsEnumerable);
+            // Create an anonymous object for holding the parameters based on ParamsList Tuple.
+            var insertParamsEnumerable = paramsList.Select(x => new { DocumentId = x.Item1, GroupId = x.Item2, UserId = x.Item3 });
+
+            await db.ExecuteAsync(insertSharedAccessSql, insertParamsEnumerable, transaction: trans);
+
+            await trans.CommitAsync();
+        }
+        catch (Exception)
+        {
+            await trans.RollbackAsync();
+
+            throw;
+        }
 
         return Result.Ok(document);
     }
@@ -281,16 +295,29 @@ public class DocumentRepository : IDocumentRepository
     /// <inheritdoc/>
     public async Task<Result> RemoveAsync(DocId documentId)
     {
-        await RemoveDocumentFromAllSharedAccessAsync(documentId);
+        using var trans = await db.BeginTransactionAsync();
 
-        var sql = "DELETE FROM documents WHERE id = @Id";
-
-        var parameters = new
+        try
         {
-            Id = documentId.Value,
-        };
+            await RemoveDocumentFromAllSharedAccessAsync(documentId, trans);
 
-        await db.ExecuteAsync(sql, parameters);
+            var sql = "DELETE FROM documents WHERE id = @Id";
+
+            var parameters = new
+            {
+                Id = documentId.Value,
+            };
+
+            await db.ExecuteAsync(sql, parameters, transaction: trans);
+
+            await trans.CommitAsync();
+        }
+        catch (Exception)
+        {
+            await trans.RollbackAsync();
+
+            throw;
+        }
 
         return Result.Ok();
     }
@@ -343,7 +370,7 @@ public class DocumentRepository : IDocumentRepository
         return await db.QueryAsync<DocumentAccessDto>(sql, parameters);
     }
 
-    private async Task RemoveDocumentFromAllSharedAccessAsync(DocId documentId)
+    private async Task RemoveDocumentFromAllSharedAccessAsync(DocId documentId, DbTransaction? transaction = null)
     {
         var sql = "DELETE FROM document_access WHERE document_id = @Id";
 
@@ -352,6 +379,6 @@ public class DocumentRepository : IDocumentRepository
             Id = documentId.Value,
         };
 
-        await db.ExecuteAsync(sql, parameters);
+        await db.ExecuteAsync(sql, parameters, transaction: transaction);
     }
 }

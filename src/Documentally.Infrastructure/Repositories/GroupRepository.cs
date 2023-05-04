@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Data;
+using System.Data.Common;
 using Documentally.Application.Abstractions.Repositories;
 using Documentally.Domain.Group;
 using Documentally.Domain.Group.ValueObjects;
@@ -39,7 +40,7 @@ public class GroupRepository : IGroupRepository
     }
 
     /// <inheritdoc/>
-    public async Task<Result<Group>> GetByIdAsync(GroupId id)
+    public async Task<Result<Group>> GetByIdAsync(GroupId id, DbTransaction? transaction = null)
     {
         const string groupSql = @"
             SELECT 
@@ -52,7 +53,7 @@ public class GroupRepository : IGroupRepository
             WHERE 
                 id = @Id;";
 
-        var group = await db.QueryFirstOrDefaultAsync<GroupDto>(groupSql, new { Id = id.Value });
+        var group = await db.QueryFirstOrDefaultAsync<GroupDto>(groupSql, new { Id = id.Value }, transaction: transaction);
 
         if (group == null)
         {
@@ -120,25 +121,40 @@ public class GroupRepository : IGroupRepository
     /// <inheritdoc/>
     public async Task<Result<Group>> AddAsync(Group group)
     {
-        var insertSql = @"
-            INSERT INTO 
-                groups (name, owner_id)
-            VALUES 
-                (@Name, @OwnerId)
-            RETURNING
-                id";
+        using var trans = await db.BeginTransactionAsync();
 
-        var parameters = new
+        try
         {
-            group.Name,
-            OwnerId = group.OwnerId.Value,
-        };
+            var insertSql = @"
+                INSERT INTO 
+                    groups (name, owner_id)
+                VALUES 
+                    (@Name, @OwnerId)
+                RETURNING
+                    id";
 
-        var x = await db.ExecuteScalarAsync(insertSql, parameters);
+            var parameters = new
+            {
+                group.Name,
+                OwnerId = group.OwnerId.Value,
+            };
 
-        await UpdateGroupUsersAsync(group, x);
+            var x = await db.ExecuteScalarAsync(insertSql, parameters, transaction: trans);
 
-        return await GetByIdAsync(new GroupId(x));
+            await UpdateGroupUsersAsync(group, x, trans);
+
+            await trans.CommitAsync();
+
+            return await GetByIdAsync(new GroupId(x));
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, null);
+
+            await trans.RollbackAsync();
+
+            throw;
+        }
     }
 
     /// <inheritdoc/>
@@ -146,25 +162,40 @@ public class GroupRepository : IGroupRepository
     {
         logger.LogInformation("GroupRepository.UpdateAsync({group})", group.Name);
 
-        var updateSql = @"
-            UPDATE 
-                groups
-            SET 
-                name = @Name, 
-                owner_id = @OwnerId
-            WHERE 
-                id = @Id";
+        using var trans = await db.BeginTransactionAsync();
 
-        var parameters = new
+        try
         {
-            Id = group.Id.Value,
-            group.Name,
-            OwnerId = group.OwnerId.Value,
-        };
+            var updateSql = @"
+                UPDATE 
+                    groups
+                SET 
+                    name = @Name, 
+                    owner_id = @OwnerId
+                WHERE 
+                    id = @Id";
 
-        await db.ExecuteAsync(updateSql, parameters);
+            var parameters = new
+            {
+                Id = group.Id.Value,
+                group.Name,
+                OwnerId = group.OwnerId.Value,
+            };
 
-        await UpdateGroupUsersAsync(group);
+            await db.ExecuteAsync(updateSql, parameters, transaction: trans);
+
+            await UpdateGroupUsersAsync(group, transaction: trans);
+
+            await trans.CommitAsync();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, null);
+
+            await trans.RollbackAsync();
+
+            throw;
+        }
 
         return await GetByIdAsync(group.Id);
     }
@@ -172,31 +203,46 @@ public class GroupRepository : IGroupRepository
     /// <inheritdoc/>
     public async Task<Result> RemoveAsync(GroupId groupId)
     {
+        using var trans = await db.BeginTransactionAsync();
+
         var parameter = new { GroupId = groupId.Value };
 
-        var deleteDocumentAccessSql = @"
+        try
+        {
+            var deleteDocumentAccessSql = @"
                 DELETE FROM 
                     document_access
                 WHERE 
                     group_id = @GroupId";
 
-        await db.ExecuteAsync(deleteDocumentAccessSql, parameter);
+            await db.ExecuteAsync(deleteDocumentAccessSql, parameter, transaction: trans);
 
-        var deleteGroupMembersSql = @"
+            var deleteGroupMembersSql = @"
                 DELETE FROM 
                     group_members
                 WHERE 
                     group_id = @GroupId";
 
-        await db.ExecuteAsync(deleteGroupMembersSql, parameter);
+            await db.ExecuteAsync(deleteGroupMembersSql, parameter, transaction: trans);
 
-        var deleteGroupSql = @"
+            var deleteGroupSql = @"
                 DELETE FROM 
                     groups
                 WHERE 
                     id = @GroupId";
 
-        await db.ExecuteAsync(deleteGroupSql, parameter);
+            await db.ExecuteAsync(deleteGroupSql, parameter, transaction: trans);
+
+            await trans.CommitAsync();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, null);
+
+            await trans.RollbackAsync();
+
+            throw;
+        }
 
         return Result.Ok();
     }
@@ -205,32 +251,61 @@ public class GroupRepository : IGroupRepository
     /// Method to update the Group Users in the database.
     /// </summary>
     /// <param name="group">The group to update.</param>
-    /// <param name="newGroupId">In case of a newly added group, pass the Id here.</param>
+    /// <param name="newGroupId">In case of a newly created group, pass the Id here.</param>
+    /// <param name="transaction">The transaction.</param>
     /// <returns>Awaitable task.</returns>
-    private async Task UpdateGroupUsersAsync(Group group, long? newGroupId = null)
+    private async Task UpdateGroupUsersAsync(Group group, long? newGroupId = null, DbTransaction? transaction = null)
     {
-        const string deleteSql = @"
-            DELETE FROM 
-                group_members
-            WHERE 
-                group_id = @GroupId";
+        var trans = transaction ?? await db.BeginTransactionAsync();
 
-        var deleteParameter = new
+        try
         {
-            GroupId = group.Id.Value,
-        };
+            const string deleteSql = @"
+                DELETE FROM 
+                    group_members
+                WHERE 
+                    group_id = @GroupId";
 
-        await db.ExecuteAsync(deleteSql, deleteParameter);
+            var deleteParameter = new
+            {
+                GroupId = group.Id.Value,
+            };
 
-        const string insertSql = @"
-            INSERT INTO 
-                group_members (group_id, user_id) 
-            VALUES 
-                (@GroupId, @UserId)";
+            await db.ExecuteAsync(deleteSql, deleteParameter, transaction: trans);
 
-        var insertParamsEnumerable = group.MemberIds.Select(userId => new { UserId = userId.Value, GroupId = newGroupId ?? group.Id.Value });
+            const string insertSql = @"
+                INSERT INTO 
+                    group_members (group_id, user_id) 
+                VALUES 
+                    (@GroupId, @UserId)";
 
-        await db.ExecuteAsync(insertSql, insertParamsEnumerable);
+            var insertParams = group.MemberIds.Select(userId => new { UserId = userId.Value, GroupId = newGroupId ?? group.Id.Value });
+
+            await db.ExecuteAsync(insertSql, insertParams, transaction: trans);
+
+            if (transaction is null)
+            {
+                await trans.CommitAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, null);
+
+            if (transaction is null)
+            {
+                await trans.RollbackAsync();
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (transaction is null)
+            {
+                await trans.DisposeAsync();
+            }
+        }
     }
 
     /// <summary>

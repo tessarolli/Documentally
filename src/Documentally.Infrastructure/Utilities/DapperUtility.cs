@@ -3,11 +3,9 @@
 // </copyright>
 
 using System.Data;
-using System.Diagnostics;
-using System.Linq;
+using System.Data.Common;
 using Dapper;
 using Documentally.Infrastructure.Abstractions;
-using Npgsql;
 
 namespace Documentally.Infrastructure.Utilities;
 
@@ -40,9 +38,9 @@ internal sealed class DapperUtility
         string sql,
         object? parameters = null,
         CommandType commandType = CommandType.Text,
-        NpgsqlTransaction? transaction = null)
+        DbTransaction? transaction = null)
     {
-        using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var connection = postgresSqlConnectionFactory.CreateConnection();
 
         if (transaction is null)
         {
@@ -54,6 +52,7 @@ internal sealed class DapperUtility
         if (transaction is null)
         {
             await connection.CloseAsync();
+            await connection.DisposeAsync();
         }
 
         return result;
@@ -72,20 +71,15 @@ internal sealed class DapperUtility
       string sql,
       object? parameters = null,
       CommandType commandType = CommandType.Text,
-      NpgsqlTransaction? transaction = null)
+      DbTransaction? transaction = null)
     {
-        using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-        if (transaction is null)
-        {
-            await connection.OpenAsync();
-        }
+        var connection = transaction?.Connection ?? postgresSqlConnectionFactory.CreateConnection();
 
         var result = await connection.QueryFirstOrDefaultAsync<T>(sql, parameters, commandType: commandType, transaction: transaction);
 
         if (transaction is null)
         {
-            await connection.CloseAsync();
+            connection.Dispose();
         }
 
         return result;
@@ -103,20 +97,15 @@ internal sealed class DapperUtility
         string sql,
         object? parameters = null,
         CommandType commandType = CommandType.Text,
-        NpgsqlTransaction? transaction = null)
+        DbTransaction? transaction = null)
     {
-        using var connection = transaction?.Connection ?? postgresSqlConnectionFactory.CreateConnection();
-
-        if (transaction is null)
-        {
-            await connection.OpenAsync();
-        }
+        var connection = transaction?.Connection ?? postgresSqlConnectionFactory.CreateConnection();
 
         var rowsAffectedCount = await connection.ExecuteAsync(sql, parameters, commandType: commandType, transaction: transaction);
 
         if (transaction is null)
         {
-            await connection.CloseAsync();
+            connection.Dispose();
         }
 
         return rowsAffectedCount;
@@ -134,20 +123,15 @@ internal sealed class DapperUtility
         string sql,
         object? parameters = null,
         CommandType commandType = CommandType.Text,
-        NpgsqlTransaction? transaction = null)
+        DbTransaction? transaction = null)
     {
-        using var connection = postgresSqlConnectionFactory.CreateConnection();
-
-        if (transaction is null)
-        {
-            await connection.OpenAsync();
-        }
+        var connection = transaction?.Connection ?? postgresSqlConnectionFactory.CreateConnection();
 
         var scalar = await connection.ExecuteScalarAsync<long>(sql, parameters, commandType: commandType, transaction: transaction);
 
         if (transaction is null)
         {
-            await connection.CloseAsync();
+            connection.Dispose();
         }
 
         return scalar;
@@ -157,9 +141,9 @@ internal sealed class DapperUtility
     /// Opens a transaction.
     /// </summary>
     /// <returns>The Transaction.</returns>
-    public async Task<NpgsqlTransaction> BeginTransactionAsync()
+    public async Task<DbTransaction> BeginTransactionAsync()
     {
-        using var connection = postgresSqlConnectionFactory.CreateConnection();
+        var connection = postgresSqlConnectionFactory.CreateConnection();
 
         await connection.OpenAsync();
 

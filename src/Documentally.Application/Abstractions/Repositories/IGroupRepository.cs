@@ -2,9 +2,9 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using System.Data.Common;
 using Documentally.Domain.Group;
 using Documentally.Domain.Group.ValueObjects;
-using Documentally.Domain.User.ValueObjects;
 using FluentResults;
 
 namespace Documentally.Application.Abstractions.Repositories;
@@ -18,8 +18,9 @@ public interface IGroupRepository
     /// Get an group aggregate by Id.
     /// </summary>
     /// <param name="id">The Group Id.</param>
+    /// <param name="transaction">The Transaction.</param>
     /// <returns>A Result with the Group Aggregate, or a error message.</returns>
-    Task<Result<Group>> GetByIdAsync(GroupId id);
+    Task<Result<Group>> GetByIdAsync(GroupId id, DbTransaction? transaction = null);
 
     /// <summary>
     /// Gets a List of all Groups from the repository.

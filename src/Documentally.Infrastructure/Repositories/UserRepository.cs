@@ -51,6 +51,8 @@ public class UserRepository : IUserRepository
     /// <inheritdoc/>
     public async Task<List<User>> GetByIdsAsync(long[] ids)
     {
+        logger.LogInformation("UserRepository.GetByIdsAsync({email})", string.Join(',', ids));
+
         var sql = "SELECT * FROM users WHERE id = ANY(@ids)";
 
         var parameters = new
@@ -148,7 +150,7 @@ public class UserRepository : IUserRepository
             p_role = user.Role,
         };
 
-        var n = await db.ExecuteAsync("sp_update_user", parameters, CommandType.StoredProcedure);
+        await db.ExecuteAsync("sp_update_user", parameters, CommandType.StoredProcedure);
 
         return Result.Ok(user);
     }
