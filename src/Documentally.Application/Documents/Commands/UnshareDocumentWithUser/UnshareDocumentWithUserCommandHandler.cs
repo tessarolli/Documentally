@@ -42,7 +42,7 @@ public class UnshareDocumentWithUserCommandHandler : ICommandHandler<UnshareDocu
         var operationResult = document.UnshareWithUser(new UserId(request.UserId));
         if (operationResult.IsFailed)
         {
-            return Result.Fail(documentResult.Errors);
+            return Result.Fail(operationResult.Errors);
         }
 
         // Update the Document Repository

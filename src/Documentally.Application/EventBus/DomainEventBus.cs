@@ -12,7 +12,7 @@ namespace Documentally.Application.EventBus;
 /// <summary>
 /// This is just a proof of concept implementation of a simple Domain Event Dispatcher (Publishing with MediatR).
 /// In a real world scenario, this would be implemented using
-/// RabbitMQ/Kafka/Azure Service Bus, or some enterprise level messaging service.
+/// RabbitMQ/Kafka/Azure Service Bus, or some other enterprise level messaging service.
 /// </summary>
 public class DomainEventBus : IDomainEventBus
 {

@@ -43,7 +43,7 @@ public class UnshareDocumentWithGroupCommandHandler : ICommandHandler<UnshareDoc
         var operationResult = document.UnshareWithGroup(new GroupId(request.GroupId));
         if (operationResult.IsFailed)
         {
-            return Result.Fail(documentResult.Errors);
+            return Result.Fail(operationResult.Errors);
         }
 
         // Update the Document Repository

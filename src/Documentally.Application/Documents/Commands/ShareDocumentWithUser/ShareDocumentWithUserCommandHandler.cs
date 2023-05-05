@@ -43,7 +43,7 @@ public class ShareDocumentWithUserCommandHandler : ICommandHandler<ShareDocument
         var operationResult = document.ShareWithUser(new UserId(request.UserId));
         if (operationResult.IsFailed)
         {
-            return Result.Fail(documentResult.Errors);
+            return Result.Fail(operationResult.Errors);
         }
 
         // Update the Document Repository

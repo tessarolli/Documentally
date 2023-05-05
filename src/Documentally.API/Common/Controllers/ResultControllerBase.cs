@@ -129,11 +129,11 @@ public class ResultControllerBase<TController> : ControllerBase
 
             if (typeof(Tresult) == typeof(Result))
             {
-                result = await mediator.Send<Result>((IRequest<Result>)command);
+                result = await mediator.Send((IRequest<Result>)command);
             }
             else
             {
-                result = await mediator.Send<Result<Tresult>>((IRequest<Result<Tresult>>)command);
+                result = await mediator.Send((IRequest<Result<Tresult>>)command);
             }
 
             if (result.IsSuccess)
