@@ -40,6 +40,9 @@ This layer contains the business logic and domain objects, including entities, a
 This layer provides concrete implementations of the application services and repositories defined in the Domain layer. 
 It is also responsible for handling data access and database communication using Dapper and PostgreSQL.
 
+### Tests Layer
+Although this project wasn't designed using Test-Driven-Development (TDD), it is highly testable, and implements several features that make it suitable for comprehensive testing. For instance, the Tests Layer can include a suite of unit tests that cover the core functionality of the application. These tests can be designed to validate the behavior of individual components and functions and can be run quickly and easily during the development process.
+
 ## Installation and Setup
 To run the application locally, follow these steps:
 
