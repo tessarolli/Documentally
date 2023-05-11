@@ -1,0 +1,23 @@
+<nav>
+  <p-menubar [model]="menuItems">
+    <ng-template pTemplate="start">
+      <img src="assets/logo.png" height="40" class="mr-2" />
+    </ng-template>
+    <ng-template pTemplate="end">
+        <app-logged-user></app-logged-user>
+    </ng-template>
+  </p-menubar>
+</nav>
+
+<main>
+  <div class="container">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-content">
+    <p-toast></p-toast>
+    <span>&copy; 2023 Documentally. All rights reserved.</span>
+  </div>
+</footer>

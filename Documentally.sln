@@ -73,6 +73,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Upload Download", "Upload D
 		Requests\Documents\Upload Download\UploadDocument.http = Requests\Documents\Upload Download\UploadDocument.http
 	EndProjectSection
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Documentally.Client", "Src\Documentally.Client\Documentally.Client.esproj", "{6BB05553-102A-4BA4-86B1-3E34C1B7FFDB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -103,6 +105,12 @@ Global
 		{95AB91F9-6335-4499-BE0F-46B9220A9BEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95AB91F9-6335-4499-BE0F-46B9220A9BEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95AB91F9-6335-4499-BE0F-46B9220A9BEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BB05553-102A-4BA4-86B1-3E34C1B7FFDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BB05553-102A-4BA4-86B1-3E34C1B7FFDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BB05553-102A-4BA4-86B1-3E34C1B7FFDB}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{6BB05553-102A-4BA4-86B1-3E34C1B7FFDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BB05553-102A-4BA4-86B1-3E34C1B7FFDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BB05553-102A-4BA4-86B1-3E34C1B7FFDB}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

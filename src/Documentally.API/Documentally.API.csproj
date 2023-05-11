@@ -34,6 +34,9 @@
     <ProjectReference Include="..\Documentally.Application\Documentally.Application.csproj" />
     <ProjectReference Include="..\Documentally.Contracts\Documentally.Contracts.csproj" />
     <ProjectReference Include="..\Documentally.Infrastructure\Documentally.Infrastructure.csproj" />
+    <!--<ProjectReference Include="..\Documentally.Client\Documentally.Client.esproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>-->
   </ItemGroup>
 
 </Project>

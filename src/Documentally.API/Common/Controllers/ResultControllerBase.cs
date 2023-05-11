@@ -2,18 +2,13 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
-using Azure.Core;
-using Documentally.API.Controllers;
 using Documentally.Application.Abstractions.Services;
-using Documentally.Application.Authentication.Commands.Register;
 using Documentally.Application.Common.Errors;
-using Documentally.Contracts.Authentication;
 using Documentally.Domain.Common;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Documentally.API.Common.Controllers;

@@ -1,0 +1,11 @@
+<p-button icon="pi pi-user" styleClass="p-button-rounded p-button-outlined" (click)="op.toggle($event)"></p-button>
+
+<p-overlayPanel #op>
+  <ng-template pTemplate="content">
+    <p-card header="John Doe" subheader="User" [style]="{ width: '360px' }">
+      <ng-template pTemplate="footer">
+        <p-button label="Log-out" icon="pi pi-sign-out" styleClass="p-button-secondary"></p-button>
+      </ng-template>
+    </p-card>
+  </ng-template>
+</p-overlayPanel>

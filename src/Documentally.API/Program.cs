@@ -22,6 +22,11 @@ var app = builder.Build();
         app.UseSwagger();
         app.UseSwaggerUI();
     }
+    else
+    {
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
+    }
 
     app.UseExceptionHandler("/error");
 

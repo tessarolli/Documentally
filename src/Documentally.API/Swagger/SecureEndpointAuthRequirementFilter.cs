@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Documentally.API;
+namespace Documentally.API.Swagger;
 
 /// <summary>
 /// Requirement Filter for the Swagger UI to add Authorization.

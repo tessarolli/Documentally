@@ -2,10 +2,11 @@
 // Copyright (c) Documentally. All rights reserved.
 // </copyright>
 
+using System.Reflection;
 using Documentally.API.Common.Mappings;
+using Documentally.API.Swagger;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 
 namespace Documentally.API;
 
@@ -26,6 +27,10 @@ public static class DependencyInjection
         services.AddMappings();
 
         services.AddControllers();
+
+        services.AddRazorPages();
+
+        services.AddMvc();
 
         services.AddEndpointsApiExplorer();
 
