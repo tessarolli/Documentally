@@ -11,13 +11,6 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist\Documentally.Client</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="src\app\components\account\login\" />
-    <Folder Include="src\app\components\account\change-password\" />
-    <Folder Include="src\app\components\account\password-recovery\" />
-    <Folder Include="src\app\components\account\register\" />
-    <Folder Include="src\app\components\group\" />
-    <Folder Include="src\app\components\document\" />
-    <Folder Include="src\app\components\user\" />
-    <Folder Include="src\app\models\" />
+    <Folder Include="src\app\authentication\components\" />
   </ItemGroup>
 </Project>

@@ -1,13 +1,15 @@
-<nav>
-  <p-menubar [model]="menuItems">
-    <ng-template pTemplate="start">
-      <img src="assets/logo.png" height="40" class="mr-2" />
-    </ng-template>
-    <ng-template pTemplate="end">
+<ng-container *ngIf="authenticationState$ | async as state">
+  <nav *ngIf="state.isAuthenticated">
+    <p-menubar [model]="menuItems">
+      <ng-template pTemplate="start">
+        <img src="assets/logo.png" height="40" class="mr-2" />
+      </ng-template>
+      <ng-template pTemplate="end">
         <app-logged-user></app-logged-user>
-    </ng-template>
-  </p-menubar>
-</nav>
+      </ng-template>
+    </p-menubar>
+  </nav>
+</ng-container>
 
 <main>
   <div class="container">
