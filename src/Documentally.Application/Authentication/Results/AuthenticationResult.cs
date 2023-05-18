@@ -13,5 +13,5 @@ namespace Documentally.Application.Authentication.Results;
 /// <param name="Token"></param>
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1313:Parameter names should begin with lower-case letter", Justification = "Reviewed")]
 public record AuthenticationResult(
-    Domain.User.User User,
+    User User,
     string Token);

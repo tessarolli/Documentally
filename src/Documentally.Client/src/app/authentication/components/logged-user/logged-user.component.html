@@ -1,25 +1,35 @@
-<!--<ng-container *ngIf="authenticationState$ | async as state; else error">
-  <div *ngIf="state.isAuthenticated; else notLoggedIn">
-    <p-button icon="pi pi-user" styleClass="p-button-rounded p-button-outlined" (click)="op.toggle($event)"></p-button>
 
-    <p-overlayPanel #op>
-      <ng-template pTemplate="content">
-        <p-card header="{{ state.authenticatedUser?.firstName }} {{ state.authenticatedUser?.lastName }}" subheader="User" [style]="{ width: '360px' }">
-          <ng-template pTemplate="footer">
-            <p-button label="Log-out" icon="pi pi-sign-out" styleClass="p-button-secondary" (click)="logout()"></p-button>
-          </ng-template>
-        </p-card>
-      </ng-template>
-    </p-overlayPanel>
-  </div>
+<ion-button aria-label="Logged User" shape="round" id="click-trigger">
+  <ion-icon slot="icon-only" name="person-outline" aria-hidden="true"></ion-icon>
+</ion-button>
 
-  <ng-template #notLoggedIn>
-    <p>User not logged in.</p>
+<ion-popover #loggedUserPopOver trigger="click-trigger" triggerAction="click">
+
+  <ng-template>
+
+    <ion-content class="ion-padding">
+
+      <ion-grid *ngIf="(authenticatedUser$ | async) as authenticatedUser">
+
+        <ion-row>
+          <ion-label>{{ authenticatedUser.firstName }} {{ authenticatedUser.lastName }}</ion-label>
+        </ion-row>
+
+        <ion-row>
+          <ion-label>{{ userRole }}</ion-label>
+        </ion-row>
+
+        <ion-row>
+          <ion-button aria-label="Logout" shape="round" (click)="logout()">
+            <ion-icon name="log-out-outline" aria-hidden="true"></ion-icon>
+             Logout
+          </ion-button>
+        </ion-row>
+
+      </ion-grid>
+
+    </ion-content>
+
   </ng-template>
-</ng-container>
 
-<ng-template #error>
-  <p>An error ocurred trying to restore logged in user.</p>
-</ng-template>-->
-
-<ion-icon name="heart"></ion-icon>
+</ion-popover>

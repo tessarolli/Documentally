@@ -9,7 +9,7 @@ export class AuthenticationService {
   // Simulating login API call
   Login(email: string, password: string): Observable<AuthenticatedUser> {
     if (email === 'user@documentally.com' && password === 'user') {
-      const user: AuthenticatedUser = { id: 1, email: 'user@documentally.com', firstName: 'User', lastName: 'User', token: 'abcd_token' };
+      const user: AuthenticatedUser = { id: 1, email: 'user@documentally.com', firstName: 'User', lastName: 'User', role: 0, token: 'abcd_token' };
       return of(user).pipe(delay(1000)); // Simulating delay for API call
     }
     

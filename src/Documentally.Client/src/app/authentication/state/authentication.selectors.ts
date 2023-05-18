@@ -1,4 +1,5 @@
 import { AppState } from '../../app.state';
+import { UserRole } from '../enums/userRole.enum';
 
 // Select the authentication feature state
 export const selectAuthenticationState = (state: AppState) => state?.authentication;
@@ -14,3 +15,6 @@ export const selectIsLoading = (state: AppState) => state?.authentication?.isLoa
 
 // Select the error
 export const selectError = (state: AppState) => state?.authentication?.error;
+
+// Select the authenticated user
+export const selectIsAdmin = (state: AppState) => state?.authentication?.authenticatedUser?.role === UserRole.Admin;

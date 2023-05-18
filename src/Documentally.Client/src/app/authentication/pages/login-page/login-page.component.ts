@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AlertController } from '@ionic/angular';
@@ -14,8 +14,8 @@ import { SharedService } from '../../../services/shared.service';
   styleUrls: ['./login-page.component.css']
 })
 
-export class LoginPageComponent {
-  loginForm: FormGroup;
+export class LoginPageComponent implements OnInit {
+  loginForm!: FormGroup;
   isLoading$ = this.store.select(selectIsLoading);
 
   constructor(
@@ -23,7 +23,9 @@ export class LoginPageComponent {
     private router: Router,
     private store: Store<AppState>,
     private sharedService: SharedService
-  ) {
+  ) { }
+
+  ngOnInit(): void {
     this.sharedService.setPageTitle('Login');
 
     // Define the Reactive Forms for the Login Form
