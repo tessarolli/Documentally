@@ -11,6 +11,6 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist\Documentally.Client</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="src\app\authentication\components\" />
+    <Folder Include="src\app\shared\" />
   </ItemGroup>
 </Project>

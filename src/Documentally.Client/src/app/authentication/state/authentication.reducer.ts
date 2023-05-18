@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import { initialAuthenticationState } from './authentication.state';
-import { Login, LoginSuccess, LoginFailure, Logout, SetAuthenticatedUser } from './authentication.actions';
+import { Login, LoginSuccess, LoginFailure, Logout, SetIsLoading, ClearError } from './authentication.actions';
 
 export const AuthenticationReducer = createReducer(
   initialAuthenticationState,
@@ -10,15 +10,15 @@ export const AuthenticationReducer = createReducer(
   on(LoginSuccess, (state, { authenticatedUser }) => ({
     ...state,
     authenticatedUser: authenticatedUser,
-    authenticated: true,
+    isAuthenticated: true,
     isLoading: false,
     error: ''
   })),
 
   on(LoginFailure, (state, { error }) => ({
-    ...state,
+    ...initialAuthenticationState,
     authenticatedUser: null,
-    authenticated: false,
+    isAuthenticated: false,
     isLoading: false,
     error: error
   })),
@@ -29,11 +29,13 @@ export const AuthenticationReducer = createReducer(
     return initialAuthenticationState;
   }),
 
-  on(SetAuthenticatedUser, (state, { authenticatedUser }) => ({
+  on(SetIsLoading, (state, { isLoading }) => ({
     ...state,
-    authenticatedUser: authenticatedUser,
-    authenticated: !!authenticatedUser,
-    isLoading: false,
-    error: ''
+    isLoading,
+  })),
+
+  on(ClearError, (state) => ({
+    ...state,
+    error: '',
   }))
 );

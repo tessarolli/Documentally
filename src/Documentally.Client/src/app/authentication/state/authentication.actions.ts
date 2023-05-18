@@ -6,7 +6,8 @@ export enum AuthenticationActionTypes {
   LoginSuccess = '[Authentication] Login Success',
   LoginFailure = '[Authentication] Login Failure',
   Logout = '[Authentication] Logout',
-  SetAuthenticatedUser = '[Authentication] Set Authenticated User',
+  ClearError = '[Authentication] Clear Error',
+  SetIsLoading = '[Authentication] Set isLoading',
 }
 
 export const Login = createAction(
@@ -26,7 +27,9 @@ export const LoginFailure = createAction(
 
 export const Logout = createAction(AuthenticationActionTypes.Logout);
 
-export const SetAuthenticatedUser = createAction(
-  AuthenticationActionTypes.SetAuthenticatedUser,
-  props<{ authenticatedUser: AuthenticatedUser | null }>()
+export const ClearError = createAction(AuthenticationActionTypes.ClearError);
+
+export const SetIsLoading = createAction(
+  AuthenticationActionTypes.SetIsLoading,
+  props<{ isLoading: boolean }>()
 );

@@ -1,4 +1,4 @@
-<ng-container *ngIf="authenticationState$ | async as state; else error">
+<!--<ng-container *ngIf="authenticationState$ | async as state; else error">
   <div *ngIf="state.isAuthenticated; else notLoggedIn">
     <p-button icon="pi pi-user" styleClass="p-button-rounded p-button-outlined" (click)="op.toggle($event)"></p-button>
 
@@ -20,4 +20,6 @@
 
 <ng-template #error>
   <p>An error ocurred trying to restore logged in user.</p>
-</ng-template>
+</ng-template>-->
+
+<ion-icon name="heart"></ion-icon>

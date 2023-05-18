@@ -1,29 +1,16 @@
-import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { AuthenticationState } from './authentication.state';
+import { AppState } from '../../app.state';
 
 // Select the authentication feature state
-export const selectAuthenticationState = createFeatureSelector<AuthenticationState>('authentication');
+export const selectAuthenticationState = (state: AppState) => state?.authentication;
 
 // Select the authenticated user
-export const selectAuthenticatedUser = createSelector(
-  selectAuthenticationState,
-  (state) => state.authenticatedUser
-);
+export const selectAuthenticatedUser = (state: AppState) => state?.authentication?.authenticatedUser;
 
 // Select the authentication status
-export const selectIsAuthenticated = createSelector(
-  selectAuthenticationState,
-  (state) => state.isAuthenticated
-);
+export const selectIsAuthenticated = (state: AppState) => state?.authentication?.isAuthenticated;
 
 // Select the loading status
-export const selectIsLoading = createSelector(
-  selectAuthenticationState,
-  (state) => state.isLoading
-);
+export const selectIsLoading = (state: AppState) => state?.authentication?.isLoading;
 
 // Select the error
-export const selectError = createSelector(
-  selectAuthenticationState,
-  (state) => state.error
-);
+export const selectError = (state: AppState) => state?.authentication?.error;

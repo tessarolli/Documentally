@@ -1,0 +1,10 @@
+{
+  "defaultProject": "Documentally.Client",
+  "projects": {
+    "Documentally.Client": {
+      "name": "Documentally.Client",
+      "integrations": {},
+      "type": "angular"
+    }
+  }
+}
