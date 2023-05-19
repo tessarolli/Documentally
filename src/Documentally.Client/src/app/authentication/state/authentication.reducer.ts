@@ -1,11 +1,13 @@
 import { createReducer, on } from '@ngrx/store';
 import { initialAuthenticationState } from './authentication.state';
-import { Login, LoginSuccess, LoginFailure, Logout, SetIsLoading, ClearError } from './authentication.actions';
+import { Login, LoginSuccess, LoginFailure, Logout, SetIsLoading, ClearError, Register } from './authentication.actions';
 
 export const AuthenticationReducer = createReducer(
   initialAuthenticationState,
 
   on(Login, (state) => ({ ...state, isLoading: true })),
+
+  on(Register, (state) => ({ ...state, isLoading: true })),
 
   on(LoginSuccess, (state, { authenticatedUser }) => ({
     ...state,

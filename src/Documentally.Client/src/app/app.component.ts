@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { SharedService } from './shared/shared.service';
 import { AppState } from './app.state';
 import { Store } from '@ngrx/store';
@@ -8,7 +8,8 @@ import { Observable } from 'rxjs';
 @Component({
   selector: 'app',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class AppComponent implements OnInit {
@@ -21,8 +22,6 @@ export class AppComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.sharedService.setPageTitle('Documentally');
-
     // Subscribe to IsAuthenticated state from AuthenticationState
     this.isAuthenticated$ = this.store.select(selectIsAuthenticated);
     // Subscribe to IsAdmin state from AuthenticationState

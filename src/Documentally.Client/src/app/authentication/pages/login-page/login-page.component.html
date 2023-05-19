@@ -51,15 +51,18 @@
 
     <ion-row>
       <ion-col>
-        <ion-label>New user? </ion-label> <a routerLink="/register">Create an account</a>
+        <ion-label>New user? </ion-label>
+        <a [routerLink]="['/register']">Create an account</a>
       </ion-col>
     </ion-row>
 
     <ion-row>
       <ion-col>
-        <ion-label>Forgot password? </ion-label> <a routerLink="/recover">Recover password</a>
+        <ion-label>Forgot password?</ion-label>
+        <a [routerLink]="['/recover']">Recover password</a>
       </ion-col>
     </ion-row>
+
 
     <ion-row>
       <ion-col>

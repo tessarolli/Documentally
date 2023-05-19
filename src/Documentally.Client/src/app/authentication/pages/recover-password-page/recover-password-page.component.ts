@@ -1,21 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SharedService } from '../../../shared/shared.service';
+import { ViewDidEnter } from '@ionic/angular';
 
 @Component({
   selector: 'app-recover-password-page',
   templateUrl: './recover-password-page.component.html',
-  styleUrls: ['./recover-password-page.component.css']
+  styleUrls: ['./recover-password-page.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RecoverPasswordPageComponent implements OnInit {
+export class RecoverPasswordPageComponent implements ViewDidEnter {
 
-  constructor(private route: ActivatedRoute, private sharedService: SharedService) { }
+  constructor(private sharedService: SharedService) {
+    this.sharedService.setPageTitle('Recover Password');
+  }
 
-  ngOnInit(): void {
-    // Subscribe to ActivatedRoute in order to update the Title in the root component
-    this.route.params.subscribe(() => {
-      this.sharedService.setPageTitle('Recover Password');
-    });
+  ionViewDidEnter(): void {
   }
 
 }

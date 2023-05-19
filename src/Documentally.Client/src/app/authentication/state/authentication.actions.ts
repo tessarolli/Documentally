@@ -8,11 +8,18 @@ export enum AuthenticationActionTypes {
   Logout = '[Authentication] Logout',
   ClearError = '[Authentication] Clear Error',
   SetIsLoading = '[Authentication] Set isLoading',
+  Register = '[Authentication] Register',
+
 }
 
 export const Login = createAction(
   AuthenticationActionTypes.Login,
   props<{ email: string; password: string }>()
+);
+
+export const Register = createAction(
+  AuthenticationActionTypes.Register,
+  props<{ firstName: string; lastName: string; email: string; password: string }>()
 );
 
 export const LoginSuccess = createAction(

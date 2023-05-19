@@ -1,23 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { SharedService } from '../../../shared/shared.service';
-import { ActivatedRoute, } from '@angular/router';
+import { ViewDidEnter } from '@ionic/angular';
 
 @Component({
   selector: 'app-my-documents-page',
   templateUrl: './my-documents-page.component.html',
-  styleUrls: ['./my-documents-page.component.css']
+  styleUrls: ['./my-documents-page.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MyDocumentsPageComponent implements OnInit {
+export class MyDocumentsPageComponent implements ViewDidEnter {
 
   constructor(
     private sharedService: SharedService,
-    private route: ActivatedRoute
-  ) { }
+  ) {
+    this.sharedService.setPageTitle('My Documents');
+  }
 
-  ngOnInit(): void {
-    // Subscribe to ActivatedRoute in order to update the Title in the root component
-    this.route.params.subscribe(() => {
-      this.sharedService.setPageTitle('My Documents');
-    });
+  ionViewDidEnter(): void {
+    this.sharedService.setPageTitle('My Documents');
   }
 }

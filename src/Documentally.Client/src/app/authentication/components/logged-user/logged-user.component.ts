@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -12,9 +12,10 @@ import { UserRole } from '../../enums/userRole.enum';
 @Component({
   selector: 'app-logged-user',
   templateUrl: './logged-user.component.html',
-  styleUrls: ['./logged-user.component.css']
+  styleUrls: ['./logged-user.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoggedUserComponent {
+export class LoggedUserComponent implements OnInit {
   authenticatedUser$!: Observable<AuthenticatedUser | null>;
   userRole!: string;
 

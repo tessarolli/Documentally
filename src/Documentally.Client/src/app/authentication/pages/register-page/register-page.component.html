@@ -1,1 +1,72 @@
-<p>register-page works!</p>
+
+
+<ion-content>
+
+  <ion-grid class="ion-text-center">
+
+    <ion-row class="ion-justify-content-center">
+      <ion-col size-md="8" size-lg="6" size-xl="4">
+
+        <div class="logo-container">
+          <img src="assets/logo2.png" alt="Logo">
+        </div>
+
+        <ion-card>
+          <ion-card-content>
+            <form [formGroup]="registerForm">
+
+              <ion-list>
+
+                <ion-item>
+                  <ion-label position="floating">First Name</ion-label>
+                  <ion-input aria-label="firstName" type="firstName" name="firstName" formControlName="firstName" required></ion-input>
+                  <ion-note color="danger" *ngIf="registerForm?.get('firstName')?.hasError('required') && registerForm?.get('firstName')?.touched">
+                    First Name is required.
+                  </ion-note>
+                </ion-item>
+
+                <ion-item>
+                  <ion-label position="floating">Last Name</ion-label>
+                  <ion-input aria-label="lastName" type="lastName" name="lastName" formControlName="lastName" required></ion-input>
+                  <ion-note color="danger" *ngIf="registerForm?.get('lastName')?.hasError('required') && registerForm?.get('lastName')?.touched">
+                    Last Name is required.
+                  </ion-note>
+                </ion-item>
+
+
+                <ion-item>
+                  <ion-label position="floating">Email</ion-label>
+                  <ion-input aria-label="email" type="email" name="email" formControlName="email" required></ion-input>
+                  <ion-note color="danger" *ngIf="registerForm?.get('email')?.hasError('required') && registerForm?.get('email')?.touched">
+                    Email is required.
+                  </ion-note>
+                  <ion-note color="danger" *ngIf="registerForm?.get('email')?.hasError('email') && registerForm?.get('email')?.touched">
+                    Invalid email format.
+                  </ion-note>
+                </ion-item>
+
+                <ion-item>
+                  <ion-label position="floating">Password</ion-label>
+                  <ion-input aria-label="password" type="password" name="password" formControlName="password" required></ion-input>
+                  <ion-note color="danger" *ngIf="registerForm?.get('password')?.hasError('required') && registerForm?.get('password')?.touched">
+                    Password is required.
+                  </ion-note>
+                </ion-item>
+              </ion-list>
+            </form>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-button expand="full" color="primary" [disabled]="!registerForm.valid || (isLoading$ | async)" (click)="register()">
+          <ng-container *ngIf="!(isLoading$ | async); else loadingTemplate">Register</ng-container>
+          <ng-template #loadingTemplate>
+            <ion-spinner></ion-spinner>
+          </ng-template>
+        </ion-button>
+
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+
+</ion-content>

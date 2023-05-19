@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, delay, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AuthenticatedUser } from './models/authenticatedUser.model';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
+import { ApiService } from '../core/api.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -12,16 +13,15 @@ const httpOptions = {
 
 @Injectable()
 export class AuthenticationService {
+  path: string = 'authentication';
 
-  constructor(private http: HttpClient) { }
+  constructor(private apiService: ApiService) { }
 
   Login(email: string, password: string): Observable<AuthenticatedUser> {
-    return this.http.post<AuthenticatedUser>('https://localhost:5001/authentication/login', { email, password }, httpOptions)
-      .pipe(
-        catchError((error: any) => {
-          return throwError(() => new Error(error.error.errors));
-        })
-      );
+    return this.apiService.post(`/${this.path}/login`, { email, password });
   }
 
+  Register(firstName: string, lastName: string, email: string, password: string): Observable<AuthenticatedUser> {
+    return this.apiService.post(`/${this.path}/register`, { firstName, lastName, email, password });
+  }
 }

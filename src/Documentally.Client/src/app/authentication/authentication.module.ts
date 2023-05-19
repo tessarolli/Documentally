@@ -8,7 +8,7 @@ import { AuthenticationRoutingModule } from './authentication-routing.module';
 import { LoggedUserComponent } from './components/logged-user/logged-user.component';
 
 // Angular HTTP Interceptor
-import { AuthenticationInterceptor } from './interceptors/authentication-interceptor';
+import { HttpAuthorizationInterceptor } from '../core/http.authorization.interceptor';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 // NgRx
@@ -22,28 +22,28 @@ import { AuthenticationService } from './authentication.service';
 
 // Modules
 import { LoginPageModule } from './pages/login-page/login-page.module';
-import { RecoverPasswordPageComponent } from './pages/recover-password-page/recover-password-page.component';
+import { RegisterPageModule } from './pages/register-page/register-page.module';
+import { RecoverPasswordPageModule } from './pages/recover-password-page/recover-password-page.module';
 
 @NgModule({
   imports: [
     StoreModule.forFeature('authentication', AuthenticationReducer),
     EffectsModule.forRoot([AuthenticationEffects]),
+    SharedModule,
     AuthenticationRoutingModule,
     LoginPageModule,
-    SharedModule,
+    RegisterPageModule,
+    RecoverPasswordPageModule,
   ],
   declarations: [
-    LoggedUserComponent,
-    RecoverPasswordPageComponent,
+    LoggedUserComponent
   ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: AuthenticationInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: HttpAuthorizationInterceptor, multi: true },
     AuthenticationService,
   ],
   exports: [
-    LoggedUserComponent,
-    SharedModule,
-    LoginPageModule,
+    LoggedUserComponent
   ]
 })
 export class AuthenticationModule { }
