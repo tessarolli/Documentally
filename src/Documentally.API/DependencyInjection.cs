@@ -56,6 +56,17 @@ public static class DependencyInjection
              options.OperationFilter<SecureEndpointAuthRequirementFilter>();
          });
 
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(
+                policy =>
+                {
+                    policy.AllowAnyOrigin();
+                    policy.AllowAnyHeader();
+                    policy.AllowAnyMethod();
+                });
+        });
+
         return services;
     }
 }

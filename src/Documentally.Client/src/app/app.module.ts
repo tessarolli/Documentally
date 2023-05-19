@@ -12,6 +12,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
 
 // NgRx
 import { StoreModule } from '@ngrx/store';
+import { metaReducers, reducers } from './app.state';
 
 // Ionic
 import { IonicModule } from '@ionic/angular';
@@ -22,13 +23,13 @@ import { IonicModule } from '@ionic/angular';
     AppComponent,
   ],
   imports: [
-    StoreModule.forRoot(),
+    StoreModule.forRoot(reducers, {metaReducers}),
     IonicModule.forRoot(),
     AppRoutingModule,
     AuthenticationModule,
-    HttpClientModule,
     BrowserModule,
     BrowserAnimationsModule,
+    HttpClientModule,
   ],
   providers: [
   ],

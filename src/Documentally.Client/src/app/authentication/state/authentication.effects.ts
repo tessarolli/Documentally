@@ -17,11 +17,9 @@ export class AuthenticationEffects {
       ofType(Login),
       mergeMap((action) =>
         this.authService.Login(action.email, action.password).pipe(
-          map((authenticatedUser) =>
-            LoginSuccess({ authenticatedUser: authenticatedUser })),
-          catchError((error) => {
-            return of(LoginFailure({ error: error.message }));
-          })
+          map((authenticatedUser) => LoginSuccess({ authenticatedUser: authenticatedUser })),
+          catchError(async (error) => LoginFailure({ error: error.message })
+          )
         )
       )
     )

@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { AlertController } from '@ionic/angular';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state';
 import { ClearError, Login } from '../../state/authentication.actions';
 import { selectError, selectIsAuthenticated, selectIsLoading } from '../../state/authentication.selectors';
-import { SharedService } from '../../../services/shared.service';
+import { SharedService } from '../../../shared/shared.service';
 
 @Component({
   selector: 'app-login-page',
@@ -21,12 +21,16 @@ export class LoginPageComponent implements OnInit {
   constructor(
     private alertController: AlertController,
     private router: Router,
+    private route: ActivatedRoute,
     private store: Store<AppState>,
     private sharedService: SharedService
   ) { }
 
   ngOnInit(): void {
-    this.sharedService.setPageTitle('Login');
+    // Subscribe to ActivatedRoute in order to update the Title in the root component
+    this.route.params.subscribe(() => {
+      this.sharedService.setPageTitle('Login');
+    });
 
     // Define the Reactive Forms for the Login Form
     this.loginForm = new FormGroup({

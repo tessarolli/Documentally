@@ -9,7 +9,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { IonicModule } from '@ionic/angular';
 
 // Services
-import { SharedService } from '../services/shared.service';
+import { SharedService } from './shared.service';
 
 @NgModule({
   imports: [

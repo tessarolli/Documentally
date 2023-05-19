@@ -1,20 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { catchError, delay, tap } from 'rxjs/operators';
 import { AuthenticatedUser } from './models/authenticatedUser.model';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+const httpOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json',
+  })
+};
 
 @Injectable()
 export class AuthenticationService {
 
-  // Simulating login API call
+  constructor(private http: HttpClient) { }
+
   Login(email: string, password: string): Observable<AuthenticatedUser> {
-    if (email === 'user@documentally.com' && password === 'user') {
-      const user: AuthenticatedUser = { id: 1, email: 'user@documentally.com', firstName: 'User', lastName: 'User', role: 0, token: 'abcd_token' };
-      return of(user).pipe(delay(1000)); // Simulating delay for API call
-    }
-    
-    // Return an error if login credentials are invalid
-    return throwError(() => new Error('Invalid credentials'));
+    return this.http.post<AuthenticatedUser>('https://localhost:5001/authentication/login', { email, password }, httpOptions)
+      .pipe(
+        catchError((error: any) => {
+          return throwError(() => new Error(error.error.errors));
+        })
+      );
   }
 
 }

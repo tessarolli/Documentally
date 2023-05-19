@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SharedService } from './services/shared.service';
+import { SharedService } from './shared/shared.service';
 import { AppState } from './app.state';
 import { Store } from '@ngrx/store';
 import { selectIsAdmin, selectIsAuthenticated } from './authentication/state/authentication.selectors';
