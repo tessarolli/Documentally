@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { SharedService } from './shared/shared.service';
 import { AppState } from './app.state';
 import { Store } from '@ngrx/store';
 import { selectIsAdmin, selectIsAuthenticated } from './authentication/state/authentication.selectors';
 import { Observable } from 'rxjs';
+import { selectPageTitle } from './core/state/root.selectors';
+import { SetTitle } from './core/state/root.actions';
 
 @Component({
   selector: 'app',
@@ -12,23 +13,24 @@ import { Observable } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 
-export class AppComponent implements OnInit {
-  isAuthenticated$!: Observable<boolean>;
-  isAdmin$!: Observable<boolean>;
+export class AppComponent {
+  isAuthenticated$: Observable<boolean>;
+  isAdmin$: Observable<boolean>;
+  pageTitle$: Observable<string>;
 
   constructor(
     private store: Store<AppState>,
-    private sharedService: SharedService
-  ) { }
+  ) {
+    this.store.dispatch(SetTitle({ title: 'Documentally' }));
 
-  ngOnInit(): void {
     // Subscribe to IsAuthenticated state from AuthenticationState
     this.isAuthenticated$ = this.store.select(selectIsAuthenticated);
+
     // Subscribe to IsAdmin state from AuthenticationState
     this.isAdmin$ = this.store.select(selectIsAdmin);
+
+    // Subscribe to pageTitle state from RootState
+    this.pageTitle$ = this.store.select(selectPageTitle);
   }
 
-  getPageTitle(): string {
-    return this.sharedService.getPageTitle();
-  }
 }

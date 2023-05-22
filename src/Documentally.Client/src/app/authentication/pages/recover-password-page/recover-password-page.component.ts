@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { SharedService } from '../../../shared/shared.service';
 import { ViewDidEnter } from '@ionic/angular';
+import { SetTitle } from '../../../core/state/root.actions';
+import { AppState } from '../../../app.state';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-recover-password-page',
@@ -11,11 +12,10 @@ import { ViewDidEnter } from '@ionic/angular';
 })
 export class RecoverPasswordPageComponent implements ViewDidEnter {
 
-  constructor(private sharedService: SharedService) {
-    this.sharedService.setPageTitle('Recover Password');
-  }
+  constructor(private store: Store<AppState>) { }
 
   ionViewDidEnter(): void {
+    this.store.dispatch(SetTitle({ title: 'Recover Password' }));
   }
 
 }

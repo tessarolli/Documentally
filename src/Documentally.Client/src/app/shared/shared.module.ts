@@ -9,9 +9,6 @@ import { EffectsModule } from '@ngrx/effects';
 // Ionic
 import { IonicModule } from '@ionic/angular';
 
-// Services
-import { SharedService } from './shared.service';
-
 @NgModule({
   imports: [
     CommonModule,
@@ -21,7 +18,6 @@ import { SharedService } from './shared.service';
     RouterModule,
   ],
   providers: [
-    SharedService
   ],
   exports: [
     CommonModule,

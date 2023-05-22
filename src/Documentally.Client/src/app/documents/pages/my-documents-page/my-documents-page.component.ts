@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { SharedService } from '../../../shared/shared.service';
 import { ViewDidEnter } from '@ionic/angular';
+import { SetTitle } from '../../../core/state/root.actions';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../app.state';
 
 @Component({
   selector: 'app-my-documents-page',
@@ -11,12 +13,10 @@ import { ViewDidEnter } from '@ionic/angular';
 export class MyDocumentsPageComponent implements ViewDidEnter {
 
   constructor(
-    private sharedService: SharedService,
-  ) {
-    this.sharedService.setPageTitle('My Documents');
-  }
+    private store: Store<AppState>,
+  ) { }
 
   ionViewDidEnter(): void {
-    this.sharedService.setPageTitle('My Documents');
+    this.store.dispatch(SetTitle({ title: 'My Documents' }));
   }
 }

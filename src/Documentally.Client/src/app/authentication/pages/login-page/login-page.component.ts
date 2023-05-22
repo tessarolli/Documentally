@@ -6,8 +6,8 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state';
 import { ClearError, Login } from '../../state/authentication.actions';
 import { selectError, selectIsAuthenticated, selectIsLoading } from '../../state/authentication.selectors';
-import { SharedService } from '../../../shared/shared.service';
 import { Subject, takeUntil } from 'rxjs';
+import { SetTitle } from '../../../core/state/root.actions';
 
 @Component({
   selector: 'app-login-page',
@@ -25,10 +25,7 @@ export class LoginPageComponent implements ViewDidEnter, ViewWillLeave {
     private alertController: AlertController,
     private router: Router,
     private store: Store<AppState>,
-    private sharedService: SharedService
   ) {
-    this.sharedService.setPageTitle('Login');
-
     // Define the Reactive Forms for the Login Form
     this.loginForm = new FormGroup({
       email: new FormControl('', [Validators.required, Validators.email]),
@@ -37,6 +34,8 @@ export class LoginPageComponent implements ViewDidEnter, ViewWillLeave {
   }
 
   ionViewDidEnter(): void {
+    this.store.dispatch(SetTitle({ title: 'Login' }));
+
     // Subscribe to Error state from AuthenticationState
     this.store.select(selectError)
       .pipe(takeUntil(this.destroy$))

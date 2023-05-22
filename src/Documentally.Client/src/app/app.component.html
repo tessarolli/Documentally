@@ -6,7 +6,7 @@
 
       <ion-header>
         <ion-toolbar>
-          <ion-title>Documentally</ion-title>
+          <img src="assets/logo2.png" alt="Logo">
         </ion-toolbar>
       </ion-header>
 
@@ -43,7 +43,7 @@
             <ion-menu-button></ion-menu-button>
           </ion-buttons>
 
-          <ion-title>{{ getPageTitle() }}</ion-title>
+          <ion-title>{{ pageTitle$ | async }}</ion-title>
 
           <ion-buttons slot="end" *ngIf="(isAuthenticated$ | async)">
             <app-logged-user></app-logged-user>
@@ -58,7 +58,7 @@
 
       <ion-footer>
         <ion-toolbar>
-          <ion-title>Footer</ion-title>
+          <p>&copy; 2023 Documentally. All rights reserved.</p>
         </ion-toolbar>
       </ion-footer>
 

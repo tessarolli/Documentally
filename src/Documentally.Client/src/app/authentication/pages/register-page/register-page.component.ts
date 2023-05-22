@@ -1,6 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { SharedService } from '../../../shared/shared.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { selectError, selectIsAuthenticated, selectIsLoading } from '../../state/authentication.selectors';
 import { AlertController, ViewDidEnter, ViewWillLeave } from '@ionic/angular';
@@ -8,6 +6,8 @@ import { AppState } from '../../../app.state';
 import { Store } from '@ngrx/store';
 import { ClearError, Register } from '../../state/authentication.actions';
 import { Subject, takeUntil } from 'rxjs';
+import { SetTitle } from '../../../core/state/root.actions';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register-page',
@@ -23,12 +23,8 @@ export class RegisterPageComponent implements ViewDidEnter, ViewWillLeave {
   constructor(
     private alertController: AlertController,
     private router: Router,
-    private route: ActivatedRoute,
     private store: Store<AppState>,
-    private sharedService: SharedService
   ) {
-    this.sharedService.setPageTitle('Register');
-
     // Define the Reactive Forms for the Register Form
     this.registerForm = new FormGroup({
       firstName: new FormControl('', Validators.required),
@@ -39,6 +35,8 @@ export class RegisterPageComponent implements ViewDidEnter, ViewWillLeave {
   }
 
   ionViewDidEnter(): void {
+    this.store.dispatch(SetTitle({ title: 'Register' }));
+
     // Subscribe to Error state from AuthenticationState
     this.store.select(selectError)
       .pipe(takeUntil(this.destroy$))
