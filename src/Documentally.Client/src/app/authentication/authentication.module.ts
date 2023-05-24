@@ -28,7 +28,7 @@ import { RecoverPasswordPageModule } from './pages/recover-password-page/recover
 @NgModule({
   imports: [
     StoreModule.forFeature('authentication', AuthenticationReducer),
-    EffectsModule.forRoot([AuthenticationEffects]),
+    EffectsModule.forFeature([AuthenticationEffects]),
     SharedModule,
     AuthenticationRoutingModule,
     LoginPageModule,

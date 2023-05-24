@@ -7,7 +7,7 @@ import { AppState } from '../../../app.state';
 import { Logout } from '../../state/authentication.actions';
 import { AuthenticatedUser } from '../../models/authenticatedUser.model';
 import { selectAuthenticatedUser } from '../../state/authentication.selectors';
-import { UserRole } from '../../enums/userRole.enum';
+import { UserRole } from '../../enums/UserRole.enum';
 
 @Component({
   selector: 'app-logged-user',

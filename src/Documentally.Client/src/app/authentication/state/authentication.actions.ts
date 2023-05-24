@@ -9,7 +9,6 @@ export enum AuthenticationActionTypes {
   ClearError = '[Authentication] Clear Error',
   SetIsLoading = '[Authentication] Set isLoading',
   Register = '[Authentication] Register',
-
 }
 
 export const Login = createAction(

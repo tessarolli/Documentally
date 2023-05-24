@@ -1,21 +1,22 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ViewWillEnter } from '@ionic/angular';
-import { SetTitle } from '../../../core/state/root.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state';
+import { SetTitle } from '../../../core/state/root.actions';
 
 @Component({
-  selector: 'app-my-documents-page',
-  templateUrl: './my-documents-page.component.html',
-  styleUrls: ['./my-documents-page.component.css'],
+  selector: 'app-shared-with-me-page',
+  templateUrl: './shared-with-me-page.component.html',
+  styleUrls: ['./shared-with-me-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MyDocumentsPageComponent implements ViewWillEnter {
+
+export class SharedWithMePageComponent implements ViewWillEnter {
   constructor(
     private store: Store<AppState>,
   ) { }
 
   ionViewWillEnter(): void {
-    this.store.dispatch(SetTitle({ title: 'My Documents' }));
+    this.store.dispatch(SetTitle({ title: 'Shared With Me' }));
   }
 }

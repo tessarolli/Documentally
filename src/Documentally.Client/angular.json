@@ -26,6 +26,11 @@
                 "glob": "**/*.svg",
                 "input": "node_modules/ionicons/dist/ionicons/svg",
                 "output": "./svg"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@fortawesome/fontawesome-free/webfonts",
+                "output": "webfonts/"
               }
             ],
             "styles": [
@@ -62,7 +67,8 @@
               },
               {
                 "input": "src/theme/variables.css"
-              }
+              },
+              "node_modules/@fortawesome/fontawesome-free/css/all.css"
             ],
             "scripts": []
           },

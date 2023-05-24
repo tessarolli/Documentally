@@ -1,4 +1,4 @@
-import { UserRole } from "../enums/userRole.enum";
+import { UserRole } from "../enums/UserRole.enum";
 
 // Contract: Authentication.AuthenticationResponse.cs
 export interface AuthenticatedUser {

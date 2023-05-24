@@ -16,6 +16,7 @@ import { metaReducers, reducers } from './app.state';
 
 // Ionic
 import { IonicModule } from '@ionic/angular';
+import { EffectsModule } from '@ngrx/effects';
 
 
 @NgModule({
@@ -23,8 +24,9 @@ import { IonicModule } from '@ionic/angular';
     AppComponent,
   ],
   imports: [
-    StoreModule.forRoot(reducers, {metaReducers}),
     IonicModule.forRoot(),
+    EffectsModule.forRoot(),
+    StoreModule.forRoot(reducers, { metaReducers }),
     AppRoutingModule,
     AuthenticationModule,
     BrowserModule,

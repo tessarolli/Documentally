@@ -1,3 +1,5 @@
+@import '~@fortawesome/fontawesome-free/css/all.css';
+
 ion-split-pane {
   --side-width: 100px;
   --side-max-width: 100px;

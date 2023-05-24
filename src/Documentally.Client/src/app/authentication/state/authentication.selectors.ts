@@ -1,5 +1,5 @@
 import { AppState } from '../../app.state';
-import { UserRole } from '../enums/userRole.enum';
+import { UserRole } from '../enums/UserRole.enum';
 
 // Select the authentication feature state
 export const selectAuthenticationState = (state: AppState) => state?.authentication;

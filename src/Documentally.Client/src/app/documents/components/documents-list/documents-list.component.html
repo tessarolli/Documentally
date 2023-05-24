@@ -1,0 +1,26 @@
+<ion-list *ngIf="!(loading$ | async)">
+  <ion-item *ngFor="let document of (documents$ | async)">
+    <ion-avatar slot="start">
+      <i [class]="getFileIcon(document.CloudFileName)" class="document-icon"></i>
+    </ion-avatar>
+    <ion-label>
+      <h2>{{ document.Name }}</h2>
+      <p>
+        Owner:
+        <a [routerLink]="'/user/' + document.OwnerId">{{ getUserName(document.OwnerId) }}</a>
+      </p>
+      <p>Size: {{ document.Size }}</p>
+      <p>Uploaded: {{ document.PostedAtUtc }}</p>
+    </ion-label>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon slot="icon-only" name="download-outline"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" color="danger" *ngIf="(isAdmin$ | async)" (click)="showConfirmationDialog(document)">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-item>
+</ion-list>
+
+<ion-spinner *ngIf="(loading$ | async)"></ion-spinner>
