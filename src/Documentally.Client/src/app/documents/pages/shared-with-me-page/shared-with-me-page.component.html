@@ -1,3 +1,5 @@
-<!--<ion-content>
-  <app-documents-list></app-documents-list>
-</ion-content>-->
+<ion-content>
+  <app-documents-list [documents]="documents$ | async"
+                      [isLoading]="isLoading$ | async"
+                      [error]="error$ | async"></app-documents-list>
+</ion-content>

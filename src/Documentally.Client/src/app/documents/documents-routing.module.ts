@@ -17,13 +17,11 @@ const routes: Routes = [
         path: 'mydocuments',
         canActivate: [authenticationGuard],
         component: MyDocumentsPageComponent,
-        //loadChildren: () => import('./pages/my-documents-page/my-documents-page.module').then(m => m.MyDocumentsPageModule)
       },
       {
         path: 'shared',
         canActivate: [authenticationGuard],
         component: SharedWithMePageComponent,
-        //loadChildren: () => import('./pages/shared-with-me-page/shared-with-me-page.module').then(m => m.SharedWithMePageModule)
       },
     ],
   },

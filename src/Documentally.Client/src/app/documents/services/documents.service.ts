@@ -12,15 +12,15 @@ export class DocumentsService {
   constructor(private apiService: ApiService) { }
 
   GetUserDocuments(userId: number | undefined): Observable<DocumentModel[]> {
-    return this.apiService.get(`/${this.path}/getuserdocuments/${userId}`);
+    return this.apiService.get(`/${this.path}/user/${userId}`);
   }
 
   GetDocumentsSharedWithUser(userId: number | undefined): Observable<DocumentModel[]> {
-    return this.apiService.get(`/${this.path}/getdocumentssharedwithuser/${userId}`);
+    return this.apiService.get(`/${this.path}/sharedwithuser/${userId}`);
   }
 
   GetDocumentById(documentId: number | undefined): Observable<DocumentModel> {
-    return this.apiService.get(`/${this.path}/getdocumentbyid/${documentId}`);
+    return this.apiService.get(`/${this.path}/${documentId}`);
   }
 
 }

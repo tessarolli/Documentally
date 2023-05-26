@@ -1,4 +1,4 @@
-import { DocumentModel } from "../../models/document.model";
+import { DocumentModel } from "../../../models/document.model";
 
 export interface MyDocumentsState {
   documents: DocumentModel[];

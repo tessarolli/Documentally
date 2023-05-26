@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { DocumentModel } from '../../models/document.model';
+import { DocumentModel } from '../../../models/document.model';
 
 export enum MyDocumentsActionTypes {
   LoadMyDocuments = '[My Documents] Load My Documents',

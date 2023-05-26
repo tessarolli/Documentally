@@ -1,5 +1,5 @@
 import { createSelector } from '@ngrx/store';
-import { AppState } from '../../../app.state';
+import { AppState } from '../../../../app.state';
 import { MyDocumentsState } from './my-documents-page.state';
 
 export const selectMyDocumentsState = (state: AppState) => state.myDocuments;

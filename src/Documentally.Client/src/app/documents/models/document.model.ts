@@ -1,13 +1,13 @@
 export interface DocumentModel {
-  Id: number;
-  OwnerId: number;
-  Name: string;
-  Description?: string;
-  Category?: string;
-  Size: number;
-  BlobUrl: string;
-  CloudFileName: string;
-  SharedGroupIds: number[];
-  SharedUserIds: number[];
-  PostedAtUtc: Date;
+  id: number;
+  ownerId: number;
+  name: string;
+  description?: string;
+  category?: string;
+  size: number;
+  blobUrl: string;
+  cloudFileName: string;
+  sharedGroupIds: number[];
+  sharedUserIds: number[];
+  postedAtUtc: Date;
 }

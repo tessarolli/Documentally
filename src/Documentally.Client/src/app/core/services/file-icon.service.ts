@@ -62,9 +62,11 @@ export class FileIconService {
   }
 
   private getFileExtension(fileName: string): string {
-    const parts = fileName.split('.');
-    if (parts.length > 1) {
-      return parts.pop()!.toLowerCase();
+    if (fileName) {
+      const parts = fileName.split('.');
+      if (parts.length > 1) {
+        return parts.pop()!.toLowerCase();
+      }
     }
     return '';
   }

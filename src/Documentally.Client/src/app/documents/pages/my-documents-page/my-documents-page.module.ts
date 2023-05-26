@@ -1,22 +1,21 @@
 import { NgModule } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { MyDocumentsPageComponent } from './my-documents-page.component';
-import { DocumentsModule } from '../../documents.module';
 import { StoreModule } from '@ngrx/store';
-import { MyDocumentsPageReducer } from './my-documents-page.reducer';
+import { MyDocumentsPageReducer } from './state/my-documents-page.reducer';
 import { EffectsModule } from '@ngrx/effects';
-import { MyDocumentsPageEffects } from './my-documents-page.effects';
+import { MyDocumentsPageEffects } from './state/my-documents-page.effects';
+import { DocumentsComponentsModule } from '../../components/documents-components.module';
 
 @NgModule({
+  imports: [
+    StoreModule.forFeature('myDocuments', MyDocumentsPageReducer),
+    EffectsModule.forFeature([MyDocumentsPageEffects]),
+    SharedModule,
+    DocumentsComponentsModule
+  ],
   declarations: [
     MyDocumentsPageComponent,
   ],
-  imports: [
-    SharedModule,
-    DocumentsModule,
-    StoreModule.forFeature('myDocuments', MyDocumentsPageReducer),
-    EffectsModule.forFeature([MyDocumentsPageEffects]),
-  ]
-
 })
 export class MyDocumentsPageModule { }
