@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ApiService } from '../../core/api.service';
+import { ApiService } from '../../core/services/api.service';
 import { Observable } from 'rxjs';
 import { DocumentModel } from '../models/document.model';
 
@@ -7,6 +7,7 @@ import { DocumentModel } from '../models/document.model';
   providedIn: 'root'
 })
 export class DocumentsService {
+
   path: string = 'documents';
 
   constructor(private apiService: ApiService) { }
@@ -23,4 +24,7 @@ export class DocumentsService {
     return this.apiService.get(`/${this.path}/${documentId}`);
   }
 
+  UploadDocument(formData: FormData) {
+    return this.apiService.upload(`/${this.path}`, formData);
+  }
 }

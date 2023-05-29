@@ -41,6 +41,7 @@ public static class DependencyInjection
                 builder.ClearProviders();
                 builder.AddConsole();
                 builder.AddDebug();
+                builder.SetMinimumLevel(LogLevel.Trace);
             })
             .AddPersistance(configuration)
             .AddAuthentication(configuration);

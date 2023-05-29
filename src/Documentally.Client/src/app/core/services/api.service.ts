@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
-import { HttpHeaders, HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { HttpClient, HttpParams, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 
 import { catchError } from 'rxjs/operators';
@@ -13,11 +13,25 @@ export class ApiService {
     private http: HttpClient
   ) { }
 
-  private formatErrors(error: any): Observable<never> {
+  private formatErrors(error: any): Observable<string> {
     if (error.error && error.error.errors) {
-        // API returned user-friendly error messages
-        const userFriendlyErrors = error.error.errors;
-        return throwError(() => new Error(userFriendlyErrors));
+      // API returned user-friendly error messages
+
+      // Create an array to hold the error messages
+      const errorMessages: string[] = [];
+
+      // Iterate over each error and add it to the errorMessages array
+      for (const key in error.error.errors) {
+        if (error.error.errors.hasOwnProperty(key)) {
+          errorMessages.push(error.error.errors[key]);
+        }
+      }
+
+      // Create the final error message to display
+      const errorMessage = `One or More errors Occurred:\n${errorMessages.join('\n')}`;
+
+      // Throw an error with the formatted message
+      return throwError(() => new Error(errorMessage));
     }
 
     if (error instanceof HttpErrorResponse) {
@@ -68,7 +82,23 @@ export class ApiService {
     return this.http.post(
       `${environment.apiUrl}${path}`,
       JSON.stringify(body)
-    ).pipe(catchError(this.formatErrors));
+    ).pipe(
+      catchError(this.formatErrors));
+  }
+
+  upload(path: string, body: FormData): Observable<any> {
+    var headers: HttpHeaders = new HttpHeaders();
+    headers = headers.set('Content-Type', 'multipart/form-data');
+
+    return this.http.post(
+      `${environment.apiUrl}${path}`,
+      body, {
+      headers: headers,
+      reportProgress: true,
+      observe: 'events'
+    }
+    ).pipe(
+      catchError(this.formatErrors));
   }
 
   delete(path: string): Observable<any> {

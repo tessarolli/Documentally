@@ -6,6 +6,7 @@ using Documentally.API;
 using Documentally.Application;
 using Documentally.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 {
@@ -27,6 +28,16 @@ var app = builder.Build();
         app.UseDefaultFiles();
         app.UseStaticFiles();
     }
+
+    app.Use(async (context, next) =>
+    {
+        // Log request information
+        var request = context.Request;
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation($"Received request: {request.Method} {request.Path}");
+
+        await next.Invoke();
+    });
 
     app.UseExceptionHandler("/error");
 

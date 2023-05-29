@@ -18,3 +18,15 @@ export const selectError = (state: AppState) => state?.authentication?.error;
 
 // Select the authenticated user
 export const selectIsAdmin = (state: AppState) => state?.authentication?.authenticatedUser?.role === UserRole.Admin;
+
+
+export const selectCanUpload = (state: AppState) => {
+  const authenticatedUser = state?.authentication?.authenticatedUser;
+  if (authenticatedUser) {
+    const userRole = authenticatedUser.role;
+
+    return [UserRole.Admin, UserRole.Manager].includes(userRole);
+  }
+
+  return false;
+};

@@ -1,0 +1,35 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Upload Document</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-card-content>
+      <form (ngSubmit)="uploadDocument()">
+
+        <ngx-dropzone [multiple]="false" (change)="onFileSelected($event)">
+
+          <ngx-dropzone-label>Drag and drop a file here or click to browse</ngx-dropzone-label>
+
+          <ngx-dropzone-preview *ngIf="selectedFile" [removable]="true" (removed)="onRemove()">
+            <ngx-dropzone-label>
+              <div>{{ selectedFile.name }} ({{ selectedFile.type }})</div>
+              <!--<ion-input placeholder="Description" [(ngModel)]="description"></ion-input>
+              <ion-input placeholder="Category" [(ngModel)]="category"></ion-input>-->
+            </ngx-dropzone-label>
+          </ngx-dropzone-preview>
+
+        </ngx-dropzone>
+
+        <ion-button expand="full" type="submit">Upload</ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { selectError, selectIsAuthenticated, selectIsLoading } from '../../state/authentication.selectors';
-import { AlertController, ViewDidEnter, ViewWillLeave } from '@ionic/angular';
+import { ViewDidEnter, ViewWillLeave } from '@ionic/angular';
 import { AppState } from '../../../app.state';
 import { Store } from '@ngrx/store';
 import { ClearError, Register } from '../../state/authentication.actions';
 import { Subject, takeUntil } from 'rxjs';
 import { SetTitle } from '../../../core/state/root.actions';
 import { Router } from '@angular/router';
+import { AlertService } from '../../../core/services/alert.service';
 
 @Component({
   selector: 'app-register-page',
@@ -21,7 +22,7 @@ export class RegisterPageComponent implements ViewDidEnter, ViewWillLeave {
   destroy$ = new Subject<void>();
 
   constructor(
-    private alertController: AlertController,
+    private alert: AlertService,
     private router: Router,
     private store: Store<AppState>,
   ) {
@@ -46,7 +47,7 @@ export class RegisterPageComponent implements ViewDidEnter, ViewWillLeave {
           this.store.dispatch(ClearError());
 
           // presents the Alert message to the user
-          this.presentAlert(error);
+          this.alert.Error(error);
         }
       });
 
@@ -63,17 +64,6 @@ export class RegisterPageComponent implements ViewDidEnter, ViewWillLeave {
   ionViewWillLeave(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  // Method for displaying an alert message for the user
-  async presentAlert(msg: string) {
-    const alert = await this.alertController.create({
-      header: 'Message',
-      message: msg,
-      buttons: ['OK'],
-    });
-
-    await alert.present();
   }
 
   // Register Method

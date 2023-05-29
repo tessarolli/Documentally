@@ -6,6 +6,7 @@ import { AppState } from '../../../app.state';
 import { FileIconService } from '../../../core/services/file-icon.service';
 import { selectIsAdmin } from '../../../authentication/state/authentication.selectors';
 import { AlertController } from '@ionic/angular';
+import { AlertService } from '../../../core/services/alert.service';
 
 @Component({
   selector: 'app-documents-list',
@@ -23,7 +24,7 @@ export class DocumentsListComponent {
   constructor(
     private store: Store<AppState>,
     private fileIconService: FileIconService,
-    private alertController: AlertController
+    private alert: AlertService
   ) {
     this.isAdmin$ = this.store.select(selectIsAdmin);
   }
@@ -37,25 +38,10 @@ export class DocumentsListComponent {
   }
 
   async showConfirmationDialog(document: DocumentModel) {
-    const alert = await this.alertController.create({
-      header: 'Confirm Deletion',
-      message: `Are you sure you want to delete ${document.name}?`,
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          cssClass: 'secondary',
-        },
-        {
-          text: 'Delete',
-          handler: () => {
-            this.deleteDocument(document);
-          },
-        },
-      ],
-    });
-
-    await alert.present();
+    await this.alert.Confirmation(
+      `Are you sure you want to delete ${document.name}?`,
+      () => this.deleteDocument(document)
+    );
   }
 
   deleteDocument(document: DocumentModel) {

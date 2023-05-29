@@ -11,6 +11,21 @@ export class HttpAuthorizationInterceptor implements HttpInterceptor {
   constructor(private store: Store<AppState>) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+
+    console.log(`${request.method} ${request.urlWithParams} HTTP/`);
+    console.log('Host:', request.headers.get('host'));
+    request.headers.keys().forEach(header => {
+      console.log(`${header}: ${request.headers.get(header)}`);
+    });
+    const formDataObject: { [key: string]: any } = {};
+    request.body.forEach((value: any, key: string | number) => {
+      formDataObject[key] = value;
+    });
+
+    // Log the converted FormData object
+    console.log('Form Data:', formDataObject);
+
+
     return this.store.select(selectAuthenticatedUser).pipe(
       take(1),
       switchMap(authenticatedUser => {

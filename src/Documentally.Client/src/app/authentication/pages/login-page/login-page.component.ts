@@ -8,6 +8,7 @@ import { ClearError, Login } from '../../state/authentication.actions';
 import { selectError, selectIsAuthenticated, selectIsLoading } from '../../state/authentication.selectors';
 import { Subject, takeUntil } from 'rxjs';
 import { SetTitle } from '../../../core/state/root.actions';
+import { AlertService } from '../../../core/services/alert.service';
 
 @Component({
   selector: 'app-login-page',
@@ -22,7 +23,7 @@ export class LoginPageComponent implements ViewDidEnter, ViewWillLeave {
   isLoading$ = this.store.select(selectIsLoading);
 
   constructor(
-    private alertController: AlertController,
+    private alert: AlertService,
     private router: Router,
     private store: Store<AppState>,
   ) {
@@ -45,7 +46,7 @@ export class LoginPageComponent implements ViewDidEnter, ViewWillLeave {
           this.store.dispatch(ClearError());
 
           // presents the Alert message to the user
-          this.presentAlert(error);
+          this.alert.Error(error);
         }
       });
 
@@ -79,17 +80,6 @@ export class LoginPageComponent implements ViewDidEnter, ViewWillLeave {
       data: 'admin',
     },
   ];
-
-  // Method for displaying an alert message for the user
-  async presentAlert(msg: string) {
-    const alert = await this.alertController.create({
-      header: 'Message',
-      message: msg,
-      buttons: ['OK'],
-    });
-
-    await alert.present();
-  }
 
   // Login Method
   login(): void {

@@ -1,8 +1,10 @@
 <ion-list *ngIf="!isLoading">
   <ion-item *ngFor="let document of documents">
+
     <ion-avatar slot="start">
       <i [class]="getFileIcon(document.cloudFileName)" class="document-icon"></i>
     </ion-avatar>
+
     <ion-label>
       <h2>{{ document.name }}</h2>
       <p>
@@ -10,16 +12,21 @@
         <a [routerLink]="'/user/' + document.ownerId">{{ getUserName(document.ownerId) }}</a>
       </p>
       <p>Size: {{ document.size }}</p>
-      <p>Uploaded: {{ document.postedAtUtc }}</p>
+      <p>Uploaded: {{ document.postedAtUtc | date:'medium' }}</p>
     </ion-label>
+
     <ion-buttons slot="end">
+
       <ion-button fill="clear">
         <ion-icon slot="icon-only" name="download-outline"></ion-icon>
       </ion-button>
+
       <ion-button fill="clear" color="danger" *ngIf="(isAdmin$ | async)" (click)="showConfirmationDialog(document)">
         <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
       </ion-button>
+
     </ion-buttons>
+
   </ion-item>
 </ion-list>
 
