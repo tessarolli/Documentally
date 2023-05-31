@@ -20,7 +20,7 @@ export class AlertService {
   async Message(message: string, title: string = 'Message') {
     const alert = await this.alertController.create({
       header: title,
-      message: `${message}`,
+      message: `${message}`.replace(/\n/g, '<br/>'),
       buttons: ['OK'],
     });
 
@@ -31,7 +31,7 @@ export class AlertService {
   async Confirmation(message: string, callback: () => void, title: string = 'Confirm Operation') {
     const alert = await this.alertController.create({
       header: title,
-      message: `${message}`,
+      message: `${message}`.replace(/\n/g, '<br/>'),
       buttons: [
         {
           text: 'Cancel',

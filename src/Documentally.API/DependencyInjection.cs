@@ -5,6 +5,7 @@
 using System.Reflection;
 using Documentally.API.Common.Mappings;
 using Documentally.API.Swagger;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 
@@ -26,7 +27,11 @@ public static class DependencyInjection
 
         services.AddMappings();
 
-        services.AddControllers();
+        services.AddControllers()
+            .ConfigureApiBehaviorOptions(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
         services.AddRazorPages();
 
@@ -67,6 +72,12 @@ public static class DependencyInjection
                 });
         });
 
+        services.Configure<FormOptions>(o =>
+        {
+            o.ValueLengthLimit = 100000000;
+            o.MultipartBodyLengthLimit = 100000000;
+            o.MemoryBufferThreshold = 100000000;
+        });
         return services;
     }
 }

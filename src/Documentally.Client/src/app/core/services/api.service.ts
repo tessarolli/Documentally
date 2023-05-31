@@ -87,13 +87,9 @@ export class ApiService {
   }
 
   upload(path: string, body: FormData): Observable<any> {
-    var headers: HttpHeaders = new HttpHeaders();
-    headers = headers.set('Content-Type', 'multipart/form-data');
-
     return this.http.post(
       `${environment.apiUrl}${path}`,
       body, {
-      headers: headers,
       reportProgress: true,
       observe: 'events'
     }

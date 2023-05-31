@@ -39,6 +39,7 @@ export class MyDocumentsPageComponent implements ViewWillEnter {
   }
 
   async openUploadModal() {
+
     const modal = await this.modalController.create({
       component: UploadDocumentModalComponent
     });

@@ -12,23 +12,15 @@ export class HttpAuthorizationInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-    console.log(`${request.method} ${request.urlWithParams} HTTP/`);
-    console.log('Host:', request.headers.get('host'));
-    request.headers.keys().forEach(header => {
-      console.log(`${header}: ${request.headers.get(header)}`);
-    });
-    const formDataObject: { [key: string]: any } = {};
-    request.body.forEach((value: any, key: string | number) => {
-      formDataObject[key] = value;
-    });
-
-    // Log the converted FormData object
-    console.log('Form Data:', formDataObject);
-
-
     return this.store.select(selectAuthenticatedUser).pipe(
       take(1),
       switchMap(authenticatedUser => {
+
+        request = request.clone({
+          setHeaders: {
+            'Accept': 'application/json'
+          }
+        });
 
         if (authenticatedUser && authenticatedUser.token) {
           request = request.clone({
@@ -38,12 +30,13 @@ export class HttpAuthorizationInterceptor implements HttpInterceptor {
           });
         }
 
-        request = request.clone({
-          setHeaders: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
+        if (!(request.body instanceof FormData)) {
+          request = request.clone({
+            setHeaders: {
+              'Content-Type': 'application/json',
+            }
+          });
+        }
 
         return next.handle(request);
       })

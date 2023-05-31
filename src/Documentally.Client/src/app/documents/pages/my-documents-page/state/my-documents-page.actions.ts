@@ -7,6 +7,7 @@ export enum MyDocumentsActionTypes {
   LoadFailure = '[My Documents] Load My Documents Failure',
   ClearError = '[My Documents] Clear Error',
   SetIsLoading = '[My Documents] Set isLoading',
+  DocumentUploaded = '[My Documents] DocumentUploaded',
 }
 
 export const LoadMyDocuments = createAction(MyDocumentsActionTypes.LoadMyDocuments);
@@ -28,3 +29,7 @@ export const SetIsLoading = createAction(
   props<{ isLoading: boolean }>()
 );
 
+export const DocumentUploaded = createAction(
+  MyDocumentsActionTypes.DocumentUploaded,
+  props<{ document: DocumentModel }>()
+);

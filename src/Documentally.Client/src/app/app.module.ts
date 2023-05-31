@@ -24,7 +24,9 @@ import { EffectsModule } from '@ngrx/effects';
     AppComponent,
   ],
   imports: [
-    IonicModule.forRoot(),
+    IonicModule.forRoot({
+      innerHTMLTemplatesEnabled: true,
+    }),
     EffectsModule.forRoot(),
     StoreModule.forRoot(reducers, { metaReducers }),
     AppRoutingModule,
