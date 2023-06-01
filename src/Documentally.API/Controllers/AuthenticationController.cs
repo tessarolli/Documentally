@@ -9,8 +9,6 @@ using Documentally.Application.Authentication.Commands.Register;
 using Documentally.Application.Authentication.Queries.Login;
 using Documentally.Application.Authentication.Results;
 using Documentally.Contracts.Authentication;
-using Documentally.Domain.Enums;
-using FluentResults;
 using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

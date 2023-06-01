@@ -21,16 +21,16 @@ namespace Documentally.API.Common.Controllers;
 [Authorize]
 public class ResultControllerBase<TController> : ControllerBase
 {
-    private readonly IMediator mediator;
-    private readonly IMapper mapper;
-    private readonly IExceptionHandlingService exceptionHandlingService;
-
     /// <summary>
     /// ILogger instance.
     /// </summary>
 #pragma warning disable SA1401 // Fields should be private
     protected readonly ILogger logger;
 #pragma warning restore SA1401 // Fields should be private
+
+    private readonly IMediator mediator;
+    private readonly IMapper mapper;
+    private readonly IExceptionHandlingService exceptionHandlingService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResultControllerBase{T}"/> class.
