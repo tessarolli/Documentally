@@ -81,10 +81,10 @@ public class UsersController : ResultControllerBase<UsersController>
     /// <summary>
     /// Deletes a User from the User Repository.
     /// </summary>
-    /// <param name="request">User Id.</param>
+    /// <param name="id">User Id.</param>
     /// <returns>The Action Result of the delete operation.</returns>
-    [HttpDelete]
+    [HttpDelete("{id:long}")]
     [RoleAuthorize(Roles.Admin)]
-    public async Task<IActionResult> DeleteUser(DeleteUserRequest request) =>
-        await HandleRequestAsync<DeleteUserCommand, Result, object>(request);
+    public async Task<IActionResult> DeleteUser(long id) =>
+        await HandleRequestAsync<DeleteUserCommand, Result, object>(id);
 }

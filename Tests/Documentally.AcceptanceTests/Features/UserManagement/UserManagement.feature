@@ -8,7 +8,7 @@ Feature: User Management
   Now, I want to make sure that I can Edit the user.
   And that I can Delete the user.
 
-Scenario: 01: Login with Administrator Credentials
+Background: I have logged in with Administrator Credentials
     Given I have the following admin credentials:
         | Email                  | Password |
         | admin@documentally.com | admin    |
@@ -18,7 +18,8 @@ Scenario: 01: Login with Administrator Credentials
         | Id | FirstName | LastName | Email                  | Token |
         |    | Admin     | Admin    | admin@documentally.com |       |
 
-Scenario: 02: Register a new User Account
+Scenario: Register, read, update and delete a User Account
+ # 01: Register a New Account
     Given I have entered the following registration details:
         | FirstName | LastName | Email                    | Password    |
         | John      | Doe      | johndoe@documentally.com | password123 |
@@ -28,7 +29,7 @@ Scenario: 02: Register a new User Account
         | Id | FirstName | LastName | Email                    | Token |
         |    | John      | Doe      | johndoe@documentally.com |       |
 
-Scenario: 03: Fetch newly registered user By Id
+# 02: Fetch newly registered user By Id
     Given I have stored the newly registered user in the Context Scenario
     When I send a GET request to "/users/{id}"
     Then the response status code should be 200
@@ -36,14 +37,14 @@ Scenario: 03: Fetch newly registered user By Id
         | Id | FirstName | LastName | Email                    | Password | Role | CreatedAtUtc |
         |    | John      | Doe      | johndoe@documentally.com |          | 0    |              |
 
-#Scenario: Update User
-#    Given I have the following user details:
-#        | Id  | FirstName | LastName | Email                    |
-#        | > 0 | John      | Doe      | johndoe@documentally.com |
-#    When I send a PUT request to "/users/{id}"
-#    Then the response status code should be 200
+# 03: Update User
+    When I update the newly registered user details to:
+        | FirstName | LastName | Email                    | Role |
+        | Johnn     | Doer     | johndoe@documentally.com | 1    |
+    And I send a PUT request to "/users/"
+    Then the response status code should be 200
 
-#Scenario: Delete User
-#    Given I have a valid user ID
-#    When I send a DELETE request to "/users/{id}"
-#    Then the response status code should be 200
+# 04: Delete User
+    When I want to delete the newly registered user
+    And I send a DELETE request to "/users/{id}"
+    Then the response status code should be 204

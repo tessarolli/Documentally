@@ -3,6 +3,7 @@ using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Policy;
 using System.Text;
@@ -15,22 +16,29 @@ namespace Documentally.AcceptanceTests.Features.UserManagement.StepDefinitions
     public partial class UserManagement
     {
         private readonly HttpClient client;
+        private readonly FeatureContext featureContext;
         private readonly ScenarioContext scenarioContext;
         private HttpResponseMessage? response = null;
 
-        public UserManagement(HttpClient client, ScenarioContext scenarioContext)
+        public UserManagement(HttpClient client, ScenarioContext scenarioContext, FeatureContext featureContext)
         {
             this.client = client;
             this.scenarioContext = scenarioContext;
+            this.featureContext = featureContext;
         }
 
-       
+
 
         [When(@"I send a POST request to ""(.*)""")]
         public async Task WhenISendAPOSTRequestTo(string url)
         {
             // Retrieve the request data from the shared context
             var requestData = scenarioContext.Get<object>("RequestData");
+
+            if (featureContext.TryGetValue("AuthenticatedUser", out AuthenticationResponse user))
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", user.Token);
+            }
 
             // Send a POST request to the specified URL with the requestData as the payload
             response = await client.PostAsJsonAsync(url, requestData);

@@ -12,7 +12,7 @@ using TechTalk.SpecFlow.Assist;
 
 namespace Documentally.AcceptanceTests.Features.UserManagement.StepDefinitions
 {
-    public partial class UserManagement
+    public partial class UserManagement // Fetch By Id
     {
 
         [Given(@"I have stored the newly registered user in the Context Scenario")]
@@ -51,6 +51,8 @@ namespace Documentally.AcceptanceTests.Features.UserManagement.StepDefinitions
             actualResponseData!.Password.Should().NotBeNullOrWhiteSpace();
             actualResponseData!.Role.Should().Be(0);
             actualResponseData!.CreatedAtUtc.Should().BeBefore(DateTime.UtcNow);
+
+            scenarioContext.Set<UserResponse>(actualResponseData, "UserResponse");
         }
 
     }

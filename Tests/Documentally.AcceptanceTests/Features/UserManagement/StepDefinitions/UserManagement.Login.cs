@@ -33,7 +33,7 @@ namespace Documentally.AcceptanceTests.Features.UserManagement.StepDefinitions
             actualResponseData!.Email.Should().BeEquivalentTo(expectedResponseData.Email);
             actualResponseData!.Token.Should().NotBeNullOrWhiteSpace(expectedResponseData.Token);
           
-            scenarioContext.Set(actualResponseData, "AuthenticatedUser");
+            featureContext.Set(actualResponseData, "AuthenticatedUser");
         }
 
     }

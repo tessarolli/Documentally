@@ -10,6 +10,7 @@ using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.CompilerServices;
 
 namespace Documentally.API.Common.Controllers;
 
@@ -96,10 +97,13 @@ public class ResultControllerBase<TController> : ControllerBase
     /// <typeparam name="Tresult">The Type of the Command or Query Result.</typeparam>
     /// <typeparam name="Tout">The Type of the Response (contract).</typeparam>
     /// <param name="request">The input received in the request.</param>
+    /// <param name="caller">The Name of the Method that Invoked this method.</param>
     /// <returns>An ActionResult for sending to the client.</returns>
     [NonAction]
-    public async Task<IActionResult> HandleRequestAsync<Tin, Tresult, Tout>(object? request = null)
+    public async Task<IActionResult> HandleRequestAsync<Tin, Tresult, Tout>(object? request = null, [CallerMemberName] string caller = "")
     {
+        logger.LogInformation($"{caller}: {request}");
+
         Result<Tresult> result;
         Tout? response = default;
 

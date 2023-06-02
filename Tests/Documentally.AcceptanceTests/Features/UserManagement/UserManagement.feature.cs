@@ -82,35 +82,16 @@ namespace Documentally.AcceptanceTests.Features.UserManagement
             testRunner.CollectScenarioErrors();
         }
         
-        void System.IDisposable.Dispose()
+        public virtual void FeatureBackground()
         {
-            this.TestTearDown();
-        }
-        
-        [Xunit.SkippableFactAttribute(DisplayName="01: Login with Administrator Credentials")]
-        [Xunit.TraitAttribute("FeatureTitle", "User Management")]
-        [Xunit.TraitAttribute("Description", "01: Login with Administrator Credentials")]
-        public void _01LoginWithAdministratorCredentials()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("01: Login with Administrator Credentials", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 11
-this.ScenarioInitialize(scenarioInfo);
 #line hidden
-            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                this.ScenarioStart();
-                TechTalk.SpecFlow.Table table1 = new TechTalk.SpecFlow.Table(new string[] {
-                            "Email",
-                            "Password"});
-                table1.AddRow(new string[] {
-                            "admin@documentally.com",
-                            "admin"});
+            TechTalk.SpecFlow.Table table1 = new TechTalk.SpecFlow.Table(new string[] {
+                        "Email",
+                        "Password"});
+            table1.AddRow(new string[] {
+                        "admin@documentally.com",
+                        "admin"});
 #line 12
     testRunner.Given("I have the following admin credentials:", ((string)(null)), table1, "Given ");
 #line hidden
@@ -120,33 +101,36 @@ this.ScenarioInitialize(scenarioInfo);
 #line 16
     testRunner.Then("the response status code should be 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
-                TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
-                            "Id",
-                            "FirstName",
-                            "LastName",
-                            "Email",
-                            "Token"});
-                table2.AddRow(new string[] {
-                            "",
-                            "Admin",
-                            "Admin",
-                            "admin@documentally.com",
-                            ""});
+            TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
+                        "Id",
+                        "FirstName",
+                        "LastName",
+                        "Email",
+                        "Token"});
+            table2.AddRow(new string[] {
+                        "",
+                        "Admin",
+                        "Admin",
+                        "admin@documentally.com",
+                        ""});
 #line 17
     testRunner.And("the response should contain the following authenticated user data:", ((string)(null)), table2, "And ");
 #line hidden
-            }
-            this.ScenarioCleanup();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="02: Register a new User Account")]
+        void System.IDisposable.Dispose()
+        {
+            this.TestTearDown();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Register, read, update and delete a User Account")]
         [Xunit.TraitAttribute("FeatureTitle", "User Management")]
-        [Xunit.TraitAttribute("Description", "02: Register a new User Account")]
-        public void _02RegisterANewUserAccount()
+        [Xunit.TraitAttribute("Description", "Register, read, update and delete a User Account")]
+        public void RegisterReadUpdateAndDeleteAUserAccount()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("02: Register a new User Account", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Register, read, update and delete a User Account", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 21
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -157,6 +141,9 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
+#line 11
+this.FeatureBackground();
+#line hidden
                 TechTalk.SpecFlow.Table table3 = new TechTalk.SpecFlow.Table(new string[] {
                             "FirstName",
                             "LastName",
@@ -167,13 +154,13 @@ this.ScenarioInitialize(scenarioInfo);
                             "Doe",
                             "johndoe@documentally.com",
                             "password123"});
-#line 22
+#line 23
     testRunner.Given("I have entered the following registration details:", ((string)(null)), table3, "Given ");
 #line hidden
-#line 25
+#line 26
     testRunner.When("I send a POST request to \"/authentication/register\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 26
+#line 27
     testRunner.Then("the response status code should be 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
                 TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
@@ -188,39 +175,17 @@ this.ScenarioInitialize(scenarioInfo);
                             "Doe",
                             "johndoe@documentally.com",
                             ""});
-#line 27
+#line 28
     testRunner.And("the register response should contain the following data and I should save the new" +
                         "ly registered user info into the context:", ((string)(null)), table4, "And ");
 #line hidden
-            }
-            this.ScenarioCleanup();
-        }
-        
-        [Xunit.SkippableFactAttribute(DisplayName="03: Fetch newly registered user By Id")]
-        [Xunit.TraitAttribute("FeatureTitle", "User Management")]
-        [Xunit.TraitAttribute("Description", "03: Fetch newly registered user By Id")]
-        public void _03FetchNewlyRegisteredUserById()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("03: Fetch newly registered user By Id", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 31
-this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                this.ScenarioStart();
-#line 32
+#line 33
     testRunner.Given("I have stored the newly registered user in the Context Scenario", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
 #line hidden
-#line 33
+#line 34
     testRunner.When("I send a GET request to \"/users/{id}\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 34
+#line 35
     testRunner.Then("the response status code should be 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
                 TechTalk.SpecFlow.Table table5 = new TechTalk.SpecFlow.Table(new string[] {
@@ -239,8 +204,36 @@ this.ScenarioInitialize(scenarioInfo);
                             "",
                             "0",
                             ""});
-#line 35
+#line 36
     testRunner.And("the response should contain the following user data:", ((string)(null)), table5, "And ");
+#line hidden
+                TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
+                            "FirstName",
+                            "LastName",
+                            "Email",
+                            "Role"});
+                table6.AddRow(new string[] {
+                            "Johnn",
+                            "Doer",
+                            "johndoe@documentally.com",
+                            "1"});
+#line 41
+    testRunner.When("I update the newly registered user details to:", ((string)(null)), table6, "When ");
+#line hidden
+#line 44
+    testRunner.And("I send a PUT request to \"/users/\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 45
+    testRunner.Then("the response status code should be 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+#line 48
+    testRunner.When("I want to delete the newly registered user", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 49
+    testRunner.And("I send a DELETE request to \"/users/{id}\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
+#line hidden
+#line 50
+    testRunner.Then("the response status code should be 204", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
