@@ -17,7 +17,7 @@ export class AlertService {
   }
 
   // Method for displaying an message for the user
-  async Message(message: string, title: string = 'Message') {
+  async Message(message: string, title = 'Message') {
     const alert = await this.alertController.create({
       header: title,
       message: `${message}`.replace(/\n/g, '<br/>'),
@@ -28,7 +28,7 @@ export class AlertService {
   }
 
   // Method for displaying a confirmation message
-  async Confirmation(message: string, callback: () => void, title: string = 'Confirm Operation') {
+  async Confirmation(message: string, callback: () => void, title = 'Confirm Operation') {
     const alert = await this.alertController.create({
       header: title,
       message: `${message}`.replace(/\n/g, '<br/>'),

@@ -58,7 +58,7 @@
         </ion-card>
 
         <ion-button expand="full" color="primary" [disabled]="!registerForm.valid || (isLoading$ | async)" (click)="register()">
-          <ng-container *ngIf="!(isLoading$ | async); else loadingTemplate">Register</ng-container>
+          <ng-container *ngIf="(isLoading$ | async) === false; else loadingTemplate">Register</ng-container>
           <ng-template #loadingTemplate>
             <ion-spinner></ion-spinner>
           </ng-template>

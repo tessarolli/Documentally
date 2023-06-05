@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { PopoverController } from '@ionic/angular';
 import { AppState } from '../../../app.state';
@@ -32,11 +32,13 @@ export class LoggedUserComponent implements OnInit {
     });
   }
 
-  logout(): void {
-    this.popoverController.dismiss('loggedUserPopOver');
+  async logout(): Promise<void> {
+    await this.popoverController.dismiss('loggedUserPopOver')
+      .catch(console.log);
 
     this.store.dispatch(Logout());
 
-    this.router.navigate(['/login']);
+    await this.router.navigate(['/login'])
+      .catch(console.log);
   }
 }

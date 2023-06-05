@@ -6,6 +6,7 @@ using Documentally.Domain.Common.Abstractions;
 using Documentally.Domain.Common.DDD;
 using Documentally.Domain.Enums;
 using Documentally.Domain.User.Events;
+using Documentally.Domain.User.Validators;
 using Documentally.Domain.User.ValueObjects;
 using FluentResults;
 using FluentValidation;
@@ -112,5 +113,5 @@ public sealed class User : AggregateRoot<UserId>
     }
 
     /// <inheritdoc/>
-    protected override IValidator GetValidator() => null!;
+    protected override IValidator GetValidator() => new UserValidator();
 }

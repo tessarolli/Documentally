@@ -40,7 +40,7 @@
         </ion-card>
 
         <ion-button expand="full" color="primary" [disabled]="!loginForm.valid || (isLoading$ | async)" (click)="login()">
-          <ng-container *ngIf="!(isLoading$ | async); else loadingTemplate">Login</ng-container>
+          <ng-container *ngIf="(isLoading$ | async) === false; else loadingTemplate">Login</ng-container>
           <ng-template #loadingTemplate>
             <ion-spinner></ion-spinner>
           </ng-template>

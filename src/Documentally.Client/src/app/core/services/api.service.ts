@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { HttpClient, HttpParams, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 
 import { catchError } from 'rxjs/operators';
@@ -13,17 +13,17 @@ export class ApiService {
     private http: HttpClient
   ) { }
 
-  private formatErrors(error: any): Observable<string> {
-    if (error.error && error.error.errors) {
+  private formatErrors(error: unknown): Observable<string> {
+    if (error && (error as any)?.error?.errors) {
       // API returned user-friendly error messages
 
       // Create an array to hold the error messages
       const errorMessages: string[] = [];
 
       // Iterate over each error and add it to the errorMessages array
-      for (const key in error.error.errors) {
-        if (error.error.errors.hasOwnProperty(key)) {
-          errorMessages.push(error.error.errors[key]);
+      for (const key in (error as any).error.errors) {
+        if (key in (error as any).error.errors) {
+          errorMessages.push((error as any).error.errors[key]);
         }
       }
 
@@ -71,14 +71,14 @@ export class ApiService {
       .pipe(catchError(this.formatErrors));
   }
 
-  put(path: string, body: Object = {}): Observable<any> {
+  put(path: string, body: object = {}): Observable<any> {
     return this.http.put(
       `${environment.apiUrl}${path}`,
       JSON.stringify(body)
     ).pipe(catchError(this.formatErrors));
   }
 
-  post(path: string, body: Object = {}): Observable<any> {
+  post(path: string, body: object = {}): Observable<any> {
     return this.http.post(
       `${environment.apiUrl}${path}`,
       JSON.stringify(body)

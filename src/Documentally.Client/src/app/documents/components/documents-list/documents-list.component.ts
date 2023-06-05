@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state';
 import { FileIconService } from '../../../core/services/file-icon.service';
 import { selectIsAdmin } from '../../../authentication/state/authentication.selectors';
-import { AlertController } from '@ionic/angular';
 import { AlertService } from '../../../core/services/alert.service';
 
 @Component({
@@ -18,7 +17,7 @@ import { AlertService } from '../../../core/services/alert.service';
 export class DocumentsListComponent {
   @Input() documents: DocumentModel[] | null = [];
   @Input() isLoading: boolean | null = false;
-  @Input() error: any;
+  @Input() error: string | null = '';
   isAdmin$: Observable<boolean>;
 
   constructor(
@@ -30,7 +29,7 @@ export class DocumentsListComponent {
   }
 
   getUserName(userId: number) {
-    return 'User Name';
+    return 'User Name' + userId;
   }
 
   getFileIcon(fileName: string): string {

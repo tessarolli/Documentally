@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { AlertController, ViewDidEnter, ViewWillLeave } from '@ionic/angular';
+import { ViewDidEnter, ViewWillLeave } from '@ionic/angular';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../app.state';
 import { ClearError, Login } from '../../state/authentication.actions';
@@ -9,7 +9,6 @@ import { selectError, selectIsAuthenticated, selectIsLoading } from '../../state
 import { Subject, takeUntil } from 'rxjs';
 import { SetTitle } from '../../../core/state/root.actions';
 import { AlertService } from '../../../core/services/alert.service';
-
 @Component({
   selector: 'app-login-page',
   templateUrl: './login-page.component.html',
@@ -46,7 +45,8 @@ export class LoginPageComponent implements ViewDidEnter, ViewWillLeave {
           this.store.dispatch(ClearError());
 
           // presents the Alert message to the user
-          this.alert.Error(error);
+          this.alert.Error(error)
+            .catch(console.log);
         }
       });
 
@@ -55,7 +55,8 @@ export class LoginPageComponent implements ViewDidEnter, ViewWillLeave {
       .pipe(takeUntil(this.destroy$))
       .subscribe((isAuthenticated) => {
         if (isAuthenticated) {
-          this.router.navigate(['/']);
+          this.router.navigate(['/'])
+            .catch(console.log);
         }
       });
   }
@@ -95,11 +96,11 @@ export class LoginPageComponent implements ViewDidEnter, ViewWillLeave {
 
   // Method that is called when user clicks on a Quick Login Action Sheet
   async quickLogin(action: any): Promise<void> {
-    const selectedAction = action?.detail?.data;
-    if (selectedAction) {
-      this.loginForm.controls['email'].setValue(selectedAction + '@documentally.com');
-      this.loginForm.controls['password'].setValue(selectedAction);
-      this.login();
-    }
+      const selectedAction = action?.detail?.data;
+      if (selectedAction) {
+        this.loginForm.controls['email'].setValue(selectedAction + '@documentally.com');
+        this.loginForm.controls['password'].setValue(selectedAction);
+        this.login();
+      }
   }
 }

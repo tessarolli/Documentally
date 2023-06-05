@@ -34,12 +34,12 @@ public class AddUserCommandHandler : ICommandHandler<AddUserCommand, UserResult>
     public async Task<Result<UserResult>> Handle(AddUserCommand request, CancellationToken cancellationToken)
     {
         var userResult = Domain.User.User.Create(
-                   null,
-                   request.FirstName,
-                   request.LastName,
-                   request.Email,
-                   request.Password,
-                   passwordHasher: passwordHasher);
+            null,
+            request.FirstName,
+            request.LastName,
+            request.Email,
+            request.Password,
+            passwordHasher: passwordHasher);
 
         if (userResult.IsSuccess)
         {

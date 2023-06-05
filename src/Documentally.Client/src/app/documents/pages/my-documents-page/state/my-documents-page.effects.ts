@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Observable, of } from 'rxjs';
-import { catchError, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { LoadMyDocuments, LoadMyDocumentsFailure, LoadMyDocumentsSuccess } from './my-documents-page.actions';
 import { DocumentsService } from '../../../services/documents.service';
 import { Action, Store } from '@ngrx/store';

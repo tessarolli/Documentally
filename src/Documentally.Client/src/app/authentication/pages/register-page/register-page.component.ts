@@ -47,7 +47,8 @@ export class RegisterPageComponent implements ViewDidEnter, ViewWillLeave {
           this.store.dispatch(ClearError());
 
           // presents the Alert message to the user
-          this.alert.Error(error);
+          this.alert.Error(error)
+            .catch(console.log);
         }
       });
 
@@ -56,7 +57,8 @@ export class RegisterPageComponent implements ViewDidEnter, ViewWillLeave {
       .pipe(takeUntil(this.destroy$))
       .subscribe((isAuthenticated) => {
         if (isAuthenticated) {
-          this.router.navigate(['/']);
+          this.router.navigate(['/'])
+            .catch(console.log);
         }
       });
   }

@@ -5,7 +5,7 @@ import { ApiService } from '../core/services/api.service';
 
 @Injectable()
 export class AuthenticationService {
-  path: string = 'authentication';
+  path = 'authentication';
 
   constructor(private apiService: ApiService) { }
 

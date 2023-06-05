@@ -8,7 +8,7 @@ import { DocumentModel } from '../models/document.model';
 })
 export class DocumentsService {
 
-  path: string = 'documents';
+  path = 'documents';
 
   constructor(private apiService: ApiService) { }
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AppState } from './app.state';
 import { Store } from '@ngrx/store';
 import { selectIsAdmin, selectIsAuthenticated } from './authentication/state/authentication.selectors';
@@ -7,7 +7,7 @@ import { selectPageTitle } from './core/state/root.selectors';
 import { SetTitle } from './core/state/root.actions';
 
 @Component({
-  selector: 'app',
+  selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush

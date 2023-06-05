@@ -65,7 +65,13 @@ export class FileIconService {
     if (fileName) {
       const parts = fileName.split('.');
       if (parts.length > 1) {
-        return parts.pop()!.toLowerCase();
+
+        const part = parts.pop()
+
+        if (part)
+          return part.toLowerCase();
+
+        return '';
       }
     }
     return '';

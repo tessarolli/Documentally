@@ -1,14 +1,12 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { DocumentsService } from '../../services/documents.service';
-import { Observable, catchError } from 'rxjs';
+import { catchError } from 'rxjs';
 import { AlertService } from '../../../core/services/alert.service';
 import { HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { AppState } from '../../../app.state';
 import { Store } from '@ngrx/store';
-import { AuthenticatedUser } from '../../../authentication/models/authenticatedUser.model';
 import { selectAuthenticatedUser } from '../../../authentication/state/authentication.selectors';
-import { DocumentUploaded } from '../../pages/my-documents-page/state/my-documents-page.actions';
 
 @Component({
   selector: 'app-upload-document-modal',
@@ -17,11 +15,11 @@ import { DocumentUploaded } from '../../pages/my-documents-page/state/my-documen
 })
 export class UploadDocumentModalComponent {
   selectedFile: File | null = null;
-  description: string = '';
-  category: string = '';
-  progress: number = 0;
-  message: string = '';
-  @Output() public onUploadFinished = new EventEmitter();
+  description = '';
+  category = '';
+  progress = 0;
+  message = '';
+  @Output() public uploadFinished = new EventEmitter();
 
   constructor(
     private modalController: ModalController,
@@ -32,7 +30,8 @@ export class UploadDocumentModalComponent {
   }
 
   dismissModal() {
-    this.modalController.dismiss();
+    this.modalController.dismiss()
+      .catch(console.log);
   }
 
   uploadDocument() {
@@ -60,9 +59,9 @@ export class UploadDocumentModalComponent {
                 this.progress = Math.round(100 * event.loaded / event.total);
               else if (event.type === HttpEventType.Response) {
                 this.message = 'Upload success.';
-                this.onUploadFinished.emit(event.body);
+                this.uploadFinished.emit(event.body);
 
-                //this.store.dispatch(DocumentUploaded({ document }));
+                // Dispatch (DocumentUploaded({ document }))
               }
             },
             error: (err: HttpErrorResponse) => console.log(err)
@@ -71,12 +70,13 @@ export class UploadDocumentModalComponent {
 
         this.selectedFile = null;
 
-        this.modalController.dismiss();
+        this.modalController.dismiss()
+          .catch(console.log);
       }
     })
   }
 
-  onFileSelected(event: any) {
+  onFileSelected(event: { addedFiles: (File | null)[]; }) {
     this.selectedFile = event.addedFiles[0];
   }
 

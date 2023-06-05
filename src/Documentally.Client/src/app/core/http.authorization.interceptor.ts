@@ -10,7 +10,7 @@ export class HttpAuthorizationInterceptor implements HttpInterceptor {
 
   constructor(private store: Store<AppState>) { }
 
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
 
     return this.store.select(selectAuthenticatedUser).pipe(
       take(1),
@@ -22,7 +22,7 @@ export class HttpAuthorizationInterceptor implements HttpInterceptor {
           }
         });
 
-        if (authenticatedUser && authenticatedUser.token) {
+        if (authenticatedUser?.token) {
           request = request.clone({
             setHeaders: {
               Authorization: `Bearer ${authenticatedUser.token}`

@@ -2,7 +2,7 @@
 
   <ion-split-pane when="lg" contentId="main-content">
 
-    <ion-menu contentId="main-content" [disabled]="!(isAuthenticated$ | async)">
+    <ion-menu contentId="main-content" [disabled]="(isAuthenticated$ | async) === false">
 
       <ion-header>
         <ion-toolbar>
